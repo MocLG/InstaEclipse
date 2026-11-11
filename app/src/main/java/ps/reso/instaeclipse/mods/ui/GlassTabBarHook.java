@@ -258,6 +258,11 @@ public final class GlassTabBarHook {
         if (bg instanceof android.graphics.drawable.ColorDrawable cd) {
             if (Color.alpha(cd.getColor()) == 0) return; // already see-through
             color = cd.getColor();
+        } else if (bg instanceof android.graphics.drawable.GradientDrawable gd) {
+            android.content.res.ColorStateList csl = gd.getColor();
+            if (csl == null) return; // a real gradient / no readable solid color: leave it alone
+            color = csl.getDefaultColor();
+            if (Color.alpha(color) == 0) return;
         } else if (bg == null) {
             color = Color.BLACK;
         } else {
@@ -276,20 +281,54 @@ public final class GlassTabBarHook {
     static final class TopBarGlass extends Drawable {
         private final View host;
         private final int color;
+        private final float density;
         private final Glass glass;
+        private final Paint sheen = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private android.graphics.LinearGradient sheenShader;
+        private float sheenShaderH = -1f;
+        private boolean sheenShaderDark;
 
         TopBarGlass(View host, int color, float density) {
             this.host = host;
             this.color = color;
+            this.density = density;
             this.glass = new Glass(density);
-            this.glass.cornerRadius = 0f; // full-width rectangular bar
+            this.glass.cornerRadius = 0f;   // full-width rectangular bar
+            this.glass.flatAlpha = 0.58f;   // a translucent frosted panel even with nothing behind
         }
 
         @Override
         public void draw(Canvas canvas) {
             if (!FeatureFlags.glassTabBar) return;
             try {
-                glass.draw(canvas, getBounds(), host, color);
+                Rect b = getBounds();
+                if (b.isEmpty()) return;
+                // Frost whatever is behind (DM threads) or fall back to the translucent tint.
+                glass.draw(canvas, b, host, color);
+                // Sell the glass over a flat / dark backdrop too: a soft light sheen fading down from
+                // the top and a crisp bright rim along the bottom edge, like light catching a panel.
+                int base = color | 0xFF000000;
+                if (IgThemeEngine.isActive()) {
+                    try { base = IgColorRemapEngine.remap(base) | 0xFF000000; } catch (Throwable ignored) {}
+                }
+                boolean dark = (0.299f * Color.red(base) + 0.587f * Color.green(base)
+                        + 0.114f * Color.blue(base)) / 255f < 0.5f;
+                int sheenRGB = dark ? 0x00FFFFFF : 0x00000000; // white sheen on dark bars, black on light
+                float sheenH = Math.min(b.height() * 0.6f, density * 56f);
+                if (sheenShader == null || sheenShaderH != sheenH || sheenShaderDark != dark) {
+                    sheenShader = new android.graphics.LinearGradient(0, b.top, 0, b.top + sheenH,
+                            0x30000000 | sheenRGB, sheenRGB, Shader.TileMode.CLAMP);
+                    sheenShaderH = sheenH;
+                    sheenShaderDark = dark;
+                }
+                sheen.setShader(sheenShader);
+                canvas.drawRect(b.left, b.top, b.right, b.top + sheenH, sheen);
+                sheen.setShader(null);
+                float hair = Math.max(1f, density * 1.0f);
+                sheen.setColor(0x80000000 | sheenRGB); // bright glass rim along the bottom edge
+                canvas.drawRect(b.left, b.bottom - hair, b.right, b.bottom, sheen);
+                sheen.setColor(0x24000000 | sheenRGB); // faint rim along the top edge to close the panel
+                canvas.drawRect(b.left, b.top, b.right, b.top + Math.max(1f, density * 0.6f), sheen);
             } catch (Throwable ignored) {}
         }
 
@@ -484,6 +523,7 @@ public final class GlassTabBarHook {
         private Object clipNode, blurNode; // RenderNode (API 31+), kept as Object for older devices
         private boolean drawing;
         float cornerRadius = -1f; // <0 = pill (height/2); >=0 = explicit radius (0 = rectangular)
+        float flatAlpha = 0.86f;  // fill alpha when nothing blurs behind (more opaque = readable)
 
         Glass(float density) {
             this.density = density;
@@ -507,7 +547,7 @@ public final class GlassTabBarHook {
                 }
             }
             // Tint: more opaque without blur so the icons stay readable over busy content.
-            float alpha = blurred ? (dark ? 0.55f : 0.68f) : 0.86f;
+            float alpha = blurred ? (dark ? 0.55f : 0.68f) : flatAlpha;
             int a = Math.round(Color.alpha(color) * alpha);
             fill.setColor((color & 0x00FFFFFF) | (a << 24));
             c.drawRoundRect(rect, radius, radius, fill);
