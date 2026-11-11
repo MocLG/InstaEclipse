@@ -75,12 +75,14 @@ public final class GlassTabBarHook {
 
     private static int tabBarId = 0;
     private static int tabBarShadowId = 0;
+    private static int actionBarId = 0;
     private static boolean idsResolved;
     private static volatile boolean pillHooked;
     private static Class<?> pillClass;
     private static List<Field> pillPaints;
 
     private static final Set<View> watchedBars = Collections.newSetFromMap(new WeakHashMap<>());
+    private static final Set<View> watchedTopBars = Collections.newSetFromMap(new WeakHashMap<>());
     private static final Map<View, Glass> glassByBar = new WeakHashMap<>();
 
     // ---------------------------------------------------------------------------------------------
@@ -195,6 +197,7 @@ public final class GlassTabBarHook {
                 refresh(bar);
             });
             applyFixedGlass(bar);
+            watchTopBar(a);
         } catch (Throwable t) {
             ModuleLog.line(TAG + "⚠️ watch: " + t);
         }
@@ -206,7 +209,78 @@ public final class GlassTabBarHook {
         String pkg = a.getPackageName();
         tabBarId = a.getResources().getIdentifier("tab_bar", "id", pkg);
         tabBarShadowId = a.getResources().getIdentifier("tab_bar_shadow", "id", pkg);
+        actionBarId = a.getResources().getIdentifier("action_bar_LinearLayout", "id", pkg);
+        if (actionBarId == 0) actionBarId = a.getResources().getIdentifier("main_feed_action_bar", "id", pkg);
         idsResolved = true;
+    }
+
+    /**
+     * Glass the top action bar too, so content scrolls under translucent chrome at both ends (the
+     * iOS "liquid glass" look). The feed list starts at the very top (behind the bar), so a
+     * see-through tint reveals it moving behind the logo/icons. Re-applied on layout; invalidated on
+     * scroll so the glass tracks the feed.
+     */
+    private static void watchTopBar(Activity a) {
+        if (actionBarId == 0 || Build.VERSION.SDK_INT < 31) return;
+        View top = a.findViewById(actionBarId);
+        if (top == null) return;
+        if (watchedTopBars.add(top)) {
+            top.getViewTreeObserver().addOnScrollChangedListener(() -> {
+                if (top.getBackground() instanceof TopBarGlass && top.isShown()) top.invalidate();
+            });
+            top.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+                applyTopBarGlass(top);
+                if (top.getBackground() instanceof TopBarGlass && top.isShown()) top.invalidate();
+            });
+        }
+        applyTopBarGlass(top);
+    }
+
+    private static void applyTopBarGlass(View top) {
+        if (!FeatureFlags.glassTabBar || Build.VERSION.SDK_INT < 31) return;
+        Drawable bg = top.getBackground();
+        if (bg instanceof TopBarGlass) return;
+        int color;
+        if (bg instanceof android.graphics.drawable.ColorDrawable cd) {
+            if (Color.alpha(cd.getColor()) == 0) return; // already see-through
+            color = cd.getColor();
+        } else if (bg == null) {
+            color = Color.BLACK;
+        } else {
+            return; // unknown background: leave it alone
+        }
+        try {
+            float density = top.getResources().getDisplayMetrics().density;
+            top.setBackground(new TopBarGlass(top, color, density));
+        } catch (Throwable t) {
+            ModuleLog.line(TAG + "⚠️ top glass: " + t);
+        }
+    }
+
+    /** Frosted full-width background for the top action bar: blurs the feed scrolling behind it. */
+    static final class TopBarGlass extends Drawable {
+        private final View host;
+        private final int color;
+        private final Glass glass;
+
+        TopBarGlass(View host, int color, float density) {
+            this.host = host;
+            this.color = color;
+            this.glass = new Glass(density);
+            this.glass.cornerRadius = 0f; // full-width rectangular bar
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            if (!FeatureFlags.glassTabBar) return;
+            try {
+                glass.draw(canvas, getBounds(), host, color);
+            } catch (Throwable ignored) {}
+        }
+
+        @Override public void setAlpha(int alpha) {}
+        @Override public void setColorFilter(android.graphics.ColorFilter colorFilter) {}
+        @Override public int getOpacity() { return android.graphics.PixelFormat.TRANSLUCENT; }
     }
 
     private static void refresh(View bar) {
@@ -428,15 +502,29 @@ public final class GlassTabBarHook {
             c.drawRoundRect(rect, radius - inset, radius - inset, edge);
         }
 
-        /** Blurs what is drawn behind the bar (its earlier siblings) into the pill. */
+        private final int[] locBar = new int[2];
+        private final int[] locV = new int[2];
+
+        /**
+         * Blurs whatever is painted behind the bar into the glass. Rather than only the bar's
+         * immediate earlier siblings, it walks up the ancestor chain and, at each level, draws the
+         * children painted before the bar's branch — positioned by absolute window coordinates. That
+         * captures the real backdrop even when the content (e.g. the feed) and the bar live in
+         * separate branches that only meet at a common ancestor (the top action bar case), while
+         * still never drawing the bar itself or any chrome stacked on top of it.
+         */
         @android.annotation.TargetApi(31)
         private boolean drawBlur(Canvas c, Rect b, View bar, int opaque, float radius) {
-            if (!(bar.getParent() instanceof ViewGroup parent)) return false;
             int w = b.width(), h = b.height();
+            if (w <= 0 || h <= 0) return false;
+            bar.getLocationInWindow(locBar);
+            float barX = locBar[0] + b.left;
+            float barY = locBar[1] + b.top;
+
             if (clipNode == null) {
                 RenderNode clip = new RenderNode("ie_glass_clip");
                 RenderNode blur = new RenderNode("ie_glass_blur");
-                float r = 20f * density;
+                float r = 24f * density;
                 blur.setRenderEffect(RenderEffect.createBlurEffect(r, r, Shader.TileMode.CLAMP));
                 clipNode = clip;
                 blurNode = blur;
@@ -446,26 +534,35 @@ public final class GlassTabBarHook {
 
             blur.setPosition(0, 0, w, h);
             RecordingCanvas rc = blur.beginRecording(w, h);
+            boolean any = false;
             try {
                 rc.drawColor(opaque);
-                float barX = bar.getLeft() + bar.getTranslationX() + b.left;
-                float barY = bar.getTop() + bar.getTranslationY() + b.top;
-                int idx = parent.indexOfChild(bar);
-                for (int i = 0; i < idx; i++) {
-                    View v = parent.getChildAt(i);
-                    if (v.getVisibility() != View.VISIBLE || v.getAlpha() <= 0f) continue;
-                    if (v.getId() == tabBarShadowId && tabBarShadowId != 0) continue;
-                    float dx = v.getLeft() + v.getTranslationX() - barX;
-                    float dy = v.getTop() + v.getTranslationY() - barY;
-                    if (dx >= w || dy >= h || dx + v.getWidth() <= 0 || dy + v.getHeight() <= 0) continue;
-                    int save = rc.save();
-                    rc.translate(dx - v.getScrollX(), dy - v.getScrollY());
-                    v.draw(rc);
-                    rc.restoreToCount(save);
+                View branch = bar;
+                int levels = 0;
+                while (branch.getParent() instanceof ViewGroup parent && levels < 12) {
+                    int idx = parent.indexOfChild(branch);
+                    for (int i = 0; i < idx; i++) {
+                        View v = parent.getChildAt(i);
+                        if (v == null || v.getVisibility() != View.VISIBLE || v.getAlpha() <= 0f) continue;
+                        if (v.getId() == tabBarShadowId && tabBarShadowId != 0) continue;
+                        int vw = v.getWidth(), vh = v.getHeight();
+                        if (vw <= 0 || vh <= 0) continue;
+                        v.getLocationInWindow(locV);
+                        float dx = locV[0] - barX, dy = locV[1] - barY;
+                        if (dx >= w || dy >= h || dx + vw <= 0 || dy + vh <= 0) continue;
+                        int save = rc.save();
+                        rc.translate(dx, dy);
+                        v.draw(rc);
+                        rc.restoreToCount(save);
+                        any = true;
+                    }
+                    branch = parent;
+                    levels++;
                 }
             } finally {
                 blur.endRecording();
             }
+            if (!any) return false;
 
             clip.setPosition(b.left, b.top, b.right, b.bottom);
             Outline o = new Outline();
