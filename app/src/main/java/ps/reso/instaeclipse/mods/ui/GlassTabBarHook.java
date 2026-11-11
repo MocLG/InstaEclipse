@@ -75,7 +75,6 @@ public final class GlassTabBarHook {
 
     private static int tabBarId = 0;
     private static int tabBarShadowId = 0;
-    private static int actionBarId = 0;
     private static boolean idsResolved;
     private static volatile boolean pillHooked;
     private static Class<?> pillClass;
@@ -83,7 +82,12 @@ public final class GlassTabBarHook {
 
     private static final Set<View> watchedBars = Collections.newSetFromMap(new WeakHashMap<>());
     private static final Set<View> watchedTopBars = Collections.newSetFromMap(new WeakHashMap<>());
+    private static final Set<View> watchedDecors = Collections.newSetFromMap(new WeakHashMap<>());
     private static final Map<View, Glass> glassByBar = new WeakHashMap<>();
+
+    /** Top-chrome bars to frost on whichever screen shows them (feed, profile, DM thread). */
+    private static final String[] TOP_BAR_IDS = {
+            "action_bar_LinearLayout", "main_feed_action_bar", "profile_action_bar", "direct_thread_header"};
 
     // ---------------------------------------------------------------------------------------------
     // 1) The floating tab bar gate
@@ -209,37 +213,47 @@ public final class GlassTabBarHook {
         String pkg = a.getPackageName();
         tabBarId = a.getResources().getIdentifier("tab_bar", "id", pkg);
         tabBarShadowId = a.getResources().getIdentifier("tab_bar_shadow", "id", pkg);
-        actionBarId = a.getResources().getIdentifier("action_bar_LinearLayout", "id", pkg);
-        if (actionBarId == 0) actionBarId = a.getResources().getIdentifier("main_feed_action_bar", "id", pkg);
         idsResolved = true;
     }
 
     /**
-     * Glass the top action bar too, so content scrolls under translucent chrome at both ends (the
-     * iOS "liquid glass" look). The feed list starts at the very top (behind the bar), so a
-     * see-through tint reveals it moving behind the logo/icons. Re-applied on layout; invalidated on
-     * scroll so the glass tracks the feed.
+     * Frost the top chrome of whatever screen is showing — the feed action bar, the profile header,
+     * the DM thread header. A single listener on the window re-scans on every layout (so fragment
+     * swaps between screens are caught) and invalidates the glass on scroll so it tracks the content
+     * behind it. Each named bar is frosted only when present and visible.
      */
     private static void watchTopBar(Activity a) {
-        if (actionBarId == 0 || Build.VERSION.SDK_INT < 31) return;
-        View top = a.findViewById(actionBarId);
-        if (top == null) return;
-        if (watchedTopBars.add(top)) {
-            top.getViewTreeObserver().addOnScrollChangedListener(() -> {
-                if (top.getBackground() instanceof TopBarGlass && top.isShown()) top.invalidate();
-            });
-            top.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-                applyTopBarGlass(top);
-                if (top.getBackground() instanceof TopBarGlass && top.isShown()) top.invalidate();
+        if (Build.VERSION.SDK_INT < 31 || a.getWindow() == null) return;
+        View decor = a.getWindow().getDecorView();
+        if (decor == null) return;
+        if (watchedDecors.add(decor)) {
+            decor.getViewTreeObserver().addOnGlobalLayoutListener(() -> scanTopBars(a));
+            decor.getViewTreeObserver().addOnScrollChangedListener(() -> {
+                for (View bar : new ArrayList<>(watchedTopBars)) {
+                    if (bar.getBackground() instanceof TopBarGlass && bar.isShown()) bar.invalidate();
+                }
             });
         }
-        applyTopBarGlass(top);
+        scanTopBars(a);
+    }
+
+    @SuppressLint("DiscouragedApi")
+    private static void scanTopBars(Activity a) {
+        if (!FeatureFlags.glassTabBar || Build.VERSION.SDK_INT < 31) return;
+        for (String name : TOP_BAR_IDS) {
+            try {
+                int id = a.getResources().getIdentifier(name, "id", a.getPackageName());
+                if (id == 0) continue;
+                View v = a.findViewById(id);
+                if (v != null && v.isShown()) applyTopBarGlass(v);
+            } catch (Throwable ignored) {}
+        }
     }
 
     private static void applyTopBarGlass(View top) {
         if (!FeatureFlags.glassTabBar || Build.VERSION.SDK_INT < 31) return;
         Drawable bg = top.getBackground();
-        if (bg instanceof TopBarGlass) return;
+        if (bg instanceof TopBarGlass) { watchedTopBars.add(top); return; }
         int color;
         if (bg instanceof android.graphics.drawable.ColorDrawable cd) {
             if (Color.alpha(cd.getColor()) == 0) return; // already see-through
@@ -252,6 +266,7 @@ public final class GlassTabBarHook {
         try {
             float density = top.getResources().getDisplayMetrics().density;
             top.setBackground(new TopBarGlass(top, color, density));
+            watchedTopBars.add(top);
         } catch (Throwable t) {
             ModuleLog.line(TAG + "⚠️ top glass: " + t);
         }
