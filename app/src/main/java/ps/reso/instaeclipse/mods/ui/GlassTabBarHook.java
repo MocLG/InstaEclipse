@@ -89,6 +89,13 @@ public final class GlassTabBarHook {
     private static final String[] TOP_BAR_IDS = {
             "action_bar_LinearLayout", "main_feed_action_bar", "profile_action_bar", "direct_thread_header"};
 
+    /** Overlay surfaces that sit over content and so frost for real: bottom sheets, dialogs. Both are
+     *  same-window containers with an opaque GradientDrawable background in IG 452. */
+    private static final String[] SURFACE_IDS = {"bottom_sheet_container", "dialog_container"};
+
+    /** Marker for any background we installed, so the window scroll listener can invalidate them all. */
+    interface GlassBg {}
+
     // ---------------------------------------------------------------------------------------------
     // 1) The floating tab bar gate
     // ---------------------------------------------------------------------------------------------
@@ -227,14 +234,15 @@ public final class GlassTabBarHook {
         View decor = a.getWindow().getDecorView();
         if (decor == null) return;
         if (watchedDecors.add(decor)) {
-            decor.getViewTreeObserver().addOnGlobalLayoutListener(() -> scanTopBars(a));
+            decor.getViewTreeObserver().addOnGlobalLayoutListener(() -> { scanTopBars(a); scanSurfaces(a); });
             decor.getViewTreeObserver().addOnScrollChangedListener(() -> {
                 for (View bar : new ArrayList<>(watchedTopBars)) {
-                    if (bar.getBackground() instanceof TopBarGlass && bar.isShown()) bar.invalidate();
+                    if (bar.getBackground() instanceof GlassBg && bar.isShown()) bar.invalidate();
                 }
             });
         }
         scanTopBars(a);
+        scanSurfaces(a);
     }
 
     @SuppressLint("DiscouragedApi")
@@ -277,8 +285,87 @@ public final class GlassTabBarHook {
         }
     }
 
+    /** Frost the overlay surfaces (bottom sheets, dialogs) that sit over content. */
+    @SuppressLint("DiscouragedApi")
+    private static void scanSurfaces(Activity a) {
+        if (!FeatureFlags.glassTabBar || Build.VERSION.SDK_INT < 31) return;
+        for (String name : SURFACE_IDS) {
+            try {
+                int id = a.getResources().getIdentifier(name, "id", a.getPackageName());
+                if (id == 0) continue;
+                View v = a.findViewById(id);
+                if (v == null || !v.isShown()) continue;
+                // The container itself is a transparent wrapper (it also holds the dim scrim); the
+                // actual sheet / dialog panel is an inner view carrying the opaque rounded background.
+                View panel = findPanel(v);
+                if (panel != null) applySurfaceGlass(panel);
+            } catch (Throwable ignored) {}
+        }
+    }
+
+    /** The visible descendant holding an opaque rounded panel background (the sheet/dialog surface). */
+    private static View findPanel(View v) {
+        if (v == null || v.getVisibility() != View.VISIBLE) return null;
+        Drawable bg = v.getBackground();
+        if (bg instanceof SurfaceGlass) return v; // already glassed
+        if (bg instanceof android.graphics.drawable.GradientDrawable gd) {
+            android.content.res.ColorStateList c = gd.getColor();
+            // A rounded panel: opaque solid fill. The thin flat dividers are ColorDrawable, not this.
+            if (c != null && Color.alpha(c.getDefaultColor()) == 255 && hasCorners(gd)) return v;
+        }
+        if (v instanceof ViewGroup g) {
+            for (int i = 0; i < g.getChildCount(); i++) {
+                View r = findPanel(g.getChildAt(i));
+                if (r != null) return r;
+            }
+        }
+        return null;
+    }
+
+    private static boolean hasCorners(android.graphics.drawable.GradientDrawable gd) {
+        try {
+            float r = gd.getCornerRadius();
+            if (r > 0f) return true;
+            float[] radii = gd.getCornerRadii();
+            if (radii != null) for (float x : radii) if (x > 0f) return true;
+            return false;
+        } catch (Throwable t) {
+            return true; // can't tell (older API): treat as a panel rather than miss it
+        }
+    }
+
+    private static void applySurfaceGlass(View panel) {
+        if (!FeatureFlags.glassTabBar || Build.VERSION.SDK_INT < 31) return;
+        Drawable bg = panel.getBackground();
+        if (bg instanceof SurfaceGlass) { watchedTopBars.add(panel); return; }
+        if (!(bg instanceof android.graphics.drawable.GradientDrawable gd)) return;
+        android.content.res.ColorStateList csl = gd.getColor();
+        if (csl == null) return;
+        int color = csl.getDefaultColor();
+        if (Color.alpha(color) == 0) return;
+        try {
+            float density = panel.getResources().getDisplayMetrics().density;
+            float corner = cornerOf(gd, density);
+            panel.setBackground(new SurfaceGlass(panel, color, density, corner));
+            watchedTopBars.add(panel);
+        } catch (Throwable t) {
+            ModuleLog.line(TAG + "⚠️ surface glass: " + t);
+        }
+    }
+
+    /** Match the panel's own corner radius so the glass keeps the sheet/dialog shape. */
+    private static float cornerOf(android.graphics.drawable.GradientDrawable gd, float density) {
+        try {
+            float r = gd.getCornerRadius();
+            if (r > 0f) return r;
+            float[] radii = gd.getCornerRadii();
+            if (radii != null) for (float x : radii) if (x > 0f) return x;
+        } catch (Throwable ignored) {}
+        return density * 18f;
+    }
+
     /** Frosted full-width background for the top action bar: blurs the feed scrolling behind it. */
-    static final class TopBarGlass extends Drawable {
+    static final class TopBarGlass extends Drawable implements GlassBg {
         private final View host;
         private final int color;
         private final float density;
@@ -329,6 +416,57 @@ public final class GlassTabBarHook {
                 canvas.drawRect(b.left, b.bottom - hair, b.right, b.bottom, sheen);
                 sheen.setColor(0x24000000 | sheenRGB); // faint rim along the top edge to close the panel
                 canvas.drawRect(b.left, b.top, b.right, b.top + Math.max(1f, density * 0.6f), sheen);
+            } catch (Throwable ignored) {}
+        }
+
+        @Override public void setAlpha(int alpha) {}
+        @Override public void setColorFilter(android.graphics.ColorFilter colorFilter) {}
+        @Override public int getOpacity() { return android.graphics.PixelFormat.TRANSLUCENT; }
+    }
+
+    /**
+     * Frosted background for an overlay surface that sits over content — a bottom sheet or a dialog.
+     * These are same-window containers, so the blur engine captures the dimmed feed behind them and
+     * frosts it. The fill stays fairly opaque (readable text over the frost) and the panel keeps a
+     * rounded top like Instagram's own sheet, with a faint rim to define the glass edge.
+     */
+    static final class SurfaceGlass extends Drawable implements GlassBg {
+        private final View host;
+        private final int color;
+        private final float density;
+        private final Glass glass;
+        private final Paint rim = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        SurfaceGlass(View host, int color, float density, float corner) {
+            this.host = host;
+            this.color = color;
+            this.density = density;
+            this.glass = new Glass(density);
+            this.glass.cornerRadius = corner > 0f ? corner : density * 18f; // keep IG's panel shape
+            this.glass.flatAlpha = 0.74f;            // readable: text sits on the frost, not raw feed
+            rim.setStyle(Paint.Style.STROKE);
+            rim.setStrokeWidth(Math.max(1f, density * 0.75f));
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            if (!FeatureFlags.glassTabBar) return;
+            try {
+                Rect b = getBounds();
+                if (b.isEmpty()) return;
+                glass.draw(canvas, b, host, color);
+                // Faint bright rim to define the glass edge of the panel.
+                int base = color | 0xFF000000;
+                if (IgThemeEngine.isActive()) {
+                    try { base = IgColorRemapEngine.remap(base) | 0xFF000000; } catch (Throwable ignored) {}
+                }
+                boolean dark = (0.299f * Color.red(base) + 0.587f * Color.green(base)
+                        + 0.114f * Color.blue(base)) / 255f < 0.5f;
+                rim.setColor(dark ? 0x2EFFFFFF : 0x1F000000);
+                float r = glass.cornerRadius;
+                float inset = rim.getStrokeWidth() / 2f;
+                canvas.drawRoundRect(b.left + inset, b.top + inset, b.right - inset, b.bottom - inset,
+                        r, r, rim);
             } catch (Throwable ignored) {}
         }
 
