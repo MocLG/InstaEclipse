@@ -154,20 +154,36 @@ public final class IgColorRemapEngine {
         if (rgb == null) return color;
         if (exact != null) {
             int exactHit = exact.get(color, CACHE_MISS);
-            if (exactHit != CACHE_MISS) return exactHit;
+            if (exactHit != CACHE_MISS) return glassify(exactHit);
         }
         int mappedRgb = rgb.get(color & 0x00FFFFFF, CACHE_MISS);
         if (mappedRgb != CACHE_MISS) {
-            return (0xFF000000 & color) | (0x00FFFFFF & mappedRgb);
+            return glassify((0xFF000000 & color) | (0x00FFFFFF & mappedRgb));
         }
         SparseIntArray fuzzy = fuzzyCache;
         if (fuzzy != null) {
             int cached = fuzzy.get(color, CACHE_MISS);
-            if (cached != CACHE_MISS) return cached;
+            if (cached != CACHE_MISS) return glassify(cached);
         }
         int result = remapFuzzy(color);
         if (fuzzy != null && fuzzy.size() < FUZZY_CACHE_LIMIT) fuzzy.put(color, result);
-        return result;
+        return glassify(result);
+    }
+
+    // Glass mode: once a color has landed on the elevated-surface slot (cards, rows, panels), make it
+    // translucent so the app reads as glass. Only the surface slot — never the full-screen background
+    // slot — so nothing that must hide what's behind it (media, modals) goes see-through. Opaque
+    // inputs only; a color already more transparent than the glass level is left as is.
+    private static final float GLASS_SURFACE_ALPHA = 0.80f;
+
+    private static int glassify(int color) {
+        if (!ps.reso.instaeclipse.utils.feature.FeatureFlags.glassTabBar) return color;
+        int rgb = color & 0x00FFFFFF;
+        if (rgb != (fuzzySurface & 0x00FFFFFF)) return color;
+        int alpha = (color >>> 24) & 0xFF;
+        int glassAlpha = Math.round(255 * GLASS_SURFACE_ALPHA);
+        if (alpha <= glassAlpha) return color;
+        return (glassAlpha << 24) | rgb;
     }
 
     public static int remapIfChanged(int color) {

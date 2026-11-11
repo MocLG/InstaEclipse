@@ -310,8 +310,9 @@ public final class GlassTabBarHook {
         if (bg instanceof SurfaceGlass) return v; // already glassed
         if (bg instanceof android.graphics.drawable.GradientDrawable gd) {
             android.content.res.ColorStateList c = gd.getColor();
-            // A rounded panel: opaque solid fill. The thin flat dividers are ColorDrawable, not this.
-            if (c != null && Color.alpha(c.getDefaultColor()) == 255 && hasCorners(gd)) return v;
+            // A rounded, mostly-solid panel. The thin flat dividers are ColorDrawable, not this; the
+            // >=160 alpha (not ==255) still matches after the glass translucency sweep dims surfaces.
+            if (c != null && Color.alpha(c.getDefaultColor()) >= 160 && hasCorners(gd)) return v;
         }
         if (v instanceof ViewGroup g) {
             for (int i = 0; i < g.getChildCount(); i++) {
