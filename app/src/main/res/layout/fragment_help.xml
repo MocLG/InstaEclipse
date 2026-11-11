@@ -376,5 +376,26 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- ===== Eclipse Mods signature ===== -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:gravity="center"
+            android:letterSpacing="0.22"
+            android:text="@string/eclipse_mods_wordmark"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:gravity="center"
+            android:text="@string/eclipse_mods_tagline"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="12sp" />
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

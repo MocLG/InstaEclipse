@@ -15,6 +15,10 @@
     <string name="help_lspatch_sub">Not rooted? Install this</string>
     <string name="help_lspatch_guide">Follow the setup guide</string>
 
+    <!-- Eclipse Mods signature (shared across all Eclipse mods) -->
+    <string name="eclipse_mods_wordmark">✦  ECLIPSE MODS  ✦</string>
+    <string name="eclipse_mods_tagline">Part of the Eclipse Mods collection</string>
+
     <!-- No-root Instagram patcher -->
     <string name="patch_title">Patch Instagram (no root)</string>
     <string name="patch_intro">Patches your Instagram so InstaEclipse loads without root, keeping Instagram\'s original signature.</string>
