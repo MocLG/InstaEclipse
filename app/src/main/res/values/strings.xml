@@ -895,11 +895,4 @@ Stay on this screen until it finishes.</string>
     <string name="ig_voice_you">You</string>
     <string name="ig_glass_tab_bar_section">Navigation bar</string>
     <string name="ig_glass_tab_bar">Glass navigation bar (restart Instagram)</string>
-    <string name="ig_block_incoming_calls">Block incoming calls</string>
-    <string name="ie_block_calls_specific_only">Only specific chats</string>
-    <string name="ie_block_calls_specific_hint">Block incoming calls hides every incoming call. Turn on \"Only specific chats\" to block calls just from the chats you pick — open a chat, tap the top-left menu, and choose \"Block incoming calls from this chat\".</string>
-    <string name="ie_block_calls_this_chat">Block incoming calls from this chat</string>
-    <string name="ie_unblock_calls_this_chat">Unblock incoming calls from this chat</string>
-    <string name="ie_block_calls_chat_on">Incoming calls from this chat will be blocked</string>
-    <string name="ie_block_calls_chat_off">Incoming calls from this chat are no longer blocked</string>
 </resources>

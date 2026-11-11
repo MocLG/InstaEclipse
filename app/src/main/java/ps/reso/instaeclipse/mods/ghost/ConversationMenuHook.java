@@ -151,9 +151,6 @@ public final class ConversationMenuHook {
             if (next == null) next = findInHeader(a, header, "action_bar_title");
             // The helper claims the existing native tap target without replacing any listener.
             gesture.update(next, header, FeatureFlags.hideSpecificChats || FeatureFlags.keepUnsentMessages);
-            // The per-chat "Block/Unblock incoming calls" entry in the thread menu (top-left button).
-            // Registered here because this scan runs reliably whenever the thread header is laid out.
-            BlockIncomingCallsHook.injectMenu(a);
             shortcut(a, root, header, HIDE,
                     FeatureFlags.hideSpecificChats && FeatureFlags.showHideChatButton,
                     R.drawable.ic_eye_off, R.string.ie_hide_this_chat);

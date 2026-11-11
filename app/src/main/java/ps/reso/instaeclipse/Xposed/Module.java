@@ -326,8 +326,6 @@ public class Module {
                     }
 
                     try {
-                        if (!skip("BlockIncomingCallsHook"))
-                            new ps.reso.instaeclipse.mods.ghost.BlockIncomingCallsHook().install(lpparam.classLoader); // Block incoming calls
                     } catch (Throwable ignored) {
                         ModuleLog.line("(InstaEclipse | BlockCalls): ❌ Failed to hook");
                     }

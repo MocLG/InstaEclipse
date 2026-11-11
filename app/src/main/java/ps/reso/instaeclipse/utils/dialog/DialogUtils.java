@@ -177,7 +177,7 @@ public class DialogUtils {
         mainLayout.addView(sectionHeader(context, I18n.t(context, R.string.feat_group_privacy)));
         LinearLayout privacy = createGroupCard(context);
         privacy.addView(createMenuRow(context, R.drawable.ic_eye, I18n.t(context, R.string.ig_dialog_menu_ghost_settings), A_PRIVACY, () -> showGhostOptions(context), onCount(context, "isGhostSeen", "isGhostTyping", "isGhostStory", "isGhostLive", "isGhostScreenshot", "isGhostViewOnce", "permanentViewMode", "readReceiptChats", "spoofLastSeen", "airplaneMode")));
-        privacy.addView(createMenuRow(context, R.drawable.ic_chat, I18n.t(context, R.string.menu_messages), A_PRIVACY, () -> showMessagesOptions(context), onCount(context, "keepEphemeralMessages", "keepUnsentMessages", "keepEditHistory", "jumpToFirstMessage", "confirmCalls", "blockIncomingCalls", "blockCallsSpecificOnly", "allowScreenshots", "translateMessages", "bulkUnsend", "chatExport", "voiceMessagesList", "hideNotesTray", "hideDmSuggestions", "hideDmBlend", "hideShareCreateGroup")));
+        privacy.addView(createMenuRow(context, R.drawable.ic_chat, I18n.t(context, R.string.menu_messages), A_PRIVACY, () -> showMessagesOptions(context), onCount(context, "keepEphemeralMessages", "keepUnsentMessages", "keepEditHistory", "jumpToFirstMessage", "confirmCalls", "allowScreenshots", "translateMessages", "bulkUnsend", "chatExport", "voiceMessagesList", "hideNotesTray", "hideDmSuggestions", "hideDmBlend", "hideShareCreateGroup")));
         privacy.addView(createMenuRow(context, R.drawable.ic_eye_off, I18n.t(context, R.string.ig_hide_chats_title), A_PRIVACY, () -> showHideChatsOptions(context), onCount(context, "hideSpecificChats")));
         privacy.addView(createMenuRow(context, R.drawable.ic_shield, I18n.t(context, R.string.ig_dialog_misc_lock_section), A_PRIVACY, () -> showLockOptions(context), onCount(context, "lockDirectMessages", "lockWholeApp", "lockSavedCollections", "lockUseFingerprint")));
         privacy.addView(createMenuRow(context, R.drawable.ic_block, I18n.t(context, R.string.menu_ads_tracking), A_PRIVACY, () -> showAdOptions(context), onCount(context, "isAdBlockEnabled", "isAnalyticsBlocked", "disableTrackingLinks", "disableSearchHistory")));
@@ -1200,37 +1200,6 @@ public class DialogUtils {
     /** DM extras: keep disappearing/unsent messages, edit history, chat tools, inbox cleanup. */
     private static void showMessagesOptions(Context context) {
         LinearLayout layout = createSwitchLayout(context);
-
-        // Block incoming calls (master) with "Only specific chats" as its child: the child is
-        // disabled/greyed when the master is off, turning the master off clears it, and turning the
-        // child on turns the master on. Flags are set live and persisted on each change.
-        ToggleRow blockCallsParent = createSwitch(context, R.drawable.ic_eye_off, "#5E5CE6",
-                I18n.t(context, R.string.ig_block_incoming_calls), FeatureFlags.blockIncomingCalls);
-        ToggleRow blockCallsChild = createSwitch(context, R.drawable.ic_chat, "#5E5CE6",
-                I18n.t(context, R.string.ie_block_calls_specific_only), FeatureFlags.blockCallsSpecificOnly);
-        int childIndent = Math.round(24 * context.getResources().getDisplayMetrics().density);
-        blockCallsChild.setPadding(blockCallsChild.getPaddingLeft() + childIndent,
-                blockCallsChild.getPaddingTop(), blockCallsChild.getPaddingRight(), blockCallsChild.getPaddingBottom());
-        blockCallsParent.setOnCheckedChangeListener((v, isChecked) -> {
-            FeatureFlags.blockIncomingCalls = isChecked;
-            blockCallsChild.setEnabled(isChecked);
-            if (!isChecked) {
-                blockCallsChild.setChecked(false);
-                blockCallsChild.setEnabled(false);
-                FeatureFlags.blockCallsSpecificOnly = false;
-            }
-            SettingsManager.saveAllFlags();
-        });
-        blockCallsChild.setOnCheckedChangeListener((v, isChecked) -> {
-            FeatureFlags.blockCallsSpecificOnly = isChecked;
-            if (isChecked && !blockCallsParent.isChecked()) {
-                blockCallsParent.setChecked(true);
-                FeatureFlags.blockIncomingCalls = true;
-            }
-            SettingsManager.saveAllFlags();
-        });
-        blockCallsChild.setEnabled(blockCallsParent.isChecked());
-
         layout.addView(cardOf(context,
                 flagSwitch(context, R.drawable.ic_timer, "#5E5CE6", R.string.ig_dialog_ghost_keep_disappearing, "keepEphemeralMessages"),
                 flagSwitch(context, R.drawable.ic_chat, "#5E5CE6", R.string.ig_dialog_ghost_keep_unsent, "keepUnsentMessages", () -> {
@@ -1249,8 +1218,6 @@ public class DialogUtils {
                 flagSwitch(context, R.drawable.ic_chat, "#5E5CE6", R.string.ig_dialog_ghost_edit_history, "keepEditHistory"),
                 flagSwitch(context, R.drawable.ic_jump_first, "#5E5CE6", R.string.ig_dialog_ghost_jump_first, "jumpToFirstMessage"),
                 flagSwitch(context, R.drawable.ic_shield, "#5E5CE6", R.string.ig_call_confirm, "confirmCalls"),
-                blockCallsParent,
-                blockCallsChild,
                 flagSwitch(context, R.drawable.ic_camera, "#5E5CE6", R.string.ig_dialog_ghost_allow_screenshots_dms, "allowScreenshots"),
                 flagSwitch(context, R.drawable.ic_chat, "#5E5CE6", R.string.ig_dialog_translate_messages, "translateMessages"),
                 flagSwitch(context, R.drawable.ic_chat, "#5E5CE6", R.string.ig_dialog_bulk_unsend, "bulkUnsend"),
@@ -1261,7 +1228,6 @@ public class DialogUtils {
                 flagSwitch(context, R.drawable.ic_block, "#5E5CE6", R.string.ig_dialog_hide_dm_blend, "hideDmBlend"),
                 flagSwitch(context, R.drawable.ic_block, "#5E5CE6", R.string.ig_dialog_misc_hide_share_create_group, "hideShareCreateGroup")));
         layout.addView(createInfoSection(context, "", I18n.t(context, R.string.ie_keep_unsent_in_chat_hint)));
-        layout.addView(createInfoSection(context, "", I18n.t(context, R.string.ie_block_calls_specific_hint)));
         showSectionDialog(context, I18n.t(context, R.string.menu_messages), layout, () -> {});
     }
 
