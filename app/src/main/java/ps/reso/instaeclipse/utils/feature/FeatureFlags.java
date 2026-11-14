@@ -42,6 +42,11 @@ public class FeatureFlags {
     // Remove Meta AI (#179)
     public static volatile boolean removeMetaAI = false;
 
+    // Group / mute Instagram's notifications (ported from HushGram)
+    public static volatile boolean groupNotifications = false;       // bundle IG's notifications into one group with a count summary
+    public static volatile boolean groupNotificationsByType = false; // a group per channel (likes, comments, messages …) instead of one
+    public static volatile String  mutedNotificationChannels = "";   // comma-separated channel ids dropped before the shade
+
     // Lock DMs (#182) — passcode stored as salted SHA-256 hash (never plaintext)
     public static volatile boolean lockDirectMessages = false;
     public static volatile String lockDirectPasscode = "";

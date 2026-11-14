@@ -102,6 +102,11 @@ public class SettingsBackupManager {
         s.put("disableTrackingLinks",    FeatureFlags.disableTrackingLinks);
         s.put("openLinksExternally",     FeatureFlags.openLinksExternally);
 
+        // Notification control
+        s.put("groupNotifications",         FeatureFlags.groupNotifications);
+        s.put("groupNotificationsByType",   FeatureFlags.groupNotificationsByType);
+        s.put("mutedNotificationChannels",  FeatureFlags.mutedNotificationChannels);
+
         // Distraction Free
         s.put("isExtremeMode",           FeatureFlags.isExtremeMode);
         s.put("disableStories",          FeatureFlags.disableStories);
@@ -289,6 +294,9 @@ public class SettingsBackupManager {
         if (s.has("isAnalyticsBlocked"))     FeatureFlags.isAnalyticsBlocked     = s.getBoolean("isAnalyticsBlocked");
         if (s.has("disableTrackingLinks"))   FeatureFlags.disableTrackingLinks   = s.getBoolean("disableTrackingLinks");
         if (s.has("openLinksExternally"))    FeatureFlags.openLinksExternally    = s.getBoolean("openLinksExternally");
+        if (s.has("groupNotifications"))       FeatureFlags.groupNotifications       = s.getBoolean("groupNotifications");
+        if (s.has("groupNotificationsByType")) FeatureFlags.groupNotificationsByType = s.getBoolean("groupNotificationsByType");
+        if (s.has("mutedNotificationChannels")) FeatureFlags.mutedNotificationChannels = s.getString("mutedNotificationChannels");
 
         if (s.has("isExtremeMode"))          FeatureFlags.isExtremeMode          = s.getBoolean("isExtremeMode");
         if (s.has("disableStories"))         FeatureFlags.disableStories         = s.getBoolean("disableStories");

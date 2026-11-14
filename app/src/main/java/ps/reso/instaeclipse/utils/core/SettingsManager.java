@@ -48,6 +48,9 @@ public class SettingsManager {
         editor.putBoolean("autoClearCache", FeatureFlags.autoClearCache);
         editor.putInt("autoClearCacheSizeMb", FeatureFlags.autoClearCacheSizeMb);
         editor.putBoolean("removeMetaAI", FeatureFlags.removeMetaAI);
+        editor.putBoolean("groupNotifications", FeatureFlags.groupNotifications);
+        editor.putBoolean("groupNotificationsByType", FeatureFlags.groupNotificationsByType);
+        editor.putString("mutedNotificationChannels", FeatureFlags.mutedNotificationChannels);
         editor.putBoolean("lockDirectMessages", FeatureFlags.lockDirectMessages);
         editor.putString("lockDirectPasscode", FeatureFlags.lockDirectPasscode);
         editor.putString("lockDirectSalt", FeatureFlags.lockDirectSalt);
@@ -285,6 +288,9 @@ public class SettingsManager {
         FeatureFlags.autoClearCache = prefs.getBoolean("autoClearCache", false);
         FeatureFlags.autoClearCacheSizeMb = prefs.getInt("autoClearCacheSizeMb", 100);
         FeatureFlags.removeMetaAI = prefs.getBoolean("removeMetaAI", false);
+        FeatureFlags.groupNotifications = prefs.getBoolean("groupNotifications", false);
+        FeatureFlags.groupNotificationsByType = prefs.getBoolean("groupNotificationsByType", false);
+        FeatureFlags.mutedNotificationChannels = prefs.getString("mutedNotificationChannels", "");
         FeatureFlags.lockDirectMessages = prefs.getBoolean("lockDirectMessages", false);
         FeatureFlags.lockDirectPasscode = prefs.getString("lockDirectPasscode", "");
         FeatureFlags.lockDirectSalt = prefs.getString("lockDirectSalt", "");

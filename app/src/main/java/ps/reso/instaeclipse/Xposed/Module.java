@@ -526,6 +526,13 @@ public class Module {
                         ModuleLog.line("(InstaEclipse | NotificationFix): ❌ Failed to hook: " + t);
                     }
 
+                    // Extras: group / mute Instagram's notifications (NotificationManager.notify/cancel)
+                    try {
+                        if (!skip("NotificationControlHook")) new ps.reso.instaeclipse.mods.extras.NotificationControlHook().install(hostClassLoader);
+                    } catch (Throwable t) {
+                        ModuleLog.line("(InstaEclipse | NotificationControl): ❌ Failed to hook: " + t);
+                    }
+
                     // Startup tab
                     try {
                         if (!skip("StartupTabHook")) new ps.reso.instaeclipse.mods.ui.StartupTabHook().install(hostClassLoader);

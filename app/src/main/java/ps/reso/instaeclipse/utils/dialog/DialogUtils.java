@@ -203,7 +203,7 @@ public class DialogUtils {
         // ---- TOOLS ---- app & account, developer, backup, restart, cache, about
         mainLayout.addView(sectionHeader(context, I18n.t(context, R.string.feat_group_tools)));
         LinearLayout tools = createGroupCard(context);
-        tools.addView(createMenuRow(context, R.drawable.ic_settings_gear, I18n.t(context, R.string.menu_app), A_TOOLS, () -> showAppOptions(context), onCount(context, "safePacing", "unlimitedAccounts", "fixNotificationRegistration", "showFeatureToasts", "openLinksExternally")));
+        tools.addView(createMenuRow(context, R.drawable.ic_settings_gear, I18n.t(context, R.string.menu_app), A_TOOLS, () -> showAppOptions(context), onCount(context, "safePacing", "unlimitedAccounts", "fixNotificationRegistration", "groupNotifications", "groupNotificationsByType", "showFeatureToasts", "openLinksExternally")));
         tools.addView(createMenuRow(context, R.drawable.ic_tune, I18n.t(context, R.string.ig_dialog_menu_dev_options), A_TOOLS, () -> showDevOptions(context), onCount(context, "isDevEnabled", "removeBuildExpiredPopup")));
         tools.addView(createMenuRow(context, R.drawable.ic_save, I18n.t(context, R.string.ig_dialog_menu_backup_restore), A_TOOLS, () -> showBackupRestoreOptions(context)));
         tools.addView(createMenuRow(context, R.drawable.ic_restart, I18n.t(context, R.string.ig_dialog_menu_restart), A_TOOLS, () -> showRestartSection(context)));
@@ -2009,7 +2009,71 @@ public class DialogUtils {
                 flagSwitch(context, R.drawable.ic_link, "#0A84FF", R.string.ig_dialog_open_links_externally, "openLinksExternally"),
                 createActionRow(context, R.drawable.ic_link, shareDomainLabel(context), "#0A84FF",
                         v -> showShareDomainDialog(context, (TextView) findFirstText(v)))));
+
+        // Group / mute Instagram's notifications (ported from HushGram).
+        ToggleRow group = createSwitch(context, R.drawable.ic_notification, "#0A84FF",
+                I18n.t(context, R.string.ig_notif_group_title), FeatureFlags.groupNotifications);
+        group.setOnCheckedChangeListener((b, checked) -> {
+            FeatureFlags.groupNotifications = checked;
+            SettingsManager.saveAllFlags();
+            // Turned off: our summaries come down at once; the notifications under them stay.
+            if (!checked) ps.reso.instaeclipse.mods.extras.NotificationControlHook.switchedOff(context);
+        });
+        layout.addView(createInfoSection(context, I18n.t(context, R.string.ig_notif_group_title),
+                I18n.t(context, R.string.ig_notif_group_sub)));
+        layout.addView(cardOf(context,
+                group,
+                flagSwitch(context, R.drawable.ic_notification, "#0A84FF", R.string.ig_notif_group_by_type, "groupNotificationsByType"),
+                createActionRow(context, R.drawable.ic_block, mutedChannelsLabel(context), "#0A84FF",
+                        v -> showMutedChannelsDialog(context, (TextView) findFirstText(v)))));
         showSectionDialog(context, I18n.t(context, R.string.menu_app), layout, () -> {});
+    }
+
+    /** "Mute notification types" action-row label, with the count when something is muted. */
+    private static String mutedChannelsLabel(Context context) {
+        int n = ps.reso.instaeclipse.mods.extras.NotificationControlHook
+                .mutedChannels(FeatureFlags.mutedNotificationChannels).size();
+        return n == 0 ? I18n.t(context, R.string.ig_notif_mute_title)
+                : I18n.t(context, R.string.ig_notif_mute_count, n);
+    }
+
+    /** Multi-select of Instagram's notification channels; checked ones are dropped before the shade. */
+    private static void showMutedChannelsDialog(Context context, TextView label) {
+        java.util.Set<String> muted = ps.reso.instaeclipse.mods.extras.NotificationControlHook
+                .mutedChannels(FeatureFlags.mutedNotificationChannels);
+        java.util.List<String[]> offered = ps.reso.instaeclipse.mods.extras.NotificationControlHook
+                .offeredChannels(context, muted);
+
+        IeDialog dlg = new IeDialog(context)
+                .title(I18n.t(context, R.string.ig_notif_mute_title))
+                .message(I18n.t(context, R.string.ig_notif_mute_sub));
+
+        if (offered.isEmpty()) {
+            dlg.quote(I18n.t(context, R.string.ig_notif_mute_empty), 6); // quote() adds itself to the dialog
+            dlg.secondary(context.getString(android.R.string.ok), null);
+            dlg.show();
+            return;
+        }
+
+        final java.util.List<String> ids = new java.util.ArrayList<>();
+        final java.util.List<android.widget.CheckBox> boxes = new java.util.ArrayList<>();
+        for (String[] each : offered) {
+            ids.add(each[0]);
+            boxes.add(dlg.checkBox(each[1], muted.contains(each[0])));
+        }
+
+        dlg.secondary(context.getString(android.R.string.cancel), null);
+        dlg.primary(I18n.t(context, R.string.ig_profile_spoofer_save), () -> {
+            java.util.Set<String> picked = new java.util.HashSet<>();
+            for (int i = 0; i < boxes.size(); i++) {
+                if (boxes.get(i).isChecked()) picked.add(ids.get(i));
+            }
+            FeatureFlags.mutedNotificationChannels =
+                    ps.reso.instaeclipse.mods.extras.NotificationControlHook.joinChannels(picked);
+            SettingsManager.saveAllFlags();
+            if (label != null) label.setText(mutedChannelsLabel(context));
+        });
+        dlg.show();
     }
 
     /** Top-level "Lock" section (Privacy group) — the grouped passcode-lock card. */
