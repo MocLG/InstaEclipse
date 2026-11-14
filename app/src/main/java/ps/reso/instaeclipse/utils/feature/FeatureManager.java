@@ -151,12 +151,6 @@ public class FeatureManager {
             FeatureStatusTracker.setDisabled("HideLikedPosts");
         }
 
-        if (FeatureFlags.showHiddenLikes) {
-            FeatureStatusTracker.setEnabled("ShowHiddenLikes", R.string.ig_dialog_clean_feed_show_hidden_likes);
-        } else {
-            FeatureStatusTracker.setDisabled("ShowHiddenLikes");
-        }
-
 
         // Miscellaneous
         if (FeatureFlags.disableTrackingLinks) {

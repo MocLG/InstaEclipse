@@ -48,7 +48,6 @@ public class SettingsBackupManager {
         s.put("hideSuggestionsInReels",     FeatureFlags.hideSuggestionsInReels);
         s.put("hidePaidPartnerships",       FeatureFlags.hidePaidPartnerships);
         s.put("hideLikedPosts",             FeatureFlags.hideLikedPosts);
-        s.put("showHiddenLikes",            FeatureFlags.showHiddenLikes);
         s.put("confirmFeedRefresh",         FeatureFlags.confirmFeedRefresh);
         s.put("hideCommunityNotes",         FeatureFlags.hideCommunityNotes);
         s.put("followingOnlyFeed",         FeatureFlags.followingOnlyFeed);
@@ -234,7 +233,6 @@ public class SettingsBackupManager {
         if (s.has("hideSuggestionsInReels"))    FeatureFlags.hideSuggestionsInReels    = s.getBoolean("hideSuggestionsInReels");
         if (s.has("hidePaidPartnerships"))      FeatureFlags.hidePaidPartnerships      = s.getBoolean("hidePaidPartnerships");
         if (s.has("hideLikedPosts"))            FeatureFlags.hideLikedPosts            = s.getBoolean("hideLikedPosts");
-        if (s.has("showHiddenLikes"))           FeatureFlags.showHiddenLikes           = s.getBoolean("showHiddenLikes");
         if (s.has("confirmFeedRefresh"))        FeatureFlags.confirmFeedRefresh        = s.getBoolean("confirmFeedRefresh");
         if (s.has("hideCommunityNotes"))        FeatureFlags.hideCommunityNotes        = s.getBoolean("hideCommunityNotes");
         if (s.has("followingOnlyFeed"))        FeatureFlags.followingOnlyFeed        = s.getBoolean("followingOnlyFeed");
