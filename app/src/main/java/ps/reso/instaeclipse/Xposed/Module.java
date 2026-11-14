@@ -124,7 +124,7 @@ public class Module {
             try {
                 if (dexKitBridge == null) {
                     // load libdexkit.so from the module (once)
-                    System.load(moduleLibDir + "/libdexkit.so");
+                    System.load(resolveDexkitLib(lpparam));
                     // ModuleLog.line("libdexkit.so loaded successfully.");
 
                     // Initialize DexKitBridge with the target app's APK
@@ -138,10 +138,56 @@ public class Module {
                 // hook the target app
                 hookInstagram(lpparam);
 
-            } catch (Exception e) {
-                ModuleLog.line("(InstaEclipse): Failed to initialize DexKitBridge for " + lpparam.packageName + ": " + e.getMessage());
+            } catch (Throwable e) {
+                // Throwable, not Exception: a failed System.load throws UnsatisfiedLinkError (an
+                // Error), which must still be logged instead of silently aborting hook install.
+                ModuleLog.line("(InstaEclipse): Failed to initialize DexKitBridge for " + lpparam.packageName + ": " + e);
             }
         }
+    }
+
+    /**
+     * Absolute path of libdexkit.so to hand to System.load(). Classic frameworks (LSPosed/Vector)
+     * unpack the module's native libs to a folder on disk, so that file is used directly. Under
+     * LSPatch the module's libs stay packed inside the module APK and no such folder exists, so the
+     * .so is extracted from the APK into the host app's cache once and that copy is loaded.
+     */
+    private static String resolveDexkitLib(XC_LoadPackage.LoadPackageParam lpparam) throws Exception {
+        java.io.File direct = new java.io.File(moduleLibDir, "libdexkit.so");
+        if (direct.exists()) return direct.getAbsolutePath();
+
+        String abi = Build.SUPPORTED_ABIS[0];
+        java.io.File outDir = new java.io.File(lpparam.appInfo.dataDir, "cache/instaeclipse/lib/" + abi);
+        //noinspection ResultOfMethodCallIgnored
+        outDir.mkdirs();
+        java.io.File out = new java.io.File(outDir, "libdexkit.so");
+        try (java.util.zip.ZipFile zip = new java.util.zip.ZipFile(moduleSourceDir)) {
+            java.util.zip.ZipEntry entry = zip.getEntry("lib/" + abi + "/libdexkit.so");
+            if (entry == null)
+                throw new java.io.FileNotFoundException("libdexkit.so missing from module APK for " + abi);
+            // Re-extract only when absent or size-mismatched (stale after a module update).
+            if (!out.exists() || out.length() != entry.getSize()) {
+                java.io.File tmp = new java.io.File(outDir, "libdexkit.so.tmp");
+                try (java.io.InputStream in = zip.getInputStream(entry);
+                     java.io.OutputStream os = new java.io.FileOutputStream(tmp)) {
+                    byte[] buffer = new byte[65536];
+                    int read;
+                    while ((read = in.read(buffer)) != -1) os.write(buffer, 0, read);
+                }
+                //noinspection ResultOfMethodCallIgnored
+                out.delete();
+                if (!tmp.renameTo(out)) {
+                    //noinspection ResultOfMethodCallIgnored
+                    tmp.delete();
+                    throw new java.io.IOException("Could not stage libdexkit.so");
+                }
+            }
+        }
+        // Loading a .so from an app-writable file is flagged (and will be rejected on a future
+        // Android); clearing the write bit makes the dynamic loader accept it.
+        //noinspection ResultOfMethodCallIgnored
+        out.setWritable(false, false);
+        return out.getAbsolutePath();
     }
 
     /** DexKitCache key set once every feature hook has been installed for this IG version. */
