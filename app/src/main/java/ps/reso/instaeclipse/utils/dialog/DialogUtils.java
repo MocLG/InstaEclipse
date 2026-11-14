@@ -1223,8 +1223,8 @@ public class DialogUtils {
                         ps.reso.instaeclipse.mods.ghost.KeepUnsentMessagesHook::onSettingsChanged),
                 flagSwitch(context, R.drawable.ic_delete, "#5E5CE6", R.string.ie_show_deleted_button, "showDeletedMessagesButton",
                         ps.reso.instaeclipse.mods.ghost.ConversationMenuHook::refreshAll),
-                createActionRow(context, R.drawable.ic_chat, I18n.t(context, R.string.ie_chat_actions), "#5E5CE6",
-                        v -> ps.reso.instaeclipse.mods.ghost.ConversationMenuHook.show(activityOf(context))),
+                // "Chat actions" row removed: opens per-chat actions that need a chat on screen;
+                // from this general menu it only said "Couldn't identify this chat".
                 createActionRow(context, R.drawable.ic_chat, I18n.t(context, R.string.ig_dialog_unsent_title), "#5E5CE6", v -> showUnsentMessages(context)),
                 flagSwitch(context, R.drawable.ic_chat, "#5E5CE6", R.string.ig_dialog_ghost_edit_history, "keepEditHistory"),
                 flagSwitch(context, R.drawable.ic_jump_first, "#5E5CE6", R.string.ig_dialog_ghost_jump_first, "jumpToFirstMessage"),
