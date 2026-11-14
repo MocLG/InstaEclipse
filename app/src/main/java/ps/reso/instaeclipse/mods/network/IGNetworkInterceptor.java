@@ -80,63 +80,125 @@ public class IGNetworkInterceptor {
         }
     }
 
+    /** Once-found IDLE constant of IG's PresenceStatus enum (keyed by its enum class). */
+    private static volatile Enum<?> presenceIdle;
+
     /**
-     * Freeze the "active now" green dot. In {@code RealtimeClientManager.createMqttClient} (both
-     * names stable/unobfuscated) IG checks one static {@code boolean(UserSession)} gate and, when it
-     * returns true, adds the subscription {@code "/disable_presence_reporting"} so the server stops
-     * reporting this account's presence to others. That gate is normally a server QE (off by
-     * default), its class/number change every release, so we anchor on the stable string, take the
-     * single matching invoke, and force it true while SpoofLastSeen is on — IG's own mechanism, so
-     * the user still receives others' presence. Takes effect on the next realtime (re)connect.
+     * Freeze the "active now" green dot. IG reports presence to Meta's presence service by
+     * constructing {@code com.facebook.presence.model.upi.PresenceWriteRequest} with a
+     * {@code PresenceStatus} (its 3rd arg): ACTIVE while the app is in front, IDLE from the
+     * background. All of these class names are stable (unobfuscated Meta presence model), so no
+     * DexKit is needed. While SpoofLastSeen is on we swap an outgoing ACTIVE for IDLE — the exact
+     * status IG itself sends when backgrounded — so others stop seeing "active now" while the
+     * stream, and the presence of people you chat with that comes back on it, are untouched.
      */
-    private static void hookPresenceReporting(ClassLoader classLoader) {
+    private static void hookActiveStatus(ClassLoader classLoader) {
         try {
-            if (ps.reso.instaeclipse.Xposed.Module.dexKitBridge == null) return;
-            java.util.List<org.luckypray.dexkit.result.MethodData> found =
-                    ps.reso.instaeclipse.Xposed.Module.dexKitBridge.findMethod(
-                            org.luckypray.dexkit.query.FindMethod.create().matcher(
-                                    org.luckypray.dexkit.query.matchers.MethodMatcher.create()
-                                            .usingStrings("/disable_presence_reporting")));
-            XC_MethodHook gateHook = new XC_MethodHook() {
+            Class<?> writeRequest = XposedHelpers.findClassIfExists(
+                    "com.facebook.presence.model.upi.PresenceWriteRequest", classLoader);
+            final Class<?> statusEnum = XposedHelpers.findClassIfExists(
+                    "com.facebook.presence.model.upi.PresenceStatus", classLoader);
+            if (writeRequest == null || statusEnum == null) {
+                ModuleLog.line("(InstaEclipse | Interceptor): ⚠️ active-status: presence classes not found");
+                return;
+            }
+            XC_MethodHook swap = new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) {
-                    if (FeatureFlags.spoofLastSeen) param.setResult(Boolean.TRUE);
+                    try {
+                        Object[] args = param.args;
+                        // The status is the 3rd parameter of the write-request constructor(s).
+                        if (args.length <= 2 || !statusEnum.isInstance(args[2])) return;
+                        if (!FeatureFlags.spoofLastSeen || !"ACTIVE".equals(((Enum<?>) args[2]).name())) return;
+                        Enum<?> idle = presenceIdleOf(statusEnum);
+                        if (idle != null) args[2] = idle;
+                    } catch (Throwable ignored) {
+                    }
+                }
+
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) {
+                    // Arg rewrites in a before-hook don't always reach the stored field under
+                    // libxposed/LSPatch, so also set the request's status field to IDLE directly.
+                    try {
+                        if (!FeatureFlags.spoofLastSeen) return;
+                        Object obj = param.thisObject;
+                        if (obj == null) return;
+                        Enum<?> idle = presenceIdleOf(statusEnum);
+                        if (idle == null) return;
+                        for (Field f : obj.getClass().getDeclaredFields()) {
+                            if (f.getType() != statusEnum) continue;
+                            f.setAccessible(true);
+                            Object v = f.get(obj);
+                            if (v instanceof Enum && "ACTIVE".equals(((Enum<?>) v).name())) f.set(obj, idle);
+                        }
+                    } catch (Throwable ignored) {
+                    }
                 }
             };
             int n = 0;
-            for (org.luckypray.dexkit.result.MethodData createMqtt : found) {
-                for (org.luckypray.dexkit.result.MethodData inv : createMqtt.getInvokes()) {
-                    Method gate;
-                    try {
-                        gate = inv.getMethodInstance(classLoader);
-                    } catch (Throwable t) {
-                        continue;
-                    }
-                    Class<?>[] pt = gate.getParameterTypes();
-                    if (!java.lang.reflect.Modifier.isStatic(gate.getModifiers())) continue;
-                    if (gate.getReturnType() != boolean.class) continue;
-                    if (pt.length != 1
-                            || !pt[0].getName().equals("com.instagram.common.session.UserSession")) continue;
-                    XposedBridge.hookMethod(gate, gateHook);
-                    n++;
-                }
+            for (java.lang.reflect.Constructor<?> c : writeRequest.getDeclaredConstructors()) {
+                XposedBridge.hookMethod(c, swap);
+                n++;
             }
             if (n > 0) FeatureStatusTracker.setHooked("SpoofLastSeen");
-            ModuleLog.line("(InstaEclipse | Interceptor): presence-reporting gate hooks: " + n);
+            ModuleLog.line("(InstaEclipse | Interceptor): active-status (presence write) ctor hooks: " + n);
+
+            // The green "active now" dot is driven by the realtime connection's foreground app-state,
+            // not only the presence write. RealtimeClientManager.updateAppStateInternal(boolean) reports
+            // it (true=foreground). Force background while SpoofLastSeen is on so the server never marks
+            // us active now. Name is stable/unobfuscated on 451/452.
+            Class<?> rcm = XposedHelpers.findClassIfExists(
+                    "com.instagram.realtimeclient.RealtimeClientManager", classLoader);
+            if (rcm != null) {
+                XposedHelpers.findAndHookMethod(rcm, "updateAppStateInternal", boolean.class, new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        try {
+                            if (FeatureFlags.spoofLastSeen && Boolean.TRUE.equals(param.args[0])) {
+                                param.args[0] = Boolean.FALSE;
+                            }
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                });
+                ModuleLog.line("(InstaEclipse | Interceptor): hooked updateAppStateInternal");
+            } else {
+                ModuleLog.line("(InstaEclipse | Interceptor): ⚠️ RealtimeClientManager not found");
+            }
         } catch (Throwable t) {
-            ModuleLog.line("(InstaEclipse | Interceptor): ⚠️ presence-reporting hook: " + t.getMessage());
+            ModuleLog.line("(InstaEclipse | Interceptor): ⚠️ active-status hook: " + t.getMessage());
         }
+    }
+
+    /** The IDLE constant of IG's PresenceStatus enum, read from its static fields (no values() needed). */
+    private static Enum<?> presenceIdleOf(Class<?> statusEnum) {
+        Enum<?> found = presenceIdle;
+        if (found != null && found.getDeclaringClass() == statusEnum) return found;
+        for (Field f : statusEnum.getDeclaredFields()) {
+            if (f.getType() != statusEnum || !java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
+            try {
+                f.setAccessible(true);
+                Object v = f.get(null);
+                if (v instanceof Enum && "IDLE".equals(((Enum<?>) v).name())) {
+                    found = (Enum<?>) v;
+                    presenceIdle = found;
+                    return found;
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        return null;
     }
 
     public void handleInterceptor(XC_LoadPackage.LoadPackageParam lpparam) {
         try {
             ClassLoader classLoader = lpparam.classLoader;
 
-            // Freeze "last seen" (the live "active now" green dot). Modern IG no longer reports
-            // presence over HTTP (the /push/setForegroundState/ endpoint is gone), so the URL drops
-            // below can't stop it — presence now rides the realtime MQTT connection. Make IG add its
-            // OWN "/disable_presence_reporting" subscription instead. See hookPresenceReporting.
-            hookPresenceReporting(classLoader);
+            // Freeze "last seen" (the live "active now" green dot). Modern IG reports presence by
+            // constructing a PresenceWriteRequest with an ACTIVE status, not over HTTP, so the URL
+            // drops below can't stop it. Swap outgoing ACTIVE -> IDLE instead. See hookActiveStatus.
+            hookActiveStatus(classLoader);
 
             // Locate the TigonServiceLayer class dynamically
             Class<?> tigonClass = classLoader.loadClass("com.instagram.api.tigon.TigonServiceLayer");
