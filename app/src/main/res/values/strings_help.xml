@@ -51,6 +51,8 @@
     <string name="patch_installed_title">Instagram patched &amp; installed</string>
     <string name="patch_installed_sub">InstaEclipse loads the next time Instagram starts.</string>
     <string name="patch_open_instagram">Open Instagram</string>
+    <string name="patch_fix_links">Enable link handling</string>
+    <string name="patch_fix_links_hint">Re-signing breaks Android\'s link verification, so Instagram links open in your browser. Tap above and turn on \"Open supported links\" to open them in the app.</string>
     <string name="patch_installed">Installed</string>
     <string name="patch_state_failed">Patch failed — check the steps below.</string>
 </resources>

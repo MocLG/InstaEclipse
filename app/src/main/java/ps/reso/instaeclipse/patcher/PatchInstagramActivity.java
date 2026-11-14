@@ -3,10 +3,12 @@ package ps.reso.instaeclipse.patcher;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,6 +60,7 @@ public class PatchInstagramActivity extends AppCompatActivity {
     private MaterialButton chooseButton;
     private MaterialButton getApkButton;
     private MaterialButton openButton;
+    private MaterialButton fixLinksButton;
     private View progressRow;
     private View successCard;
     private LinearProgressIndicator progress;
@@ -89,6 +92,7 @@ public class PatchInstagramActivity extends AppCompatActivity {
         chooseButton = findViewById(R.id.patch_choose_button);
         getApkButton = findViewById(R.id.patch_get_apk_button);
         openButton = findViewById(R.id.patch_open_button);
+        fixLinksButton = findViewById(R.id.patch_fix_links_button);
         progressRow = findViewById(R.id.patch_progress_row);
         successCard = findViewById(R.id.patch_success_card);
         progress = findViewById(R.id.patch_progress);
@@ -107,6 +111,7 @@ public class PatchInstagramActivity extends AppCompatActivity {
             }
         });
         openButton.setOnClickListener(v -> openInstagram());
+        fixLinksButton.setOnClickListener(v -> openLinkSettings());
 
         PatchInstallReceiver.setCallback(installStatus);
     }
@@ -222,6 +227,37 @@ public class PatchInstagramActivity extends AppCompatActivity {
             }
         }
         IeToast.makeText(this, getString(R.string.not_installed_instagram), Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Opens the patched app's "Open by default" screen so the user can turn on "Open supported
+     * links". A re-signed build fails Android's App Links verification (its cert no longer matches
+     * Instagram's published fingerprint), and a non-root app can't approve its own links, so this
+     * sends the user straight to the one toggle that makes instagram.com / facebook.com links open
+     * in the app again.
+     */
+    private void openLinkSettings() {
+        String target = null;
+        for (String pkg : CommonUtils.SUPPORTED_PACKAGES) {
+            if (getPackageManager().getLaunchIntentForPackage(pkg) != null) { target = pkg; break; }
+        }
+        if (target == null) {
+            IeToast.makeText(this, getString(R.string.not_installed_instagram), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Uri uri = Uri.parse("package:" + target);
+        try {
+            Intent intent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                    ? new Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, uri)
+                    : new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri);
+            startActivity(intent);
+        } catch (Throwable t) {
+            try {
+                startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri));
+            } catch (Throwable ignored) {
+                IeToast.makeText(this, getString(R.string.patch_failed, String.valueOf(t)), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void updateProgress(int percent) {
