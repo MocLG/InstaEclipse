@@ -28,6 +28,9 @@ final class SignatureReader {
     private static final long APK_SIG_BLOCK_MAGIC_HI = 0x3234206b636f6c42L; // "Block 42"
     private static final int V2_BLOCK_ID = 0x7109871a;
     private static final int V3_BLOCK_ID = 0xf05368c0;
+    // APK Signature Scheme v3.1 — used to carry a ROTATED (current) key while v3.0/v2 keep the
+    // old key for older Android. Instagram 455 rotated its signing key this way.
+    private static final int V31_BLOCK_ID = 0x1b93ad61;
 
     /** Lowercase hex of the first signing certificate's DER bytes, or null if none could be read. */
     static String originalCertHex(File apk) {
@@ -63,7 +66,7 @@ final class SignatureReader {
             byte[] pairs = readAt(raf, pairsStart, (int) (pairsEnd - pairsStart));
             ByteBuffer pb = ByteBuffer.wrap(pairs).order(ByteOrder.LITTLE_ENDIAN);
 
-            byte[] v2 = null, v3 = null;
+            byte[] v2 = null, v3 = null, v31 = null;
             while (pb.remaining() >= 12) {
                 long len = pb.getLong();
                 if (len < 4 || len > pb.remaining()) break;
@@ -73,13 +76,14 @@ final class SignatureReader {
                 pb.get(value);
                 if (id == V2_BLOCK_ID) v2 = value;
                 else if (id == V3_BLOCK_ID) v3 = value;
+                else if (id == V31_BLOCK_ID) v31 = value;
             }
-            // Prefer V3: on a key-rotated app the V2 block carries the OLD key (kept for
-            // backward compatibility) while V3 carries the CURRENT signer plus the rotation
-            // lineage. Reading V2 first would report a stale certificate (e.g. IG 455 rotated
-            // from the 2012 cert to a new one); the current signer is what the stock app reports
-            // to its own signature checks, so that's what the bypass must hand back.
-            byte[] scheme = v3 != null ? v3 : v2;
+            // Prefer v3.1 > v3.0 > v2. On a key-rotated app (e.g. Instagram 455) only the v3.1
+            // block carries the CURRENT signer; the v3.0 and v2 blocks keep the OLD key for
+            // backward compatibility. The current signer is what the stock app presents to its
+            // own signature checks, so that's what the bypass must hand back — reading v3.0/v2
+            // would report a stale certificate.
+            byte[] scheme = v31 != null ? v31 : (v3 != null ? v3 : v2);
             return scheme == null ? null : firstCertificate(scheme);
         } catch (Throwable t) {
             return null;
