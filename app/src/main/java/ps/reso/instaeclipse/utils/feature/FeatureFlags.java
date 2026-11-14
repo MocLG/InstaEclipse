@@ -80,6 +80,14 @@ public class FeatureFlags {
     public static volatile boolean hideProfileBioLinks = false;   // hide the bio links row
     public static volatile boolean hideProfileInterests = false;  // hide interests / category chips
     public static volatile boolean hideProfileBanners = false;    // hide cross-app banner row (Threads/FB/WhatsApp)
+    // Feed Declutter: per-element toggles that hide chrome on home-feed posts (FeedDeclutterHook)
+    public static volatile boolean hideFeedFollowButton = false;  // hide Follow/Subscribe on feed posts
+    public static volatile boolean hideFeedSaveButton = false;    // hide the Save button on feed posts
+    public static volatile boolean hideFeedLikeButton = false;    // hide the Like button + like count
+    public static volatile boolean hideFeedActivityBubbles = false; // hide friend-activity facepile bubbles
+    public static volatile boolean hideFeedAudioIcon = false;     // hide the audio icon on feed posts
+    public static volatile boolean hideFeedMadeWithEdits = false; // hide the "Made with Edits" label
+    public static volatile boolean hideFeedCaptions = false;      // hide post captions in the feed
     public static volatile boolean hideNotesTray = false; // hide the Notes tray in the DM inbox (#241)
     public static volatile boolean hideInstants = false; // the floating Instants stack
     public static volatile boolean hideDmSuggestions = false; // no "Suggested for you" accounts under the DM inbox (#282)

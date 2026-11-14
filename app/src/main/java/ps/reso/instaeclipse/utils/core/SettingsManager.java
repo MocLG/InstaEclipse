@@ -145,6 +145,13 @@ public class SettingsManager {
         editor.putBoolean("hideProfileBioLinks", FeatureFlags.hideProfileBioLinks);
         editor.putBoolean("hideProfileInterests", FeatureFlags.hideProfileInterests);
         editor.putBoolean("hideProfileBanners", FeatureFlags.hideProfileBanners);
+        editor.putBoolean("hideFeedFollowButton", FeatureFlags.hideFeedFollowButton);
+        editor.putBoolean("hideFeedSaveButton", FeatureFlags.hideFeedSaveButton);
+        editor.putBoolean("hideFeedLikeButton", FeatureFlags.hideFeedLikeButton);
+        editor.putBoolean("hideFeedActivityBubbles", FeatureFlags.hideFeedActivityBubbles);
+        editor.putBoolean("hideFeedAudioIcon", FeatureFlags.hideFeedAudioIcon);
+        editor.putBoolean("hideFeedMadeWithEdits", FeatureFlags.hideFeedMadeWithEdits);
+        editor.putBoolean("hideFeedCaptions", FeatureFlags.hideFeedCaptions);
 
         // Ads
         editor.putBoolean("isAdBlockEnabled", FeatureFlags.isAdBlockEnabled);
@@ -390,6 +397,13 @@ public class SettingsManager {
         FeatureFlags.hideProfileBioLinks = prefs.getBoolean("hideProfileBioLinks", false);
         FeatureFlags.hideProfileInterests = prefs.getBoolean("hideProfileInterests", false);
         FeatureFlags.hideProfileBanners = prefs.getBoolean("hideProfileBanners", false);
+        FeatureFlags.hideFeedFollowButton = prefs.getBoolean("hideFeedFollowButton", false);
+        FeatureFlags.hideFeedSaveButton = prefs.getBoolean("hideFeedSaveButton", false);
+        FeatureFlags.hideFeedLikeButton = prefs.getBoolean("hideFeedLikeButton", false);
+        FeatureFlags.hideFeedActivityBubbles = prefs.getBoolean("hideFeedActivityBubbles", false);
+        FeatureFlags.hideFeedAudioIcon = prefs.getBoolean("hideFeedAudioIcon", false);
+        FeatureFlags.hideFeedMadeWithEdits = prefs.getBoolean("hideFeedMadeWithEdits", false);
+        FeatureFlags.hideFeedCaptions = prefs.getBoolean("hideFeedCaptions", false);
 
         // Ads
         FeatureFlags.isAdBlockEnabled = prefs.getBoolean("isAdBlockEnabled", false);

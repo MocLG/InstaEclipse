@@ -1227,6 +1227,17 @@ public class FeaturesFragment extends Fragment {
                 createClickable(R.drawable.ic_sparkle, "#64D2FF", feedCornerText(), this::chooseFeedCorner)
         ));
 
+        defs.add(getString(R.string.ig_dialog_feed_declutter));
+        defs.add(Arrays.asList(
+                createSwitch(R.drawable.ic_eye_off, "#64D2FF", getString(R.string.ig_feat_hide_feed_follow), "hideFeedFollowButton"),
+                createSwitch(R.drawable.ic_save, "#64D2FF", getString(R.string.ig_feat_hide_feed_save), "hideFeedSaveButton"),
+                createSwitch(R.drawable.ic_heart, "#64D2FF", getString(R.string.ig_feat_hide_feed_like), "hideFeedLikeButton"),
+                createSwitch(R.drawable.ic_sparkle, "#64D2FF", getString(R.string.ig_feat_hide_feed_activity_bubbles), "hideFeedActivityBubbles"),
+                createSwitch(R.drawable.ic_movie, "#64D2FF", getString(R.string.ig_feat_hide_feed_audio_icon), "hideFeedAudioIcon"),
+                createSwitch(R.drawable.ic_tune, "#64D2FF", getString(R.string.ig_feat_hide_feed_made_with_edits), "hideFeedMadeWithEdits"),
+                createSwitch(R.drawable.ic_chat, "#64D2FF", getString(R.string.ig_feat_hide_feed_captions), "hideFeedCaptions")
+        ));
+
         return defs;
     }
 

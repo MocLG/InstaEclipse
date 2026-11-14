@@ -338,6 +338,13 @@ public class FeatureManager {
         reg(FeatureFlags.hideProfileBioLinks,  "HideProfileBioLinks",  R.string.ig_feat_hide_profile_bio_links);
         reg(FeatureFlags.hideProfileInterests, "HideProfileInterests", R.string.ig_feat_hide_profile_interests);
         reg(FeatureFlags.hideProfileBanners,   "HideProfileBanners",   R.string.ig_feat_hide_profile_banners);
+        reg(FeatureFlags.hideFeedFollowButton, "HideFeedFollowButton", R.string.ig_feat_hide_feed_follow);
+        reg(FeatureFlags.hideFeedSaveButton,   "HideFeedSaveButton",   R.string.ig_feat_hide_feed_save);
+        reg(FeatureFlags.hideFeedLikeButton,   "HideFeedLikeButton",   R.string.ig_feat_hide_feed_like);
+        reg(FeatureFlags.hideFeedActivityBubbles, "HideFeedActivityBubbles", R.string.ig_feat_hide_feed_activity_bubbles);
+        reg(FeatureFlags.hideFeedAudioIcon,    "HideFeedAudioIcon",    R.string.ig_feat_hide_feed_audio_icon);
+        reg(FeatureFlags.hideFeedMadeWithEdits, "HideFeedMadeWithEdits", R.string.ig_feat_hide_feed_made_with_edits);
+        reg(FeatureFlags.hideFeedCaptions,     "HideFeedCaptions",     R.string.ig_feat_hide_feed_captions);
         reg(FeatureFlags.offerPlaybackSpeed,   "PlaybackSpeed",        R.string.ig_playback_speed_title);
         reg(FeatureFlags.keepVideoPlayingBackground, "KeepVideoPlayingBackground", R.string.ig_background_play_title);
         reg(FeatureFlags.videoPictureInPicture, "VideoPictureInPicture", R.string.ig_video_pip_title);

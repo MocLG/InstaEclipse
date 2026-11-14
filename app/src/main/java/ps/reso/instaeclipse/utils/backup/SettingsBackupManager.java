@@ -95,6 +95,13 @@ public class SettingsBackupManager {
         s.put("hideProfileBioLinks", FeatureFlags.hideProfileBioLinks);
         s.put("hideProfileInterests", FeatureFlags.hideProfileInterests);
         s.put("hideProfileBanners", FeatureFlags.hideProfileBanners);
+        s.put("hideFeedFollowButton", FeatureFlags.hideFeedFollowButton);
+        s.put("hideFeedSaveButton", FeatureFlags.hideFeedSaveButton);
+        s.put("hideFeedLikeButton", FeatureFlags.hideFeedLikeButton);
+        s.put("hideFeedActivityBubbles", FeatureFlags.hideFeedActivityBubbles);
+        s.put("hideFeedAudioIcon", FeatureFlags.hideFeedAudioIcon);
+        s.put("hideFeedMadeWithEdits", FeatureFlags.hideFeedMadeWithEdits);
+        s.put("hideFeedCaptions", FeatureFlags.hideFeedCaptions);
 
         // Ads
         s.put("isAdBlockEnabled",        FeatureFlags.isAdBlockEnabled);
@@ -294,6 +301,13 @@ public class SettingsBackupManager {
         if (s.has("hideProfileBioLinks")) FeatureFlags.hideProfileBioLinks = s.getBoolean("hideProfileBioLinks");
         if (s.has("hideProfileInterests")) FeatureFlags.hideProfileInterests = s.getBoolean("hideProfileInterests");
         if (s.has("hideProfileBanners")) FeatureFlags.hideProfileBanners = s.getBoolean("hideProfileBanners");
+        if (s.has("hideFeedFollowButton")) FeatureFlags.hideFeedFollowButton = s.getBoolean("hideFeedFollowButton");
+        if (s.has("hideFeedSaveButton")) FeatureFlags.hideFeedSaveButton = s.getBoolean("hideFeedSaveButton");
+        if (s.has("hideFeedLikeButton")) FeatureFlags.hideFeedLikeButton = s.getBoolean("hideFeedLikeButton");
+        if (s.has("hideFeedActivityBubbles")) FeatureFlags.hideFeedActivityBubbles = s.getBoolean("hideFeedActivityBubbles");
+        if (s.has("hideFeedAudioIcon")) FeatureFlags.hideFeedAudioIcon = s.getBoolean("hideFeedAudioIcon");
+        if (s.has("hideFeedMadeWithEdits")) FeatureFlags.hideFeedMadeWithEdits = s.getBoolean("hideFeedMadeWithEdits");
+        if (s.has("hideFeedCaptions")) FeatureFlags.hideFeedCaptions = s.getBoolean("hideFeedCaptions");
 
         if (s.has("isAdBlockEnabled"))       FeatureFlags.isAdBlockEnabled       = s.getBoolean("isAdBlockEnabled");
         if (s.has("isAnalyticsBlocked"))     FeatureFlags.isAnalyticsBlocked     = s.getBoolean("isAnalyticsBlocked");
