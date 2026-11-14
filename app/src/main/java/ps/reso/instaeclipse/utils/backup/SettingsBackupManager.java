@@ -89,6 +89,11 @@ public class SettingsBackupManager {
         s.put("hideDmBlend", FeatureFlags.hideDmBlend);
         s.put("readReceiptChats", FeatureFlags.readReceiptChats);
         s.put("hideThreadsButton", FeatureFlags.hideThreadsButton);
+        s.put("hideProfileHighlights", FeatureFlags.hideProfileHighlights);
+        s.put("hideProfileSong", FeatureFlags.hideProfileSong);
+        s.put("hideProfileBioLinks", FeatureFlags.hideProfileBioLinks);
+        s.put("hideProfileInterests", FeatureFlags.hideProfileInterests);
+        s.put("hideProfileBanners", FeatureFlags.hideProfileBanners);
 
         // Ads
         s.put("isAdBlockEnabled",        FeatureFlags.isAdBlockEnabled);
@@ -112,6 +117,8 @@ public class SettingsBackupManager {
         s.put("spoofLastSeen",           FeatureFlags.spoofLastSeen);
         s.put("disableSearchHistory",    FeatureFlags.disableSearchHistory);
         s.put("confirmCalls",            FeatureFlags.confirmCalls);
+        s.put("callBlockMode",           FeatureFlags.callBlockMode);
+        s.put("callBlockAccounts",       FeatureFlags.callBlockAccounts);
         s.put("spoofLocation",           FeatureFlags.spoofLocation);
         s.put("spoofLat",                String.valueOf(FeatureFlags.spoofLat));
         s.put("spoofLng",                String.valueOf(FeatureFlags.spoofLng));
@@ -269,6 +276,11 @@ public class SettingsBackupManager {
         if (s.has("hideDmBlend")) FeatureFlags.hideDmBlend = s.getBoolean("hideDmBlend");
         if (s.has("readReceiptChats")) FeatureFlags.readReceiptChats = s.getBoolean("readReceiptChats");
         if (s.has("hideThreadsButton")) FeatureFlags.hideThreadsButton = s.getBoolean("hideThreadsButton");
+        if (s.has("hideProfileHighlights")) FeatureFlags.hideProfileHighlights = s.getBoolean("hideProfileHighlights");
+        if (s.has("hideProfileSong")) FeatureFlags.hideProfileSong = s.getBoolean("hideProfileSong");
+        if (s.has("hideProfileBioLinks")) FeatureFlags.hideProfileBioLinks = s.getBoolean("hideProfileBioLinks");
+        if (s.has("hideProfileInterests")) FeatureFlags.hideProfileInterests = s.getBoolean("hideProfileInterests");
+        if (s.has("hideProfileBanners")) FeatureFlags.hideProfileBanners = s.getBoolean("hideProfileBanners");
 
         if (s.has("isAdBlockEnabled"))       FeatureFlags.isAdBlockEnabled       = s.getBoolean("isAdBlockEnabled");
         if (s.has("isAnalyticsBlocked"))     FeatureFlags.isAnalyticsBlocked     = s.getBoolean("isAnalyticsBlocked");
@@ -289,6 +301,8 @@ public class SettingsBackupManager {
         if (s.has("spoofLastSeen"))          FeatureFlags.spoofLastSeen          = s.getBoolean("spoofLastSeen");
         if (s.has("disableSearchHistory"))   FeatureFlags.disableSearchHistory   = s.getBoolean("disableSearchHistory");
         if (s.has("confirmCalls"))           FeatureFlags.confirmCalls           = s.getBoolean("confirmCalls");
+        if (s.has("callBlockMode"))          FeatureFlags.callBlockMode          = s.getInt("callBlockMode");
+        if (s.has("callBlockAccounts"))      FeatureFlags.callBlockAccounts      = s.getString("callBlockAccounts");
         if (s.has("spoofLocation"))          FeatureFlags.spoofLocation          = s.getBoolean("spoofLocation");
         if (s.has("spoofLat"))               FeatureFlags.spoofLat               = parseDouble(s.get("spoofLat"), 0.0);
         if (s.has("spoofLng"))               FeatureFlags.spoofLng               = parseDouble(s.get("spoofLng"), 0.0);

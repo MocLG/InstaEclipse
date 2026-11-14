@@ -1254,7 +1254,7 @@ public class DialogUtils {
     }
 
     /** Incoming-call blocker: pick one of the 4 modes and edit the account list. */
-    private static void showCallBlockerOptions(Context context) {
+    public static void showCallBlockerOptions(Context context) {
         try {
             IeDialog dlg = new IeDialog(context)
                     .title(I18n.t(context, R.string.ig_call_block_title))

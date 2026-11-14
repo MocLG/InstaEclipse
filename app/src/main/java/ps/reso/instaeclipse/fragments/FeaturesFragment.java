@@ -1126,6 +1126,8 @@ public class FeaturesFragment extends Fragment {
                 createSwitch(R.drawable.ic_chat, "#5E5CE6", getString(R.string.ig_dialog_ghost_edit_history), "keepEditHistory"),
                 createSwitch(R.drawable.ic_jump_first, "#5E5CE6", getString(R.string.ig_dialog_ghost_jump_first), "jumpToFirstMessage"),
                 createSwitch(R.drawable.ic_shield, "#5E5CE6", getString(R.string.ig_call_confirm), "confirmCalls"),
+                createClickable(R.drawable.ic_block, "#5E5CE6", getString(R.string.ig_call_block_title),
+                        () -> ps.reso.instaeclipse.utils.dialog.DialogUtils.showCallBlockerOptions(requireContext())),
                 createSwitch(R.drawable.ic_camera, "#5E5CE6", getString(R.string.ig_dialog_ghost_allow_screenshots_dms), "allowScreenshots"),
                 createSwitch(R.drawable.ic_chat, "#5E5CE6", getString(R.string.ig_dialog_translate_messages), "translateMessages"),
                 createSwitch(R.drawable.ic_chat, "#5E5CE6", getString(R.string.ig_dialog_bulk_unsend), "bulkUnsend"),
@@ -1668,7 +1670,12 @@ public class FeaturesFragment extends Fragment {
                 createSwitch(R.drawable.ic_notification, A_SOCIAL, getString(R.string.ig_dialog_misc_show_follower_toast), "showFollowerToast"),
                 createSwitch(R.drawable.ic_download, A_SOCIAL, getString(R.string.ig_dialog_misc_follow_export), "followListExport"),
                 createSwitch(R.drawable.ic_eye, A_SOCIAL, getString(R.string.ig_feat_followers_history), "followersHistory"),
-                createSwitch(R.drawable.ic_save, A_SOCIAL, getString(R.string.ig_saved_on_profile), "savedOnProfile")
+                createSwitch(R.drawable.ic_save, A_SOCIAL, getString(R.string.ig_saved_on_profile), "savedOnProfile"),
+                createSwitch(R.drawable.ic_story_ring, A_SOCIAL, getString(R.string.ig_dialog_hide_profile_highlights), "hideProfileHighlights"),
+                createSwitch(R.drawable.ic_sparkle, A_SOCIAL, getString(R.string.ig_dialog_hide_profile_song), "hideProfileSong"),
+                createSwitch(R.drawable.ic_link, A_SOCIAL, getString(R.string.ig_dialog_hide_profile_bio_links), "hideProfileBioLinks"),
+                createSwitch(R.drawable.ic_sparkle, A_SOCIAL, getString(R.string.ig_dialog_hide_profile_interests), "hideProfileInterests"),
+                createSwitch(R.drawable.ic_block, A_SOCIAL, getString(R.string.ig_dialog_hide_profile_banners), "hideProfileBanners")
         ));
 
         return defs;
