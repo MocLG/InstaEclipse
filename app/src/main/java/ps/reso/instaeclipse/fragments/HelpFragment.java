@@ -57,6 +57,8 @@ public class HelpFragment extends Fragment {
         view.findViewById(R.id.lspatch_guide_button).setOnClickListener(v -> openUrl(LSPATCH_GUIDE_URL));
         view.findViewById(R.id.patch_instagram_button).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), ps.reso.instaeclipse.patcher.PatchInstagramActivity.class)));
+        view.findViewById(R.id.fix_links_button).setOnClickListener(v ->
+                ps.reso.instaeclipse.patcher.AppLinkFixer.fix(requireActivity()));
         for (int id : new int[]{R.id.vector_logo, R.id.lspatch_logo}) {
             View logo = view.findViewById(id);
             logo.setOutlineProvider(new android.view.ViewOutlineProvider() {
