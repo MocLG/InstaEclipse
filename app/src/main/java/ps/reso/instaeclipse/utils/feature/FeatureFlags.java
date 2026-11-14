@@ -21,6 +21,10 @@ public class FeatureFlags {
     // Ghost Mode
     public static volatile boolean isGhostModeEnabled = false;
     public static volatile boolean isGhostSeen = false;
+    // Child of isGhostSeen: when on (default), opening a chat still marks it read on THIS device
+    // (clears the "new messages" highlight) while the seen receipt stays hidden; off leaves the
+    // chat showing as unread. See GhostDMSeenHook.
+    public static volatile boolean markSeenReadLocally = true;
     public static volatile boolean isGhostTyping = false;
     public static volatile boolean isGhostScreenshot = false;
     public static volatile boolean isGhostViewOnce = false;

@@ -41,6 +41,11 @@ import ps.reso.instaeclipse.utils.core.DexKitQueryCache;
  * latest call wins, like Instagram's own de-duplication): allowed when Hide DM Seen is off at that
  * moment (this also covers the Mark as Read buttons, which turn it off briefly) or the chat is on
  * the read receipt whitelist.
+ *
+ * "Mark chats read on this device" (FeatureFlags.markSeenReadLocally, on by default) picks between
+ * the two paths: on = let Instagram queue the mark-seen so the chat reads locally (executor still
+ * stops the send); off = block the sender outright, so nothing is queued and the chat stays unread
+ * locally. A receipt is never sent either way.
  */
 public class GhostDMSeenHook {
 
@@ -82,7 +87,7 @@ public class GhostDMSeenHook {
                 boolean allow = FORCE_SEND.get() == Boolean.TRUE
                         || !FeatureFlags.isGhostSeen
                         || (threadId != null && ReadReceiptWhitelist.isAllowed(threadId));
-                if (localSeenMode) {
+                if (localSeenMode && FeatureFlags.markSeenReadLocally) {
                     // Let Instagram queue it (local read state); the executor hook stops the send.
                     if (threadId != null) {
                         remember(threadId, allow);

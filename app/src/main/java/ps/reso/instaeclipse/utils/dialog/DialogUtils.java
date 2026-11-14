@@ -1177,14 +1177,29 @@ public class DialogUtils {
                 GhostEmojiManager.addGhostEmojiNextToInbox(activity, GhostModeUtils.isGhostModeActive());
             }
         };
+        ToggleRow hideSeenRow = flagSwitch(context, R.drawable.ic_eye_off, "#5E5CE6", R.string.ig_dialog_ghost_hide_dm_seen, "isGhostSeen", refreshGhostEmoji);
         addMasterGroup(context, layout,
-                flagSwitch(context, R.drawable.ic_eye_off, "#5E5CE6", R.string.ig_dialog_ghost_hide_dm_seen, "isGhostSeen", refreshGhostEmoji),
+                hideSeenRow,
                 flagSwitch(context, R.drawable.ic_chat, "#5E5CE6", R.string.ig_dialog_ghost_hide_typing, "isGhostTyping", refreshGhostEmoji),
                 flagSwitch(context, R.drawable.ic_story_ring, "#5E5CE6", R.string.ig_dialog_ghost_hide_story_views, "isGhostStory", refreshGhostEmoji),
                 flagSwitch(context, R.drawable.ic_live, "#5E5CE6", R.string.ig_dialog_ghost_hide_live_presence, "isGhostLive", refreshGhostEmoji),
                 flagSwitch(context, R.drawable.ic_camera, "#5E5CE6", R.string.ig_dialog_ghost_bypass_screenshot, "isGhostScreenshot", refreshGhostEmoji),
                 flagSwitch(context, R.drawable.ic_eye_off, "#5E5CE6", R.string.ig_dialog_ghost_hide_view_once, "isGhostViewOnce", refreshGhostEmoji),
                 flagSwitch(context, R.drawable.ic_eye, "#5E5CE6", R.string.ig_dialog_ghost_permanent_view_once, "permanentViewMode", refreshGhostEmoji));
+
+        // Child of Hide DM Seen: also clear the chat's "new messages" highlight on THIS device
+        // (the seen receipt stays hidden either way). Off = leave chats showing as unread.
+        // Only meaningful while Hide DM Seen is on, so it follows that switch's enabled state.
+        ToggleRow markReadLocalRow = createSwitch(context, R.drawable.ic_eye, "#5E5CE6",
+                I18n.t(context, R.string.ig_dialog_ghost_mark_read_local), FeatureFlags.markSeenReadLocally);
+        markReadLocalRow.setOnCheckedChangeListener((b, checked) -> {
+            FeatureFlags.markSeenReadLocally = checked;
+            SettingsManager.saveAllFlags();
+        });
+        markReadLocalRow.setEnabled(FeatureFlags.isGhostSeen);
+        hideSeenRow.addOnCheckedChangeListener((b, checked) -> markReadLocalRow.setEnabled(checked));
+        layout.addView(cardOf(context, markReadLocalRow));
+        layout.addView(createInfoSection(context, "", I18n.t(context, R.string.ig_dialog_ghost_mark_read_local_hint)));
 
         // Outside the master switch: last-seen spoofing and airplane mode.
         layout.addView(createDivider(context));

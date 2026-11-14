@@ -35,6 +35,7 @@ public class SettingsManager {
         // Ghost Mode
         editor.putBoolean("isGhostModeEnabled", FeatureFlags.isGhostModeEnabled);
         editor.putBoolean("isGhostSeen", FeatureFlags.isGhostSeen);
+        editor.putBoolean("markSeenReadLocally", FeatureFlags.markSeenReadLocally);
         editor.putBoolean("isGhostTyping", FeatureFlags.isGhostTyping);
         editor.putBoolean("isGhostScreenshot", FeatureFlags.isGhostScreenshot);
         editor.putBoolean("isGhostViewOnce", FeatureFlags.isGhostViewOnce);
@@ -261,6 +262,7 @@ public class SettingsManager {
         // Ghost Mode
         FeatureFlags.isGhostModeEnabled = prefs.getBoolean("isGhostModeEnabled", false);
         FeatureFlags.isGhostSeen = prefs.getBoolean("isGhostSeen", false);
+        FeatureFlags.markSeenReadLocally = prefs.getBoolean("markSeenReadLocally", true);
         FeatureFlags.isGhostTyping = prefs.getBoolean("isGhostTyping", false);
         FeatureFlags.isGhostScreenshot = prefs.getBoolean("isGhostScreenshot", false);
         FeatureFlags.isGhostViewOnce = prefs.getBoolean("isGhostViewOnce", false);

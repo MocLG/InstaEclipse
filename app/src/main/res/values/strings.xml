@@ -283,6 +283,8 @@
 
     <!-- Ghost Mode options -->
     <string name="ig_dialog_ghost_hide_dm_seen">Hide DM Seen</string>
+    <string name="ig_dialog_ghost_mark_read_local">Mark chats read on this device</string>
+    <string name="ig_dialog_ghost_mark_read_local_hint">While Hide DM Seen is on, opening a chat clears its \"new messages\" highlight on your phone without letting the other person know you saw it. Turn this off to leave chats showing as unread in the list.</string>
     <string name="ig_dialog_ghost_hide_typing">Hide Typing Indicator</string>
     <string name="ig_dialog_ghost_hide_story_views">Hide Story Views</string>
     <string name="ig_dialog_ghost_hide_live_presence">Hide Live Presence</string>
