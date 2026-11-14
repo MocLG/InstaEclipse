@@ -102,6 +102,8 @@ public class HomeFragment extends Fragment {
             "enableVoiceDownload", "enableStickerDownload", "enableDmMediaDownload", "offerCopyImage", "offerMediaInfo", "offerPlaybackSpeed",
             "keepVideoPlayingBackground", "videoPictureInPicture",
             "forceReelScrubber", "holdLeftSlowMotion", "maxUploadQuality", "saveInstants", "keepInstantHistory", "uploadInstants", "cacheStories",
+            // Battery (stop background wake-ups)
+            "stopBackgroundHeartbeat", "stopUploadAlarm", "stopBackgroundPrefetch",
             // Developer
             "isDevEnabled", "removeBuildExpiredPopup"
     };

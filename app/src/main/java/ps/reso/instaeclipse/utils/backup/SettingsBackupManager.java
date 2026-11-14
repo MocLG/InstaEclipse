@@ -107,6 +107,11 @@ public class SettingsBackupManager {
         s.put("groupNotificationsByType",   FeatureFlags.groupNotificationsByType);
         s.put("mutedNotificationChannels",  FeatureFlags.mutedNotificationChannels);
 
+        // Stop Background Wake-ups (battery)
+        s.put("stopBackgroundHeartbeat", FeatureFlags.stopBackgroundHeartbeat);
+        s.put("stopUploadAlarm",         FeatureFlags.stopUploadAlarm);
+        s.put("stopBackgroundPrefetch",  FeatureFlags.stopBackgroundPrefetch);
+
         // Distraction Free
         s.put("isExtremeMode",           FeatureFlags.isExtremeMode);
         s.put("disableStories",          FeatureFlags.disableStories);
@@ -297,6 +302,10 @@ public class SettingsBackupManager {
         if (s.has("groupNotifications"))       FeatureFlags.groupNotifications       = s.getBoolean("groupNotifications");
         if (s.has("groupNotificationsByType")) FeatureFlags.groupNotificationsByType = s.getBoolean("groupNotificationsByType");
         if (s.has("mutedNotificationChannels")) FeatureFlags.mutedNotificationChannels = s.getString("mutedNotificationChannels");
+
+        if (s.has("stopBackgroundHeartbeat")) FeatureFlags.stopBackgroundHeartbeat = s.getBoolean("stopBackgroundHeartbeat");
+        if (s.has("stopUploadAlarm"))        FeatureFlags.stopUploadAlarm        = s.getBoolean("stopUploadAlarm");
+        if (s.has("stopBackgroundPrefetch")) FeatureFlags.stopBackgroundPrefetch = s.getBoolean("stopBackgroundPrefetch");
 
         if (s.has("isExtremeMode"))          FeatureFlags.isExtremeMode          = s.getBoolean("isExtremeMode");
         if (s.has("disableStories"))         FeatureFlags.disableStories         = s.getBoolean("disableStories");

@@ -1778,6 +1778,9 @@ public class FeaturesFragment extends Fragment {
                 createSwitch(R.drawable.ic_notification, "#0A84FF", getString(R.string.ig_notif_group_by_type), "groupNotificationsByType"),
                 createSwitch(R.drawable.ic_notification, "#0A84FF", getString(R.string.ig_dialog_misc_show_feature_toasts), "showFeatureToasts"),
                 createSwitch(R.drawable.ic_link, "#0A84FF", getString(R.string.ig_dialog_open_links_externally), "openLinksExternally"),
+                createSwitch(R.drawable.ic_timer, "#0A84FF", getString(R.string.ig_stop_background_heartbeat), "stopBackgroundHeartbeat"),
+                createSwitch(R.drawable.ic_timer, "#0A84FF", getString(R.string.ig_stop_upload_alarm), "stopUploadAlarm"),
+                createSwitch(R.drawable.ic_timer, "#0A84FF", getString(R.string.ig_stop_background_prefetch), "stopBackgroundPrefetch"),
                 createClickable(R.drawable.ic_link, "#0A84FF", shareDomainLabel(), this::showShareDomainDialog)
         ));
         // Auto-clear cache (mirrors the in-IG dialog's Tools section).

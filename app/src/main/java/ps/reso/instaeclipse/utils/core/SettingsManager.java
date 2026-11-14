@@ -32,6 +32,11 @@ public class SettingsManager {
 
         editor.putBoolean("isDevEnabled", FeatureFlags.isDevEnabled);
 
+        // Stop Background Wake-ups (battery)
+        editor.putBoolean("stopBackgroundHeartbeat", FeatureFlags.stopBackgroundHeartbeat);
+        editor.putBoolean("stopUploadAlarm", FeatureFlags.stopUploadAlarm);
+        editor.putBoolean("stopBackgroundPrefetch", FeatureFlags.stopBackgroundPrefetch);
+
         // Ghost Mode
         editor.putBoolean("isGhostModeEnabled", FeatureFlags.isGhostModeEnabled);
         editor.putBoolean("isGhostSeen", FeatureFlags.isGhostSeen);
@@ -271,6 +276,11 @@ public class SettingsManager {
         }
 
         FeatureFlags.isDevEnabled = prefs.getBoolean("isDevEnabled", false);
+
+        // Stop Background Wake-ups (battery)
+        FeatureFlags.stopBackgroundHeartbeat = prefs.getBoolean("stopBackgroundHeartbeat", false);
+        FeatureFlags.stopUploadAlarm = prefs.getBoolean("stopUploadAlarm", false);
+        FeatureFlags.stopBackgroundPrefetch = prefs.getBoolean("stopBackgroundPrefetch", false);
 
         // Ghost Mode
         FeatureFlags.isGhostModeEnabled = prefs.getBoolean("isGhostModeEnabled", false);

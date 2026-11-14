@@ -15,6 +15,13 @@ public class FeatureFlags {
     public static volatile boolean downloaderCompatibility = false;
     public static volatile boolean downloaderAllowFallback = false;
 
+    // Stop Background Wake-ups (battery): each suppresses one periodic background wake-up IG
+    // schedules, all default OFF. See mods.battery.StopWakeupsHook. Fail-open: foreground messaging,
+    // user-started uploads and notifications go through other paths and are never affected.
+    public static volatile boolean stopBackgroundHeartbeat = false; // the warm_heartbeat keep-alive alarm
+    public static volatile boolean stopUploadAlarm = false;         // the analytics batch-upload alarm
+    public static volatile boolean stopBackgroundPrefetch = false;  // the IgBgFetch feed-prefetch job
+
     // Dev Options
     public static volatile boolean isDevEnabled = false;
 

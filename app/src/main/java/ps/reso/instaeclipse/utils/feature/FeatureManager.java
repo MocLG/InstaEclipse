@@ -370,6 +370,9 @@ public class FeatureManager {
         reg(!FeatureFlags.spoofDevice.isEmpty(), "SpoofDevice",        R.string.ig_spoof_device);
         reg(FeatureFlags.storyTrayScale < 100, "StoryTraySize",        R.string.ig_story_tray_size);
         reg(FeatureFlags.autoClearCache,       "AutoClearCache",       R.string.ig_dialog_auto_clear_cache);
+        reg(FeatureFlags.stopBackgroundHeartbeat, "StopBackgroundHeartbeat", R.string.ig_stop_background_heartbeat);
+        reg(FeatureFlags.stopUploadAlarm,      "StopUploadAlarm",      R.string.ig_stop_upload_alarm);
+        reg(FeatureFlags.stopBackgroundPrefetch, "StopBackgroundPrefetch", R.string.ig_stop_background_prefetch);
         reg(FeatureFlags.hideTabHome || FeatureFlags.hideTabReels || FeatureFlags.hideTabCreate
                 || FeatureFlags.hideTabMessages || FeatureFlags.hideTabActivity || FeatureFlags.hideTabProfile,
                 "HideNavTabs", R.string.menu_nav_tabs);

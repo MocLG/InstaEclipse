@@ -695,6 +695,9 @@ Stay on this screen until it finishes.</string>
     <string name="ig_timestamp_format_invalid">Not a valid format</string>
     <string name="ig_dialog_misc_hide_share_create_group">Hide \"Create group\" on Share Sheet</string>
     <string name="ig_dialog_misc_show_feature_toasts">Show Feature Toasts</string>
+    <string name="ig_stop_background_heartbeat">Stop Background Heartbeat</string>
+    <string name="ig_stop_upload_alarm">Stop Analytics Upload Alarm</string>
+    <string name="ig_stop_background_prefetch">Stop Background Prefetch</string>
     <string name="ig_dialog_misc_show_follower_toast">Show Follower Toast</string>
     <string name="ig_dialog_misc_view_story_mentions">View Story Mentions</string>
     <string name="ig_dialog_misc_disable_discover_people">Disable Discover People</string>

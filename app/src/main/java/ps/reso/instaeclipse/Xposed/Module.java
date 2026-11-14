@@ -933,6 +933,15 @@ public class Module {
                         ModuleLog.line("(InstaEclipse | Interceptor): ❌ Failed to hook");
                     }
 
+                    // Stop background wake-ups (battery): no-op IG's heartbeat/upload alarms and its
+                    // background prefetch job. Framework-level hooks (no DexKit), each gated by its own
+                    // switch; fails open.
+                    try {
+                        if (!skip("StopWakeupsHook")) new ps.reso.instaeclipse.mods.battery.StopWakeupsHook().install();
+                    } catch (Throwable ignored) {
+                        ModuleLog.line("(InstaEclipse | StopWakeups): ❌ Failed to hook");
+                    }
+
                     // Crash guard: drop tasks rejected by already-shut-down executors (carousel/
                     // realtime teardown race on IG 446+/447.0.0.39+) instead of letting AbortPolicy
                     // throw and hard-crash the app.
