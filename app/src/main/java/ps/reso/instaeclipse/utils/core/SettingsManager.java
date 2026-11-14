@@ -130,6 +130,11 @@ public class SettingsManager {
         editor.putBoolean("hideDmBlend", FeatureFlags.hideDmBlend);
         editor.putBoolean("readReceiptChats", FeatureFlags.readReceiptChats);
         editor.putBoolean("hideThreadsButton", FeatureFlags.hideThreadsButton);
+        editor.putBoolean("hideProfileHighlights", FeatureFlags.hideProfileHighlights);
+        editor.putBoolean("hideProfileSong", FeatureFlags.hideProfileSong);
+        editor.putBoolean("hideProfileBioLinks", FeatureFlags.hideProfileBioLinks);
+        editor.putBoolean("hideProfileInterests", FeatureFlags.hideProfileInterests);
+        editor.putBoolean("hideProfileBanners", FeatureFlags.hideProfileBanners);
 
         // Ads
         editor.putBoolean("isAdBlockEnabled", FeatureFlags.isAdBlockEnabled);
@@ -357,6 +362,11 @@ public class SettingsManager {
         FeatureFlags.hideDmBlend = prefs.getBoolean("hideDmBlend", false);
         FeatureFlags.readReceiptChats = prefs.getBoolean("readReceiptChats", false);
         FeatureFlags.hideThreadsButton = prefs.getBoolean("hideThreadsButton", false);
+        FeatureFlags.hideProfileHighlights = prefs.getBoolean("hideProfileHighlights", false);
+        FeatureFlags.hideProfileSong = prefs.getBoolean("hideProfileSong", false);
+        FeatureFlags.hideProfileBioLinks = prefs.getBoolean("hideProfileBioLinks", false);
+        FeatureFlags.hideProfileInterests = prefs.getBoolean("hideProfileInterests", false);
+        FeatureFlags.hideProfileBanners = prefs.getBoolean("hideProfileBanners", false);
 
         // Ads
         FeatureFlags.isAdBlockEnabled = prefs.getBoolean("isAdBlockEnabled", false);

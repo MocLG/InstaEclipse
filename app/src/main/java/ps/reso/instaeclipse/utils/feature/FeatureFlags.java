@@ -62,6 +62,12 @@ public class FeatureFlags {
     public static volatile boolean readReceiptChats = false; // per-chat read receipts, chosen in the chat menu
     public static volatile boolean hideDmBlend = false; // hide the Blend button in DM thread headers
     public static volatile boolean hideThreadsButton = false; // hide the Threads button on profiles
+    // Profile Declutter: hide clutter from profile headers (ProfileDeclutterHook)
+    public static volatile boolean hideProfileHighlights = false; // hide the story-highlights tray on profiles
+    public static volatile boolean hideProfileSong = false;       // hide the profile song/music block
+    public static volatile boolean hideProfileBioLinks = false;   // hide the bio links row
+    public static volatile boolean hideProfileInterests = false;  // hide interests / category chips
+    public static volatile boolean hideProfileBanners = false;    // hide cross-app banner row (Threads/FB/WhatsApp)
     public static volatile boolean hideNotesTray = false; // hide the Notes tray in the DM inbox (#241)
     public static volatile boolean hideInstants = false; // the floating Instants stack
     public static volatile boolean hideDmSuggestions = false; // no "Suggested for you" accounts under the DM inbox (#282)

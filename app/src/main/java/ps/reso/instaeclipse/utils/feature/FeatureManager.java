@@ -333,6 +333,11 @@ public class FeatureManager {
         reg(FeatureFlags.hideDmBlend,          "HideDmBlend",          R.string.ig_feat_hide_blend);
         reg(FeatureFlags.readReceiptChats,     "ReadReceiptChats",     R.string.ig_feat_read_receipt_chats);
         reg(FeatureFlags.hideThreadsButton,    "HideThreadsButton",    R.string.ig_feat_hide_threads);
+        reg(FeatureFlags.hideProfileHighlights, "HideProfileHighlights", R.string.ig_feat_hide_profile_highlights);
+        reg(FeatureFlags.hideProfileSong,      "HideProfileSong",      R.string.ig_feat_hide_profile_song);
+        reg(FeatureFlags.hideProfileBioLinks,  "HideProfileBioLinks",  R.string.ig_feat_hide_profile_bio_links);
+        reg(FeatureFlags.hideProfileInterests, "HideProfileInterests", R.string.ig_feat_hide_profile_interests);
+        reg(FeatureFlags.hideProfileBanners,   "HideProfileBanners",   R.string.ig_feat_hide_profile_banners);
         reg(FeatureFlags.offerPlaybackSpeed,   "PlaybackSpeed",        R.string.ig_playback_speed_title);
         reg(FeatureFlags.holdLeftSlowMotion,   "HoldSlowMotion",       R.string.ig_dialog_reels_hold_left_slow);
         reg(FeatureFlags.enableVoiceDownload,  "VoiceDownload",        R.string.ig_feat_voice_download);
