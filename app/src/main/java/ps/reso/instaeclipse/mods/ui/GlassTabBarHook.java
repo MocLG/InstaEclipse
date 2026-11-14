@@ -52,7 +52,7 @@ import ps.reso.instaeclipse.xposedcompat.XposedBridge;
  * Instagram already ships a floating tab bar (MainTabUtil styles FLOATING / FIXED /
  * FIXED_IN_FLOATING_POSITION) behind a MobileConfig gate. With the gate on, Instagram itself lays
  * the content out under the bar, publishes the content inset, moves badges and keeps the Reels tab
- * on its own fixed bar. So we:
+ * on its own fixed bar. Two steps:
  *  1. force that gate to true. It is the static boolean(UserSession) that InstagramMainActivity
  *     calls right before it stores the style in MainTabUtil's static style field; its class also
  *     has a static int(Context, UserSession) (the content inset). Anchored on the string
@@ -65,7 +65,7 @@ import ps.reso.instaeclipse.xposedcompat.XposedBridge;
  *     an idle screen costs nothing.
  *
  * Tabs, the profile avatar and badges are Instagram's own views and are not touched. Every step
- * is guarded: if a lookup fails we log and leave Instagram's bar as it is.
+ * is guarded: a failed lookup logs and leaves Instagram's bar as it is.
  */
 public final class GlassTabBarHook {
     private static final String TAG = "(IE|GlassTabBar) ";

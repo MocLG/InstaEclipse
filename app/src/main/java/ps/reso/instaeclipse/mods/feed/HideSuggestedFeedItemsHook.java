@@ -211,11 +211,9 @@ public class HideSuggestedFeedItemsHook {
         }
     }
 
-    // Mark the feature(s) as hooked as soon as the filter is successfully attached, rather
-    // than waiting for a matching feed item to actually be filtered at runtime. The status
-    // toast is built ~1.5s after the main activity's onCreate — whether a suggestion/Threads
-    // unit has scrolled into the feed by then is essentially random, so gating the status on
-    // that produced a false ❌ even when the hook was installed and working correctly.
+    // Mark hooked when the filter attaches, not when an item is first filtered: the status
+    // toast fires ~1.5s after the main activity's onCreate, by which point whether a
+    // suggestion/Threads unit has scrolled in is random — gating on that gave a false ❌.
     private void markHookedForEnabledFlags() {
         if (FeatureFlags.hideSuggestionsInFeed) FeatureStatusTracker.setHooked("HideSuggestionsInFeed");
         if (FeatureFlags.hideThreadsSuggestions) FeatureStatusTracker.setHooked("HideThreadsSuggestions");

@@ -57,19 +57,17 @@ import ps.reso.instaeclipse.xposedcompat.XC_MethodHook;
 import ps.reso.instaeclipse.xposedcompat.XposedBridge;
 
 /**
- * Voice messages of a chat (#307): a "Voice messages" row on the chat details page (and in the
- * module's thread header menu) opens a list of the chat's voice messages with sender and time;
- * tap to play, or download.
+ * Voice messages of a chat (#307): a "Voice messages" row on the chat details page (and the module's
+ * thread header menu) opens the chat's voice messages with sender and time; tap to play, or download.
  *
- * - Chat details page = the fragment whose code uses "ThreadDetailHomePageFragment" and
- *   "shortcutsContainer" (X.0HEF on 452.0.0.33). After its onViewCreated the row is added right
- *   above the shared media section (resource id shared_section), else at the end of
- *   thread_details_header. Resource names, not obfuscated names.
- * - The chat comes from the page's own arguments (a ThreadIdParcelable wrapping the id), falling
- *   back to the chat that was open right before.
- * - Messages: the thread's live message store and IG's own message JSON, shared with chat export
+ * - Details page = fragment whose code uses "ThreadDetailHomePageFragment" and "shortcutsContainer"
+ *   (X.0HEF on 452.0.0.33). After onViewCreated the row goes right above the shared media section
+ *   (shared_section), else at the end of thread_details_header. Resource names, not obfuscated names.
+ * - Chat comes from the page's own arguments (a ThreadIdParcelable wrapping the id), falling back to
+ *   the chat open right before.
+ * - Messages: the thread's live store and IG's own message JSON, shared with chat export
  *   ({@link ChatExportHook}); voice items are item_type "voice_media" with an audio_src URL. Only
- *   messages the chat has loaded are known.
+ *   loaded messages are known.
  * - Playback: Android MediaPlayer streaming the audio URL; released when the list closes.
  */
 public class VoiceMessagesHook {

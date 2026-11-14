@@ -1,13 +1,12 @@
 package ps.reso.instaeclipse.utils.log;
 
 /**
- * Writes every uncaught exception in Instagram's process to the module log, then hands it to the
- * handler that was already there, so the app still crashes exactly as it would have. It only adds
- * a record: on phones where Instagram dies after a while (seen on non-root installs) the stack ends
- * up in the Logs tab, so the crash can be read without a live adb connection.
+ * Logs every uncaught exception in Instagram's process, then delegates to the handler already in
+ * place so the app crashes as it normally would. On installs where Instagram dies unattended (seen
+ * non-root) the stack lands in the Logs tab, readable without a live adb connection.
  *
- * Each record notes whether a module class is on the stack, which separates a crash this module
- * caused from one in Instagram or the framework that it only happened to observe.
+ * Each record flags whether a module class is on the stack, separating a crash this module caused
+ * from one in Instagram or the framework it only observed.
  */
 public final class CrashReporter {
     private static volatile boolean installed;

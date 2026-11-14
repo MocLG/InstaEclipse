@@ -40,10 +40,9 @@ import ps.reso.instaeclipse.xposedcompat.XposedBridge;
  * comment bar on the Reels screen. The right-hand action column (ClipsUfiComponent: like, comment,
  * share, save) is never touched.
  *
- * <p>The Reels overlay is built from Litho components. Each part below is its own component whose
- * render method carries an "android_purge_…_&lt;Component&gt;_render" marker; when the switch is on,
- * the render result is replaced by null after the original ran (Litho draws nothing for a null
- * render, and the component's hooks still run in the same order). Nothing is matched by position.
+ * <p>Each part is a Litho component whose render method carries an
+ * "android_purge_…_&lt;Component&gt;_render" marker; with the switch on, render returns null after the
+ * original runs (Litho draws nothing for null, hooks still run in order). Nothing is matched by position.
  * <ul>
  *   <li>Follow: ClipsFollowButtonComponent, ClipsFollowButtonComponentLegacy.</li>
  *   <li>Meta AI: ClipsMetaAiPillComponent, ClipsContentDeepDiveComponent, and attribution pills of

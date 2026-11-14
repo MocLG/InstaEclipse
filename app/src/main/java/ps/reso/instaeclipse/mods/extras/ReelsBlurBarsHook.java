@@ -39,19 +39,16 @@ import ps.reso.instaeclipse.xposedcompat.XposedBridge;
 /**
  * Fill the black bars around Reels with a blurred, darkened copy of the reel's cover (#273).
  *
- * <p>The Reels video lives in IG's clips_viewer_video_layout container (a FrameLayout; class
- * "LithoClipsViewerVideoLayout", obfuscated). It holds the cover image (IgImageView, exposed as
- * {@code getImagePlaceHolder()}) and the video (SimpleVideoLayout); IG sizes both to the video's
- * aspect ratio and leaves the rest of the container empty, which is the black bar. A small view is
- * added to the container, drawn behind its children (negative Z, so IG's own children keep their
- * indexes: IG removes the video by index when it swaps it), that paints the cover bitmap with a
- * RenderEffect blur and a dark scrim.
+ * <p>The reel's container (FrameLayout, obfuscated "LithoClipsViewerVideoLayout") holds the cover
+ * (IgImageView via {@code getImagePlaceHolder()}) and video, both sized to the video's aspect ratio;
+ * the empty remainder is the bar. A backdrop view is added behind IG's children (negative Z, so their
+ * indexes stay put — IG removes the video by index on swap) and paints the cover with a RenderEffect
+ * blur and dark scrim.
  *
- * <p>Cost: the view is laid out at 1/{@value #SCALE} size and scaled up, so its blur layer is
- * tiny. It redraws only when the cover bitmap changes (checked by reference on pre-draw).
- * RenderEffect needs Android 12; older Android is skipped.
+ * <p>Laid out at 1/{@value #SCALE} size and scaled up, so the blur layer is tiny; redraws only when
+ * the cover bitmap changes (reference check on pre-draw). RenderEffect needs Android 12; older skipped.
  *
- * <p>Anchors: the container's constructor uses the purge marker
+ * <p>Anchors: container constructor's purge marker
  * "android_purge_26_q2_LithoClipsViewerVideoLayout_init"; fallback: the class declaring
  * getImagePlaceHolder() + getVideoPlaceHolder(). Applies to reels opened after the switch is on.
  */
@@ -218,8 +215,7 @@ public class ReelsBlurBarsHook {
                     if (o instanceof Bitmap b && !b.isRecycled()) return b;
                 } catch (Throwable ignored) {}
             }
-            // IG's cover is a custom drawable (not a BitmapDrawable and no getBitmap): rasterize
-            // whatever it is currently showing into a bitmap we can blur. Cached by drawable.
+            // custom drawable (no getBitmap): rasterize what it's showing into a blurrable bitmap, cached by drawable
             return rasterize(d);
         }
 

@@ -58,7 +58,7 @@ public class DisableVideoAutoPlayHook {
 
     private void findAndHookDynamicMethod(DexKitBridge bridge) {
         try {
-            // Step 1: Find methods referencing "ig_disable_video_autoplay"
+            // methods referencing "ig_disable_video_autoplay"
             List<MethodData> methods = DexKitQueryCache.findMethod(bridge, FindMethod.create()
                     .matcher(MethodMatcher.create()
                             .usingStrings("ig_disable_video_autoplay")
@@ -70,7 +70,7 @@ public class DisableVideoAutoPlayHook {
                 return;
             }
 
-            // Step 2: Find the correct method: boolean return type, 1 parameter
+            // pick the method: boolean return, 1 param
             for (MethodData method : methods) {
                 boolean returnTypeMatch = String.valueOf(method.getReturnType()).contains("boolean");
                 boolean paramTypesMatch = method.getParamTypes().size() == 1;

@@ -44,19 +44,18 @@ import ps.reso.instaeclipse.xposedcompat.XC_MethodHook;
 import ps.reso.instaeclipse.xposedcompat.XposedBridge;
 
 /**
- * Marks the rows of messages that the other side unsent but "Keep received unsent messages in
- * chat" kept (#222): a small "Unsent" pill at the end of the row and the row content faded.
+ * Marks rows the other side unsent but "Keep received unsent messages in chat" kept (#222): a small
+ * "Unsent" pill at the row's end and the row content faded.
  *
- * <p>Rows are found through AndroidX RecyclerView's final bindViewHolder (the method holding the
- * "RV onBindViewHolder type=0x%X" trace string, X.04Sl.A0R on 452.0.0.33.64). Only holders owned
- * by the DM thread list ({@code id/message_list}) are looked at. The bound message is the first
- * DM message in the holder's object graph, the same mapping Bulk Unsend uses for its rows; it is
- * matched by id against the retained set. The decoration is removed before every bind, so a
- * recycled row never keeps it, and visible rows are refreshed when a message is retained or the
- * settings change.
+ * <p>Rows come from RecyclerView's final bindViewHolder (holds the "RV onBindViewHolder type=0x%X"
+ * trace string, X.04Sl.A0R on 452.0.0.33.64). Only holders owned by the DM thread list
+ * ({@code id/message_list}) are considered. The bound message is the first DM message in the
+ * holder's graph (same mapping Bulk Unsend uses), matched by id against the retained set. The
+ * decoration is cleared before every bind so a recycled row never keeps it; visible rows refresh
+ * when a message is retained or settings change.
  *
- * <p>Fail safe: when the bind method or the holder's fields cannot be resolved, nothing is hooked.
- * Every callback swallows its errors.
+ * <p>Fail safe: if the bind method or holder fields can't be resolved, nothing is hooked. Every
+ * callback swallows its errors.
  */
 final class UnsentMarkerHook {
 

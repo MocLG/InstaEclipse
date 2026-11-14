@@ -82,7 +82,7 @@ public class GhostChannelMarkAsReadHook {
             triggerChannelSeen(textView);
         });
 
-        // Optional: Append a ghost emoji to indicate it's modded
+        // ghost emoji to mark it as modded
         String currentText = textView.getText().toString();
         if (!currentText.contains("👻")) {
             textView.setText(currentText + " 👻");

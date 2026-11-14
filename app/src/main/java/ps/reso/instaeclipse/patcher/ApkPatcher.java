@@ -98,7 +98,7 @@ public final class ApkPatcher {
     // ---- base APK -----------------------------------------------------------------------------
 
     private static File patchBase(Context ctx, File input, File output, PatchLogger log) throws Exception {
-        // Step 1: the original signing certificate, hex, before we touch anything.
+        // original signing certificate, hex, before touching anything.
         log.log("Reading the original Instagram signature");
         String originalSignature = SignatureReader.originalCertHex(input);
         if (originalSignature == null) {
@@ -108,7 +108,7 @@ public final class ApkPatcher {
         String config = buildConfig(originalSignature);
         byte[] configBytes = config.getBytes(StandardCharsets.UTF_8);
 
-        // Step 2: output ZFile with the LSPatch alignment rules.
+        // output ZFile with the LSPatch alignment rules.
         ZFileOptions options = new ZFileOptions();
         options.setAlignmentRule(AlignmentRules.compose(
                 AlignmentRules.constantForSuffix(".so", 16384),
@@ -117,41 +117,41 @@ public final class ApkPatcher {
         if (output.exists() && !output.delete()) throw new IOException("Cannot overwrite " + output.getName());
 
         try (ZFile dst = ZFile.openReadWrite(output, options)) {
-            // Step 3: register the signing extension on the output.
+            // register the signing extension on the output.
             registerSigning(ctx, dst);
 
-            // Step 4: embed the original APK as a nested, stored zip.
+            // embed the original APK as a nested, stored zip.
             log.log("Embedding the original APK");
             NestedZip src = dst.addNestedZip(zf -> ORIGIN_APK, input, false);
 
-            // Step 5: patch the original manifest and write it as the output manifest.
+            // patch the original manifest, write it as the output manifest.
             log.log("Patching the manifest");
             StoredEntry manifestEntry = src.get(MANIFEST);
             if (manifestEntry == null) throw new IOException("The APK has no AndroidManifest.xml");
             byte[] patchedManifest = patchManifest(manifestEntry.read(), configBytes);
             dst.add(MANIFEST, new ByteArrayInputStream(patchedManifest));
 
-            // Step 6: the config.
+            // the config.
             dst.add(CONFIG_JSON, new ByteArrayInputStream(configBytes));
 
-            // Step 7: the loader dex.
+            // the loader dex.
             log.log("Adding the loader");
             addAsset(ctx, dst, LOADER_DEX, SRC + "dexes/loader.dex");
 
-            // Step 8: the native libraries, stored and aligned.
+            // native libraries, stored and aligned.
             for (String abi : ABIS) {
                 byte[] so = readAsset(ctx, SRC + "so/" + abi + "/liblspatch.so");
                 if (so != null) dst.add(SO_DIR + abi + "/liblspatch.so", ByteSource.wrap(so), false);
             }
 
-            // Step 9: embed the module (this app's own installed APK).
+            // embed the module (this app's own installed APK).
             log.log("Embedding the module");
             File self = new File(ctx.getApplicationInfo().sourceDir);
             try (InputStream in = new FileInputStream(self)) {
                 dst.add(MODULES_DIR + ctx.getPackageName() + ".apk", in);
             }
 
-            // Step 10: link every remaining entry from the original APK.
+            // link every remaining entry from the original APK.
             log.log("Linking remaining files");
             for (StoredEntry entry : src.entries()) {
                 String name = entry.getCentralDirectoryHeader().getName();
@@ -162,10 +162,10 @@ public final class ApkPatcher {
                 src.addFileLink(name, name);
             }
 
-            // Step 11: the meta loader becomes the app's dex.
+            // the meta loader becomes the app's dex.
             addAsset(ctx, dst, "classes.dex", SRC + "dexes/metaloader.dex");
 
-            // Step 12: realign; closing the ZFile writes and signs the output.
+            // realign; closing the ZFile writes and signs the output.
             dst.realign();
             log.log("Signing");
         }

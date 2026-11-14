@@ -36,22 +36,20 @@ import ps.reso.instaeclipse.utils.log.ModuleLog;
 
 /**
  * Upload an Instant from gallery (#199). The quicksnap camera is Jetpack Compose with a suspend,
- * obfuscated send pipeline, so we don't build the payload. Instead:
- *   1. Detect the camera is open (a QuickSnapCameraViewModel instance method fires) and inject a
- *      floating "Gallery" chip onto the hosting Activity's decor (the module's decor-overlay
- *      pattern — works regardless of the Compose content).
- *   2. The chip launches the system image picker.
- *   3. We receive the pick by hooking base Activity.onActivityResult (filtered by a unique request
- *      code, so IG's Activity subclassing doesn't matter), decode it to a Bitmap, and mark it
- *      pending.
- *   4. When the user taps the shutter, QuickSnapCameraViewModel.A02(Context,Bitmap,Bitmap,…) fires;
- *      we swap the captured Bitmap (arg1) for the gallery bitmap and let IG build+send the payload.
+ * obfuscated send pipeline, so the payload isn't rebuilt. Instead:
+ *   1. Camera-open (a QuickSnapCameraViewModel instance method fires) injects a floating "Gallery"
+ *      chip onto the host Activity's decor (module decor-overlay pattern, regardless of Compose).
+ *   2. Chip launches the system image picker.
+ *   3. Pick arrives via base Activity.onActivityResult (filtered by a unique request code, so IG's
+ *      Activity subclassing doesn't matter), decoded to a Bitmap and marked pending.
+ *   4. On shutter, QuickSnapCameraViewModel.A02(Context,Bitmap,Bitmap,…) fires; the captured Bitmap
+ *      (arg1) is swapped for the gallery bitmap and IG builds+sends the payload.
  */
 public class InstantUploadHook {
 
     private static final String VM_CLASS =
             "com.instagram.quicksnap.camera.domain.QuickSnapCameraViewModel";
-    private static final int PICK_REQUEST = 0x1E5A; // unique request code for our picker
+    private static final int PICK_REQUEST = 0x1E5A; // unique request code for the picker
 
     static volatile Bitmap pendingBitmap;
     private static volatile long pendingSetAt = 0;   // when pendingBitmap was armed (staleness guard)
@@ -62,11 +60,11 @@ public class InstantUploadHook {
     private static View chipIcon;              // gallery glyph (idle state)
     private static ImageView chipThumb;        // picked photo, circle-cropped (ready state)
     private static View chipBadge;             // green check badge (ready state)
-    private static Activity chipHost;          // the Activity we injected them on
+    private static Activity chipHost;          // Activity the overlay is injected on
     private static boolean lifecycleRegistered = false;
-    // True while OUR gallery picker is on top of the camera. The camera screen pauses/stops while
-    // the picker is open; the chip must survive that, otherwise backing out of the picker without
-    // choosing anything leaves the camera with no Gallery chip until it is reopened.
+    // True while the gallery picker is on top of the camera. The camera pauses/stops while the
+    // picker is open; the chip must survive that, or backing out without choosing leaves the
+    // camera with no Gallery chip until it is reopened.
     private static volatile boolean pickerOpen = false;
 
     public void install(ClassLoader cl) {
@@ -420,7 +418,7 @@ public class InstantUploadHook {
     private static void injectChip(Activity act) {
         try {
             // Only inject on the camera's own modal window — never the long-lived MainTabActivity
-            // (which would glue the chip app-wide). The quicksnap camera runs in a modal activity.
+            // (which would glue the chip app-wide).
             if (!act.getClass().getName().contains("ModalActivity")) return;
             if (chip != null && chipHost == act) return; // already showing on this screen
             removeChip();                                 // clear any stale chip from a prior screen

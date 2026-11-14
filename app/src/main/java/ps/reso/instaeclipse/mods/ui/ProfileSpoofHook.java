@@ -314,7 +314,6 @@ public final class ProfileSpoofHook {
         return moved;
     }
 
-    /** The tapped view is a count or sits next to one inside the same header cell. */
     /** The first load can still show your own data: pull to refresh twice once the profile is open. */
     private static void pullTwice(android.view.View tab) {
         android.view.View decor = tab.getRootView();
@@ -339,6 +338,7 @@ public final class ProfileSpoofHook {
         }
     }
 
+    /** The tapped view is a count or sits next to one inside the same header cell. */
     private static boolean isCountView(android.view.View v) {
         android.view.View node = v;
         for (int i = 0; i < 2 && node != null; i++) {
@@ -589,7 +589,6 @@ public final class ProfileSpoofHook {
         followersId = f != 0 ? f : -1;
     }
 
-    /** Your own profile is on screen: the account switcher chevron is shown. */
     /** On the copied account's lists, a Follow button becomes Message and opens a chat with that person. */
     private static final java.util.Map<android.widget.TextView, Object[]> MESSAGE_LOOK = new java.util.WeakHashMap<>();
 
@@ -659,7 +658,6 @@ public final class ProfileSpoofHook {
             XposedBridge.hookAllMethods(android.widget.TextView.class, name, hook);
     }
 
-    /** Your own profile has Edit profile and Share profile there: make the copied profile's two buttons match. */
     /** FollowButton draws its chevron itself: clear whatever drawable or image it keeps. */
     private static void dropChevron(android.widget.TextView f) {
         for (Class<?> c = f.getClass(); c != null && c != android.widget.TextView.class; c = c.getSuperclass()) {
@@ -799,6 +797,7 @@ public final class ProfileSpoofHook {
         badge.setOnClickListener(v -> openLink(v.getContext(), "instagram://camera", false));
     }
 
+    /** Your own profile has Edit profile and Share profile there: make the copied profile's two buttons match. */
     private static void restyleActions(android.view.View root) {
         try {
             if (hideIds[0] == 0 || !ownProfileShown(root)) return;
@@ -948,6 +947,7 @@ public final class ProfileSpoofHook {
         }
     }
 
+    /** Your own profile is on screen: the account switcher chevron is shown. */
     private static boolean ownProfileShown(android.view.View v) {
         if (followersId == 0) resolveIds(v);
         if (chevronShown(v)) return true;
@@ -1017,9 +1017,7 @@ public final class ProfileSpoofHook {
                 return;
             }
             if (id == titleId) {
-                // The username only in the title next to the chevron (other screens' action bars
-                // reuse this id); the badge as before.
-                // Other screens' action bars reuse this id: only the title beside the chevron.
+                // Other screens' action bars reuse this id: only the title beside the chevron; badge as before.
                 if (!besideChevron(tv)) { badge(tv, false); return; }
                 {
                     String user = FeatureFlags.spoofUsername;

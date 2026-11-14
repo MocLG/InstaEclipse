@@ -43,17 +43,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Foreground service that runs in the companion-app process and saves downloaded media
- * to a SAF (Storage Access Framework) folder.
+ * Foreground service in the companion-app process that saves downloaded media to a
+ * SAF (Storage Access Framework) folder.
  *
  * <p>The companion app holds the persistable SAF permission for folders picked via
- * FeaturesFragment.  The Xposed module (running in Instagram's process) cannot use
- * that permission directly, so it forwards the CDN URL(s) to this service as plain
- * string extras.  The service downloads the media itself — no file-descriptor passing
- * across different UIDs is required.
+ * FeaturesFragment. The Xposed module (in Instagram's process) can't use that permission,
+ * so it forwards the CDN URL(s) as plain string extras and the service downloads the media
+ * itself — no file-descriptor passing across UIDs.
  *
- * <p>For video+audio-separate streams the service also handles the merge step locally.
- * Download progress is reported via a live-updating foreground notification.
+ * <p>Video+audio-separate streams are merged locally. Progress shows in a live-updating
+ * foreground notification.
  */
 public class DownloadSaveService extends Service {
 
@@ -441,12 +440,11 @@ public class DownloadSaveService extends Service {
             try {
                 DocumentFile dir = resolveNestedDir(fSave, subdir);
                 pushProgress("Saving chat export…", 0, 100, true);
-                // The HTML references media by bare filename (src="0001_photo.jpg"). That only
-                // resolves when the page is opened with file:// access — but file managers open it
-                // through a content:// URI, where sibling files can't be reached. So as each media is
-                // downloaded (and saved to the folder), inline it into the HTML as a base64 data URI,
-                // making the page self-contained and render everywhere. Oversized media (large videos)
-                // are left as a file reference to keep the HTML openable.
+                // The HTML references media by bare filename (src="0001_photo.jpg"), which only
+                // resolves under file:// access; file managers open it via a content:// URI where
+                // sibling files are unreachable. So each saved media is also inlined into the HTML
+                // as a base64 data URI, making the page self-contained. Oversized media (large
+                // videos) stay as a file reference to keep the HTML openable.
                 StringBuilder html = (htmlB64 != null)
                         ? new StringBuilder(new String(android.util.Base64.decode(htmlB64, android.util.Base64.DEFAULT), java.nio.charset.StandardCharsets.UTF_8))
                         : null;
@@ -618,9 +616,7 @@ public class DownloadSaveService extends Service {
 
     // ── Notification helpers ──────────────────────────────────────────────────
 
-    /**
-     * Unconditionally updates the foreground notification (use for phase transitions).
-     */
+    /** Unconditionally updates the foreground notification (for phase transitions). */
     private void pushProgress(String text, int progress, int max, boolean indeterminate) {
         lastNotifPct = progress;
         lastNotifMs  = System.currentTimeMillis();
@@ -633,8 +629,8 @@ public class DownloadSaveService extends Service {
     }
 
     /**
-     * Throttled update — called on every chunk read. Skips the notify call if
-     * less than {@link #NOTIF_INTERVAL_MS} have passed AND progress changed < 2 %.
+     * Throttled update, called on every chunk read. Skips the notify if less than
+     * {@link #NOTIF_INTERVAL_MS} have passed AND progress changed < 2 %.
      */
     private void maybeUpdateProgress(String text, int pct, int max) {
         maybeUpdateProgress(text, pct, max, false);
@@ -691,13 +687,9 @@ public class DownloadSaveService extends Service {
     }
 
     /**
-     * Posts a non-ongoing completion/error notification that persists after the service stops.
-     * Uses {@code DONE_NOTIF_BASE + startId} so concurrent downloads don't collide.
-     */
-    /**
-     * Posts a persistent completion notification.
-     * If {@code fileUri} is non-null, tapping the notification opens the saved file
-     * in the device's default viewer (gallery, video player, etc.).
+     * Posts a persistent completion/error notification that outlives the service;
+     * {@code DONE_NOTIF_BASE + startId} keeps concurrent downloads from colliding. A non-null
+     * {@code fileUri} makes tapping it open the saved file in the default viewer.
      */
     private void postDoneNotification(int startId, String text, String mimeType, Uri fileUri) {
         postDoneNotification(startId, text, mimeType, fileUri, fileUri != null);
@@ -708,7 +700,7 @@ public class DownloadSaveService extends Service {
                 ? android.R.drawable.stat_sys_download_done
                 : android.R.drawable.stat_notify_error;
 
-        // Build a tap-to-open PendingIntent when we have a valid file URI
+        // tap-to-open PendingIntent when there's a valid file URI
         android.app.PendingIntent contentIntent = null;
         if (fileUri != null && mimeType != null) {
             Intent viewIntent = new Intent(Intent.ACTION_VIEW);
@@ -740,7 +732,7 @@ public class DownloadSaveService extends Service {
     }
 
     private void showToast(String msg) {
-        // Use application context — service context is invalid after stopSelf() fires
+        // application context — service context is invalid after stopSelf()
         Context appCtx = getApplicationContext();
         new Handler(Looper.getMainLooper()).post(() ->
                 ps.reso.instaeclipse.utils.toast.IeToast.relayFromCompanion(appCtx, msg, Toast.LENGTH_SHORT));

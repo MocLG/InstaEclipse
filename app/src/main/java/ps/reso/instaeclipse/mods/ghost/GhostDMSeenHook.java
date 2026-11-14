@@ -117,7 +117,7 @@ public class GhostDMSeenHook {
         }
 
         try {
-            // Step 1: Find all methods containing "mark_thread_seen-"
+            // find all methods using "mark_thread_seen-"
             List<MethodData> methods = DexKitQueryCache.findMethod(bridge, FindMethod.create()
                     .matcher(MethodMatcher.create().usingStrings("mark_thread_seen-")));
 
@@ -138,7 +138,7 @@ public class GhostDMSeenHook {
                 String returnType = String.valueOf(method.getReturnType());
                 ClassDataList paramTypes = method.getParamTypes();
 
-                // Step 2: Match: static final void method(?, ?, ?, ...)
+                // match: static final void method(?, ?, ?, ...)
                 if (Modifier.isStatic(modifiers)
                         && Modifier.isFinal(modifiers)
                         && returnType.contains("void")

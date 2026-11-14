@@ -103,12 +103,9 @@ public class ProfileFollowsYouHook {
         }
     }
 
-    /**
-     * Result of IG's /friendships/show/ call (parsed by FollowStatusHook): used when the User
-     * model doesn't carry followed_by yet (common for accounts you don't follow).
-     */
-    /** userId -> followed_by from /friendships/show/, kept so a result that arrives before the
-     *  profile screen registers is still applied. */
+    /** userId -> followed_by from IG's /friendships/show/ call (parsed by FollowStatusHook), used
+     *  when the User model doesn't carry followed_by yet (accounts you don't follow), kept so a
+     *  result arriving before the profile screen registers is still applied. */
     private static final java.util.Map<String, Boolean> RESULTS = new java.util.concurrent.ConcurrentHashMap<>();
 
     public static void onFollowResult(String userId, boolean followedBy) {

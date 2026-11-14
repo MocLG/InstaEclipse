@@ -34,17 +34,16 @@ public class GhostViewOnceHook {
         }
 
         List<Method> hooked = new java.util.ArrayList<>();
-        // Primary anchor (IG 447+): the visual view-once "item seen" reporter was inlined
-        // into the handler. It contains BOTH the stable REST path and the visual media type
-        // "raven_media". The voice sibling uses the SAME path but "voice_media", so ANDing
-        // "raven_media" selects only the view-once (visual) reporter — never voice.
-        // Disappearing media, then media shown as permanent (Unlock View-Once/Twice), then older builds.
+        // Primary anchor (IG 447+): view-once "item seen" reporter, inlined into the handler with
+        // both the stable REST path and "raven_media". The voice sibling shares the path but uses
+        // "voice_media", so ANDing "raven_media" picks the visual reporter only — never voice.
+        // Covers disappearing media, then media shown as permanent (Unlock View-Once/Twice), then older builds.
         collect(bridge, FindMethod.create().matcher(MethodMatcher.create()
                 .usingStrings("direct_v2/visual_threads/%s/item_seen/", "raven_media")), hooked);
         collect(bridge, FindMethod.create().matcher(MethodMatcher.create()
                 .usingStrings("direct_v2/visual_threads/%s/visual_items/%s/seen/")), hooked);
-        // Legacy fallback (IG 436 and older): the reporter inlined the marker name
-        // "visual_item_seen" rather than the REST path. Same (3-param, void) shape.
+        // Legacy fallback (IG 436 and older): reporter inlined the marker "visual_item_seen"
+        // instead of the REST path. Same (3-param, void) shape.
         if (hooked.isEmpty()) {
             collect(bridge, FindMethod.create().matcher(MethodMatcher.create()
                     .usingStrings("visual_item_seen")), hooked);
@@ -81,10 +80,9 @@ public class GhostViewOnceHook {
     }
 
     /**
-     * Finds (3-param, void) methods matching the query and hooks them. Both anchors resolve
-     * to a visual-only "report seen" handler, so unconditional setResult(null) is safe.
+     * Hooks every (3-param, void) reporter the query finds. Both anchors resolve to a visual-only
+     * "report seen" handler, so unconditional setResult(null) is safe.
      */
-    /** Hooks every (3-param, void) reporter the query finds. */
     private void collect(DexKitBridge bridge, FindMethod query, List<Method> hooked) {
         try {
             for (MethodData method : DexKitQueryCache.findMethod(bridge, query)) {
@@ -108,10 +106,9 @@ public class GhostViewOnceHook {
         return new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) { ps.reso.instaeclipse.utils.core.JitGuard.tick(param.method);
-                // The hooked method is the visual/view-once seen-reporter only (selected via
-                // "raven_media" on 447 / hardcoded "visual_item_seen" on 436). Skipping it
-                // suppresses just the view-once "seen/opened" report; voice/other sends are
-                // different methods and are untouched.
+                // Hooked method is the visual/view-once seen-reporter only (via "raven_media" on 447,
+                // hardcoded "visual_item_seen" on 436). Skipping it suppresses just the view-once
+                // "seen/opened" report; voice/other sends are different methods, untouched.
                 if (param.args.length > 3) {
                     if (!FeatureFlags.isGhostSeen && !FeatureFlags.isGhostViewOnce) return;
                     for (Object a : param.args) {

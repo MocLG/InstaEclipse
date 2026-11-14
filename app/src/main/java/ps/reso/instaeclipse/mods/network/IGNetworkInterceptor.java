@@ -23,7 +23,7 @@ public class IGNetworkInterceptor {
      * Neutralise a dropped request by redirecting it to a dead local URL. IG 446+/447.0.0.39+ keeps
      * the request URL in MULTIPLE fields on the request object (e.g. a String copy plus two java.net.URI
      * copies), and the actual dispatch reads one of the copies — not necessarily the single URI field
-     * we resolve for inspection. Rewriting only that one field is silently ignored, so the request
+     * resolved for inspection. Rewriting only that one field is silently ignored, so the request
      * still goes out. Rewrite EVERY url-bearing field: every java.net.URI field, and every String
      * field that currently holds this request's URL (matched by the original value / same path).
      */
@@ -186,11 +186,8 @@ public class IGNetworkInterceptor {
                                     if (FeatureFlags.disableFeed) {
                                         shouldDrop |= uri.getPath().endsWith("/feed/timeline/");
                                     }
-                                    // Full Disable Reels takes precedence over the except-DM exception:
-                                    // when it is on, every clips endpoint is dropped — including
-                                    // "Allow in DM" (disableReelsExceptDM) is the switch that controls DM
-                                    // reels: when it is ON, DM-opened reels (/api/v1/clips/items/) are
-                                    // allowed and only the reels feed/discover is dropped; when it is OFF,
+                                    // disableReelsExceptDM: when ON, DM-opened reels (/api/v1/clips/items/)
+                                    // are allowed and only the reels feed/discover is dropped; when OFF,
                                     // full Disable Reels drops every clips endpoint including clips/items/.
                                     if (FeatureFlags.disableReels && !FeatureFlags.disableReelsExceptDM) {
                                         shouldDrop |= uri.getPath().endsWith("/qp/batch_fetch/")
@@ -257,10 +254,9 @@ public class IGNetworkInterceptor {
                                                 || p.contains("/presence/");
                                         FeatureStatusTracker.setHooked("SpoofLastSeen");
                                     }
-                                    // NOTE: Disable Repost is handled at the UI/action level in
-                                    // mods.ui.DisableRepostHook — NOT here. Dropping the repost network
-                                    // request is ineffective because IG applies the repost optimistically
-                                    // client-side, so the repost completes even when the request is dropped.
+                                    // Disable Repost is handled at the UI/action level in
+                                    // mods.ui.DisableRepostHook, not here: IG applies the repost
+                                    // optimistically client-side, so dropping the request doesn't stop it.
                                     if (FeatureFlags.disableDiscoverPeople) {
                                         shouldDrop |= uri.getPath().contains("/discover/ayml/");
                                         shouldDrop |= uri.getPath().contains("discover/chaining/");
@@ -329,7 +325,7 @@ public class IGNetworkInterceptor {
                         if (body == null) continue;
                         String text = new String(body, java.nio.charset.StandardCharsets.ISO_8859_1);
                         if (!text.contains(self)) continue;
-                        // Reads only: a mutation (anything that changes something) always goes out as sent.
+                        // Reads only: a mutation always goes out as sent.
                         if (text.toLowerCase(java.util.Locale.ROOT).contains("mutation")) continue;
                         bf.set(holder, text.replace(self, target).getBytes(java.nio.charset.StandardCharsets.ISO_8859_1));
                         ModuleLog.line("(IE|ProfileSpoof) read redirected: graphql body");

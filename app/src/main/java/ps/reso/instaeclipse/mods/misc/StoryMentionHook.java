@@ -39,14 +39,12 @@ import ps.reso.instaeclipse.utils.core.DexKitQueryCache;
 
 public class StoryMentionHook {
 
-    // Story @mentions live behind a two-step pipeline, not a single Media-level getter:
+    // Story @mentions go through a two-step pipeline, not a single Media-level getter:
     //   Media -> LiveTreeMediaDict (found by type) -> "reel_mentions" field (raw tree entries)
     //   -> a converter method that turns each raw entry into an Interactive sticker object,
-    //      with the actual mentioned User stored in one of Interactive's own fields.
-    // Anchoring on the "reel_mentions" JSON key and the converter's own debug string is far
-    // more stable across IG versions than matching a Media-level method's signature — those
-    // getters get refactored/renamed/re-typed constantly (see git history of this file), but
-    // literal JSON field names and hardcoded log/QPL strings don't change on a version bump.
+    //      with the mentioned User in one of Interactive's own fields.
+    // Anchor on the "reel_mentions" JSON key and the converter's debug string: method
+    // signatures get renamed on version bumps, literal JSON keys and log strings don't.
     private static volatile Method rawMentionsGetter;   // LiveTreeMediaDict -> List (raw entries)
     private static volatile Method mentionsConverter;   // List(raw) -> List<Interactive w/ User field>
 
@@ -218,8 +216,8 @@ public class StoryMentionHook {
 
     // ── Hook 2: handle "View Mentions" tap ───────────────────────────────────
     //
-    // Same anchor as StoryDownloadHook click handler. We intercept only our label;
-    // all other taps pass through to Instagram and to the StoryDownloadHook.
+    // Same anchor as StoryDownloadHook click handler. Intercepts only our label;
+    // other taps pass through to Instagram and StoryDownloadHook.
 
     private void installClickHook(DexKitBridge bridge, ClassLoader classLoader) {
         List<Method> dispatchers = ps.reso.instaeclipse.mods.media.StoryDownloadHook.storyClickDispatchers(bridge, classLoader);

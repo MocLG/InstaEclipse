@@ -76,10 +76,10 @@ public class GhostDMMarkAsReadHook {
 
         int size = dp(ctx, 35);
 
-        // We use FrameLayout params because most Instagram composer parents are FrameLayouts
+        // FrameLayout params — most Instagram composer parents are FrameLayouts
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size);
 
-        // POSITION: Left side, slightly elevated so it doesn't block the text input or mic
+        // left side, slightly raised so it doesn't block the text input or mic
         lp.gravity = Gravity.CENTER_VERTICAL | Gravity.START;
         lp.setMargins(dp(ctx, 5), 25, 0, 0);
 

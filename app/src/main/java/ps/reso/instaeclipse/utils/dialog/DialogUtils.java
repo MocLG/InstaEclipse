@@ -523,7 +523,6 @@ public class DialogUtils {
     private static void showGhostQuickToggleOptions(Context context) {
         LinearLayout layout = createSwitchLayout(context);
 
-        // Create switches for customizing what gets toggled
         ToggleRow[] toggleSwitches = new ToggleRow[]{
                 createSwitch(context, R.drawable.ic_eye_off, "#5E5CE6", I18n.t(context, R.string.ig_dialog_quick_hide_seen),           FeatureFlags.quickToggleSeen),
                 createSwitch(context, R.drawable.ic_chat, "#5E5CE6", I18n.t(context, R.string.ig_dialog_quick_hide_typing),         FeatureFlags.quickToggleTyping),
@@ -535,7 +534,6 @@ public class DialogUtils {
                 createSwitch(context, R.drawable.ic_eye, "#5E5CE6", I18n.t(context, R.string.ig_dialog_quick_permanent_view),      FeatureFlags.quickTogglePermanentView),
                 createSwitch(context, R.drawable.ic_camera, "#5E5CE6", I18n.t(context, R.string.ig_dialog_quick_allow_screenshots),   FeatureFlags.quickToggleAllowScreenshots)};
 
-        // Create Enable/Disable All switch
         ToggleRow enableAllSwitch = createSwitch(context, I18n.t(context, R.string.ig_dialog_enable_disable_all), areAllEnabled(toggleSwitches));
 
         // Master listener
@@ -600,16 +598,14 @@ public class DialogUtils {
         }
 
 
-        // Add views to layout
-        layout.addView(createDivider(context)); // Divider above
-        layout.addView(createEnableAllSwitch(context, enableAllSwitch)); // Styled enable all switch
-        layout.addView(createDivider(context)); // Divider below
+        layout.addView(createDivider(context));
+        layout.addView(createEnableAllSwitch(context, enableAllSwitch));
+        layout.addView(createDivider(context));
 
         for (ToggleRow s :toggleSwitches) {
             layout.addView(s);
         }
 
-        // Show dialog
         showSectionDialog(context, I18n.t(context, R.string.ig_dialog_section_quick_toggle), layout, () -> {
         });
 
@@ -727,7 +723,7 @@ public class DialogUtils {
                 }
             }
         }
-        // A direct result for a file or an empty directory
+        // file, or the now-empty directory
         fileOrDirectory.delete();
     }
 

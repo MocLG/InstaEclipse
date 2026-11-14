@@ -106,9 +106,6 @@ public class Module {
     }
 
     public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lpparam) {
-        // Ensure preferences are loaded
-
-
         // Hook into Instagram and its clones
         // Debug kill switch: `adb shell setprop debug.instaeclipse.off 1` loads the module but
         // installs no hooks (isolates crashes to the framework vs. this module).
@@ -126,7 +123,7 @@ public class Module {
             ps.reso.instaeclipse.utils.log.CrashReporter.install();
             try {
                 if (dexKitBridge == null) {
-                    // Load the .so file from your module (if not already loaded)
+                    // load libdexkit.so from the module (once)
                     System.load(moduleLibDir + "/libdexkit.so");
                     // ModuleLog.line("libdexkit.so loaded successfully.");
 
@@ -138,7 +135,7 @@ public class Module {
                 // Use the target app's ClassLoader
                 hostClassLoader = lpparam.classLoader;
 
-                // Call the method to hook the target app
+                // hook the target app
                 hookInstagram(lpparam);
 
             } catch (Exception e) {

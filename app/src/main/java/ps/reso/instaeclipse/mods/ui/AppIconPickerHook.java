@@ -228,9 +228,8 @@ public final class AppIconPickerHook {
     }
 
     /**
-     * Switching the alias at once ends the task that was started through the old alias, so
-     * Instagram closed under the user (found in the agent test, 9 Nov). The pick is kept and applied
-     * when the last Instagram activity stops, i.e. when the user leaves the app.
+     * Switching the alias immediately ends the task started through the old alias, closing Instagram
+     * under the user. Pick is applied when the last Instagram activity stops (user leaves the app).
      */
     private static void schedule(Context ctx, int pick) {
         pending = pick;

@@ -11,19 +11,17 @@ import ps.reso.instaeclipse.utils.feature.FeatureFlags;
 import ps.reso.instaeclipse.utils.log.ModuleLog;
 
 /**
- * Auto-clears Instagram's cache when the app is closed/backgrounded, if the cache is over a
- * user-set size (GitHub feature request).
+ * Auto-clears Instagram's cache on background if it's over a user-set size (GitHub feature
+ * request).
  *
- * Clearing runs when the app goes to the background — i.e. when the last visible activity stops —
- * so nothing on screen references the files being deleted (this avoids the broken-image
- * placeholders that mid-session clearing caused). When the user returns, Instagram simply
- * rebuilds the cache.
+ * Runs when the last visible activity stops, so nothing on screen references the deleted files
+ * (mid-session clearing caused broken-image placeholders); IG rebuilds the cache on return.
  *
- * Instagram keeps almost nothing in getExternalCacheDir(); the bulk of its image/video cache
- * lives under getCacheDir() (Fresco image pipeline, exoplayer, etc.) and in some builds under
- * subdirs of filesDir(). We therefore measure and clear the standard cache dirs AND any obvious
- * cache-like subdirectory of filesDir (names containing "cache"). The size check uses the OS's
- * authoritative cache figure (what Android Settings shows), which is cache IG safely regenerates.
+ * IG keeps almost nothing in getExternalCacheDir(); the bulk of its image/video cache lives
+ * under getCacheDir() (Fresco, exoplayer) and in some builds under subdirs of filesDir(). So the
+ * standard cache dirs and any cache-like subdir of filesDir (name contains "cache") are measured
+ * and cleared. Size check uses the OS cache figure (what Android Settings shows), cache IG
+ * safely regenerates.
  */
 public class CacheAutoClear {
 
@@ -70,9 +68,8 @@ public class CacheAutoClear {
                 int limitMb = FeatureFlags.autoClearCacheSizeMb > 0 ? FeatureFlags.autoClearCacheSizeMb : 100;
                 long limit = (long) limitMb * 1024 * 1024;
 
-                // Measure with the OS's authoritative cache figure (matches what Android Settings
-                // shows and counts cache the app registered on all volumes); fall back to summing
-                // the cache dirs directly when StorageStatsManager is unavailable.
+                // OS cache figure (matches Android Settings, counts all volumes); fall back to
+                // summing the cache dirs when StorageStatsManager is unavailable.
                 File[] targets = cacheTargets(app);
                 long osCache = osCacheBytes(app);
                 long dirTotal = 0;
@@ -94,9 +91,9 @@ public class CacheAutoClear {
     }
 
     /**
-     * The set of directories treated as "cache": the standard internal + external cache dirs,
-     * plus any first-level subdirectory of filesDir whose name looks cache-like (some IG builds
-     * put the Fresco/media cache under files/ rather than cache/). code_cache is included too.
+     * Dirs treated as cache: internal + external cache dirs, code_cache, and any first-level
+     * filesDir subdir whose name looks cache-like (some IG builds put Fresco/media cache under
+     * files/ rather than cache/).
      */
     private static File[] cacheTargets(Context app) {
         java.util.LinkedHashSet<File> out = new java.util.LinkedHashSet<>();

@@ -39,7 +39,7 @@ import ps.reso.instaeclipse.utils.core.DexKitQueryCache;
  * Playback speed for feed videos and a forced reel seek bar (#247).
  *
  * Feed: IG's feed player (class using "IgFeedVideoPlayer: Persistent Visible Cover Image",
- * X.05fU on 452) starts a video via its (Media, …)boolean method; we keep the last instance.
+ * X.05fU on 452) starts a video via its (Media, …)boolean method; the last instance is kept.
  * The underlying Groot player's speed setter is the (float) caller of the method that uses
  * "setPlaybackSpeed" (X.01Nh.A0L → X.01Om.A0R on 452) — the same path IG's own hold-for-2x uses.
  * The chosen speed is re-applied to every video that starts afterwards (1x = off).
@@ -221,9 +221,9 @@ public class PlaybackSpeedHook {
     }
 
     // IG 452 only speeds up a hold on the left edge of a reel; a hold elsewhere pauses it. The
-    // right-half hold (left of the like/comment/share column) is ours: just before IG's long press
-    // fires, IG gets an ACTION_CANCEL (so it never pauses) and the rest of the gesture is ours,
-    // 2x until the finger lifts.
+    // right-half hold (left of the like/comment/share column) is handled here: just before IG's
+    // long press fires it gets an ACTION_CANCEL (so it never pauses), and the rest of the gesture
+    // runs as 2x until the finger lifts.
     private static volatile boolean rightActive;
     private static boolean rightPending;
     private static boolean INJECTING;

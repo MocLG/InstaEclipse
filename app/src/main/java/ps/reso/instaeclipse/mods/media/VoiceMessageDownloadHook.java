@@ -36,11 +36,11 @@ import ps.reso.instaeclipse.utils.core.DexKitQueryCache;
  * Download voice messages from the DM long-press menu (#223).
  *
  * - The menu is built by the static factory of the named class MessageActionsViewModel; its
- *   main action list is a List<LongPressActionData> argument. We append a row built like IG's own
- *   helper (new LongPressActionData(null, style, action, null, null, icon, null, label, ...)),
+ *   main action list is a List<LongPressActionData> argument. A row is appended, built like IG's
+ *   own helper (new LongPressActionData(null, style, action, null, null, icon, null, label, ...)),
  *   carried by the action enum value named SAVE_MEDIA (not used in the DM long-press list).
  * - The long-pressed message comes from the message lookup in the class using
- *   ": null_direct_message" (X.0BVY on 452); we keep the last one returned.
+ *   ": null_direct_message" (X.0BVY on 452); the last one returned is kept.
  * - Taps of every DM menu renderer end in the dispatcher using
  *   "DirectReportDailyPromptInteractor.reportDailyPrompt" (X.0RAg.A06), which receives the
  *   action and the message; SAVE_MEDIA on a voice message is consumed and downloaded.
