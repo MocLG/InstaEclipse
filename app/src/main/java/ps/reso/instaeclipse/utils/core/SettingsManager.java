@@ -152,6 +152,7 @@ public class SettingsManager {
         editor.putBoolean("confirmCalls", FeatureFlags.confirmCalls);
         editor.putInt("callBlockMode", FeatureFlags.callBlockMode);
         editor.putString("callBlockAccounts", FeatureFlags.callBlockAccounts);
+        editor.putString("callBlockChats", FeatureFlags.callBlockChats);
         editor.putBoolean("spoofLocation", FeatureFlags.spoofLocation);
         editor.putString("spoofLat", String.valueOf(FeatureFlags.spoofLat));
         editor.putString("spoofLng", String.valueOf(FeatureFlags.spoofLng));
@@ -387,6 +388,7 @@ public class SettingsManager {
         FeatureFlags.confirmCalls = prefs.getBoolean("confirmCalls", false);
         FeatureFlags.callBlockMode = prefs.getInt("callBlockMode", 0);
         FeatureFlags.callBlockAccounts = prefs.getString("callBlockAccounts", "");
+        FeatureFlags.callBlockChats = prefs.getString("callBlockChats", "");
         FeatureFlags.spoofLocation = prefs.getBoolean("spoofLocation", false);
         FeatureFlags.spoofLat = readDoublePref(prefs, "spoofLat", 0.0);
         FeatureFlags.spoofLng = readDoublePref(prefs, "spoofLng", 0.0);

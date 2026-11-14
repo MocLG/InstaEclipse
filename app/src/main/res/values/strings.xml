@@ -884,6 +884,10 @@ Stay on this screen until it finishes.</string>
     <string name="ig_call_block_mode_except">Everyone except the list</string>
     <string name="ig_call_block_accounts">Accounts (one per line)</string>
     <string name="ig_call_block_accounts_hint">Caller name or user id, one per line</string>
+    <string name="ie_call_block_chat">Block calls from this chat</string>
+    <string name="ie_call_unblock_chat">Unblock calls from this chat</string>
+    <string name="ie_call_block_chat_on">Calls from this chat blocked</string>
+    <string name="ie_call_block_chat_off">Calls from this chat unblocked</string>
     <string name="ig_confirm_refresh">Ask Before Refreshing the Feed</string>
     <string name="ig_confirm_refresh_question">Refresh the feed?</string>
     <string name="ig_confirm_refresh_action">Refresh</string>

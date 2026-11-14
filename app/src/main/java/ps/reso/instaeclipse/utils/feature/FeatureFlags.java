@@ -151,6 +151,7 @@ public class FeatureFlags {
     public static volatile boolean confirmCalls = false;       // ask before a chat call starts (#277)
     public static volatile int     callBlockMode = 0;          // incoming call blocker: 0=everyone(off)/1=nobody/2=only list/3=except list
     public static volatile String  callBlockAccounts = "";     // caller names / user ids, newline- or comma-separated
+    public static volatile String  callBlockChats = "";        // per-chat block list (chat names) from the thread menu; always blocks
     public static volatile boolean showFollowerToast = false;
     public static volatile boolean showFeatureToasts = false;
     public static volatile boolean disableRepost = false;

@@ -47,14 +47,48 @@ public final class CallBlocker {
     /** Asked first with each call Instagram is about to ring. True means don't ring. Never throws. */
     public static boolean drop(Object call) {
         try {
-            int mode = FeatureFlags.callBlockMode;
-            if (call == null || mode == EVERYONE) return false;
+            if (call == null) return false;
             String text = String.valueOf(call);
             if (!text.startsWith(RINGING)) return false;
+            // Per-chat block list (toggled from the thread menu) always applies, even when the
+            // global mode is Everyone (off).
+            List<String> perChat = accounts(FeatureFlags.callBlockChats);
+            if (!perChat.isEmpty() && matchesCaller(text, perChat)) return true;
+            int mode = FeatureFlags.callBlockMode;
+            if (mode == EVERYONE) return false;
             return drops(mode, text, usesList(mode) ? accounts(FeatureFlags.callBlockAccounts) : Collections.emptyList());
         } catch (Throwable failure) {
             return false; // fail open: let the call ring
         }
+    }
+
+    /** Whether this ringing call's caller (name or id) is in {@code list}. */
+    static boolean matchesCaller(String text, List<String> list) {
+        String rawName = between(text, CALLER_NAME, AFTER_NAME);
+        String name = rawName == null ? null : rawName.toLowerCase(Locale.ROOT);
+        String id = between(text, CALLER_ID, ", ");
+        return (name != null && list.contains(name)) || (id != null && list.contains(id));
+    }
+
+    // ---- Per-chat block list (thread menu) ---------------------------------------------------
+
+    /** Whether this chat (by its header title) is on the per-chat call block list. */
+    public static boolean isChatBlocked(String title) {
+        String n = normalize(title);
+        return n != null && accounts(FeatureFlags.callBlockChats).contains(n);
+    }
+
+    /** Returns the per-chat block list with {@code title} added or removed (display form kept). */
+    public static String toggleChat(String title, boolean blocked) {
+        String n = normalize(title);
+        if (n == null) return FeatureFlags.callBlockChats;
+        List<String> kept = new ArrayList<>();
+        for (String piece : FeatureFlags.callBlockChats.split("[\\n\\r]")) {
+            String t = piece.trim();
+            if (!t.isEmpty() && !n.equals(normalize(t))) kept.add(t);
+        }
+        if (blocked) kept.add(title.trim());
+        return String.join("\n", kept);
     }
 
     /** Whether a ringing call with this text stays quiet. A caller the list can't be checked against rings. */

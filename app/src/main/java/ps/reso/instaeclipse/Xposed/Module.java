@@ -600,6 +600,7 @@ public class Module {
                     try {
                         if (!skip("JumpToFirstMessageHook")) new ps.reso.instaeclipse.mods.ghost.JumpToFirstMessageHook().install();
                         if (!skip("ReadReceiptChatHook")) new ps.reso.instaeclipse.mods.ghost.ReadReceiptChatHook().install(hostClassLoader);
+                        if (!skip("CallBlockChatHook")) new ps.reso.instaeclipse.mods.ghost.CallBlockChatHook().install(hostClassLoader);
                     } catch (Throwable ignored) {
                         ModuleLog.line("(IE|JumpFirst) ❌ Failed to hook");
                     }

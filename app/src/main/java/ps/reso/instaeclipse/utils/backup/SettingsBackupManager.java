@@ -119,6 +119,7 @@ public class SettingsBackupManager {
         s.put("confirmCalls",            FeatureFlags.confirmCalls);
         s.put("callBlockMode",           FeatureFlags.callBlockMode);
         s.put("callBlockAccounts",       FeatureFlags.callBlockAccounts);
+        s.put("callBlockChats",          FeatureFlags.callBlockChats);
         s.put("spoofLocation",           FeatureFlags.spoofLocation);
         s.put("spoofLat",                String.valueOf(FeatureFlags.spoofLat));
         s.put("spoofLng",                String.valueOf(FeatureFlags.spoofLng));
@@ -303,6 +304,7 @@ public class SettingsBackupManager {
         if (s.has("confirmCalls"))           FeatureFlags.confirmCalls           = s.getBoolean("confirmCalls");
         if (s.has("callBlockMode"))          FeatureFlags.callBlockMode          = s.getInt("callBlockMode");
         if (s.has("callBlockAccounts"))      FeatureFlags.callBlockAccounts      = s.getString("callBlockAccounts");
+        if (s.has("callBlockChats"))         FeatureFlags.callBlockChats         = s.getString("callBlockChats");
         if (s.has("spoofLocation"))          FeatureFlags.spoofLocation          = s.getBoolean("spoofLocation");
         if (s.has("spoofLat"))               FeatureFlags.spoofLat               = parseDouble(s.get("spoofLat"), 0.0);
         if (s.has("spoofLng"))               FeatureFlags.spoofLng               = parseDouble(s.get("spoofLng"), 0.0);
