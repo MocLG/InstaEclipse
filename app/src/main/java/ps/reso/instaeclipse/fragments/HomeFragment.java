@@ -105,7 +105,8 @@ public class HomeFragment extends Fragment {
             "downloaderUsernameFolder", "downloaderAddTimestamp", "copyMediaLink", "offerAudioDownload",
             "enableVoiceDownload", "enableStickerDownload", "enableDmMediaDownload", "offerCopyImage", "offerMediaInfo", "offerPlaybackSpeed",
             "keepVideoPlayingBackground", "videoPictureInPicture",
-            "forceReelScrubber", "holdLeftSlowMotion", "maxUploadQuality", "saveInstants", "keepInstantHistory", "uploadInstants", "cacheStories",
+            "forceReelScrubber", "holdLeftSlowMotion", "feedVideoTapPause", "feedVideoSeekBar", "feedVideoHold2x", "feedVideoDoubleTapSkip",
+            "maxUploadQuality", "saveInstants", "keepInstantHistory", "uploadInstants", "cacheStories",
             // Battery (stop background wake-ups)
             "stopBackgroundHeartbeat", "stopUploadAlarm", "stopBackgroundPrefetch",
             // Developer

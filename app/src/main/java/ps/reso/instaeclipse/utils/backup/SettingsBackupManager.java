@@ -82,6 +82,11 @@ public class SettingsBackupManager {
         s.put("maxUploadQuality",           FeatureFlags.maxUploadQuality);
         s.put("forceReelScrubber",          FeatureFlags.forceReelScrubber);
         s.put("holdLeftSlowMotion",         FeatureFlags.holdLeftSlowMotion);
+        s.put("feedVideoTapPause",          FeatureFlags.feedVideoTapPause);
+        s.put("feedVideoSeekBar",           FeatureFlags.feedVideoSeekBar);
+        s.put("feedVideoHold2x",            FeatureFlags.feedVideoHold2x);
+        s.put("feedVideoDoubleTapSkip",     FeatureFlags.feedVideoDoubleTapSkip);
+        s.put("feedVideoSkipSeconds",       FeatureFlags.feedVideoSkipSeconds);
         s.put("keepEditHistory",            FeatureFlags.keepEditHistory);
         s.put("jumpToFirstMessage",         FeatureFlags.jumpToFirstMessage);
         s.put("translateMessages",          FeatureFlags.translateMessages);
@@ -303,6 +308,11 @@ public class SettingsBackupManager {
         if (s.has("maxUploadQuality"))          FeatureFlags.maxUploadQuality          = s.getBoolean("maxUploadQuality");
         if (s.has("forceReelScrubber"))         FeatureFlags.forceReelScrubber         = s.getBoolean("forceReelScrubber");
         if (s.has("holdLeftSlowMotion"))        FeatureFlags.holdLeftSlowMotion        = s.getBoolean("holdLeftSlowMotion");
+        if (s.has("feedVideoTapPause"))         FeatureFlags.feedVideoTapPause         = s.getBoolean("feedVideoTapPause");
+        if (s.has("feedVideoSeekBar"))          FeatureFlags.feedVideoSeekBar          = s.getBoolean("feedVideoSeekBar");
+        if (s.has("feedVideoHold2x"))           FeatureFlags.feedVideoHold2x           = s.getBoolean("feedVideoHold2x");
+        if (s.has("feedVideoDoubleTapSkip"))    FeatureFlags.feedVideoDoubleTapSkip    = s.getBoolean("feedVideoDoubleTapSkip");
+        if (s.has("feedVideoSkipSeconds"))      FeatureFlags.feedVideoSkipSeconds      = Math.max(1, Math.min(60, s.getInt("feedVideoSkipSeconds")));
         if (s.has("keepEditHistory"))           FeatureFlags.keepEditHistory           = s.getBoolean("keepEditHistory");
         if (s.has("jumpToFirstMessage"))        FeatureFlags.jumpToFirstMessage        = s.getBoolean("jumpToFirstMessage");
         if (s.has("translateMessages"))         FeatureFlags.translateMessages         = s.getBoolean("translateMessages");

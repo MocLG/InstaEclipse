@@ -103,6 +103,11 @@ public class FeatureFlags {
     public static volatile boolean videoPictureInPicture = false; // force Instagram's native reel picture-in-picture window on exit
     public static volatile boolean forceReelScrubber = false; // always show IG's reel seek bar (#247)
     public static volatile boolean holdLeftSlowMotion = false; // hold the left half of a reel: 0.5x instead of IG's 2x
+    public static volatile boolean feedVideoTapPause = false; // tap a home-feed video to pause/play it
+    public static volatile boolean feedVideoSeekBar = false; // scrubber overlay on home-feed videos
+    public static volatile boolean feedVideoHold2x = false; // hold a home-feed video for 2x playback
+    public static volatile boolean feedVideoDoubleTapSkip = false; // double-tap a feed video's edge to seek
+    public static volatile int feedVideoSkipSeconds = 10; // how far feedVideoDoubleTapSkip seeks, seconds
     public static volatile boolean offerCopyImage = false; // offer "Copy image to clipboard" when downloading a photo (#228)
     public static volatile boolean enableVoiceDownload = false; // Download row for DM voice messages (#223)
     public static volatile boolean enableStickerDownload = false; // Download row for DM stickers and GIFs

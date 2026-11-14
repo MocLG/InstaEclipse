@@ -538,6 +538,12 @@
     <string name="ig_dialog_downloader_offer_speed">Add Playback Speed to the Post Menu</string>
     <string name="ig_dialog_downloader_reel_scrubber">Always Show the Reel Seek Bar</string>
     <string name="ig_dialog_reels_hold_left_slow">Hold the Left Side for Slow Motion (0.5×)</string>
+    <string name="ig_dialog_feed_video_tap_pause">Tap a Feed Video to Pause</string>
+    <string name="ig_dialog_feed_video_seek_bar">Seek Bar on Feed Videos</string>
+    <string name="ig_dialog_feed_video_hold_2x">Hold a Feed Video for 2×</string>
+    <string name="ig_dialog_feed_video_double_tap_skip">Double-Tap a Feed Video to Skip</string>
+    <string name="ig_feed_video_skip_seconds">Skip length</string>
+    <string name="ig_dialog_feed_video_controls">Video controls</string>
     <string name="ig_dialog_max_upload_quality">Always Upload at Highest Quality</string>
     <string name="ig_media_info_title">Media info</string>
     <string name="ig_media_info_copy">Copy</string>

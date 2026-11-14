@@ -496,6 +496,38 @@ public class PlaybackSpeedHook {
         }
     }
 
+    // ---- Reused by FeedVideoControlsHook (in-feed tap/seek/hold/skip, mods.extras) ----
+
+    /** The IgFeedVideoPlayer instance that started/played last, or null. */
+    public static Object currentFeedPlayer() {
+        WeakReference<Object> ref = lastPlayer;
+        return ref != null ? ref.get() : null;
+    }
+
+    /** The speed chosen in the ⋯ chooser (1f when none), so a feed hold restores it on release. */
+    public static float activeSpeed() {
+        return speed;
+    }
+
+    /** Sets {@code s} on every live story/reel/feed player and Hero player now; true if any took it. */
+    public static boolean applyLiveSpeed(float s) {
+        boolean ok = applyToHeroes(s);
+        ok |= applyToPlayers(s);
+        Object p = currentFeedPlayer();
+        if (p != null) ok |= apply(p, s);
+        return ok;
+    }
+
+    /** A snapshot of the live Hero player instances, for FeedVideoControlsHook's seek. */
+    public static java.util.List<Object> liveHeroPlayers() {
+        synchronized (HEROES) { return new ArrayList<>(HEROES.keySet()); }
+    }
+
+    /** True while a reel (not a feed video) is on screen, so feed gestures stand aside. */
+    public static boolean reelShowing(Activity a) {
+        return reelOnScreen(a);
+    }
+
     /** Speed chooser from the post ⋯ menu; applies to the playing feed video and the next ones. */
     static void showChooser(Context ctx) {
         showChooser(ctx, null);

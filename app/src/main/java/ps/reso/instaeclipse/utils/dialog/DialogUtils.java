@@ -167,7 +167,7 @@ public class DialogUtils {
         mainLayout.addView(sectionHeader(context, I18n.t(context, R.string.feat_group_appearance)));
         LinearLayout appearance = createGroupCard(context);
         appearance.addView(createMenuRow(context, R.drawable.ic_palette, I18n.t(context, R.string.ig_dialog_menu_theme), A_APPEARANCE, () -> showThemeOptions(context), onCount(context, "customThemeEnabled", "customFontEnabled", "customEmojiEnabled", "themeDynamicAccent", "themeOledSurfaces", "themeAccentOnly")));
-        appearance.addView(createMenuRow(context, R.drawable.ic_sparkle, I18n.t(context, R.string.menu_feed), A_APPEARANCE, () -> showFeedOptions(context), onCount(context, "hideSuggestionsInFeed", "hideThreadsSuggestions", "hideSuggestionsInReels", "hidePaidPartnerships", "hideLikedPosts", "confirmFeedRefresh", "hideCommunityNotes", "followingOnlyFeed", "disableDiscoverPeople", "hideExploreGrid", "exploreNoPersonalization", "hideSearchSuggestions", "expandCaptions", "exactTimestamps", "enablePhotoZoom", "disableVideoAutoPlay", "hideFeedFollowButton", "hideFeedSaveButton", "hideFeedLikeButton", "hideFeedActivityBubbles", "hideFeedAudioIcon", "hideFeedMadeWithEdits", "hideFeedCaptions")));
+        appearance.addView(createMenuRow(context, R.drawable.ic_sparkle, I18n.t(context, R.string.menu_feed), A_APPEARANCE, () -> showFeedOptions(context), onCount(context, "hideSuggestionsInFeed", "hideThreadsSuggestions", "hideSuggestionsInReels", "hidePaidPartnerships", "hideLikedPosts", "confirmFeedRefresh", "hideCommunityNotes", "followingOnlyFeed", "disableDiscoverPeople", "hideExploreGrid", "exploreNoPersonalization", "hideSearchSuggestions", "expandCaptions", "exactTimestamps", "enablePhotoZoom", "disableVideoAutoPlay", "feedVideoTapPause", "feedVideoSeekBar", "feedVideoHold2x", "feedVideoDoubleTapSkip", "hideFeedFollowButton", "hideFeedSaveButton", "hideFeedLikeButton", "hideFeedActivityBubbles", "hideFeedAudioIcon", "hideFeedMadeWithEdits", "hideFeedCaptions")));
         appearance.addView(createMenuRow(context, R.drawable.ic_tune, I18n.t(context, R.string.menu_navigation), A_APPEARANCE, () -> showNavigationOptions(context), navCount(context)));
         appearance.addView(createMenuRow(context, R.drawable.ic_movie, I18n.t(context, R.string.menu_reels), A_APPEARANCE, () -> showReelsOptions(context), onCount(context, "reelsAutoScroll", "reelsLockScroll", "forceReelScrubber", "holdLeftSlowMotion", "offerPlaybackSpeed", "keepVideoPlayingBackground", "videoPictureInPicture", "reelsBlurBars", "reelsHideFollow", "reelsHideMetaAi", "reelsHidePills", "reelsHideCommentBar", "hideAiReels", "hideReelsByCaption", "hideReelsByLanguage", "hideLowViewReels")));
         appearance.addView(createMenuRow(context, R.drawable.ic_story_ring, I18n.t(context, R.string.menu_stories), A_APPEARANCE, () -> showStoriesOptions(context), onCount(context, "disableStoryFlipping", "enableStoryMentions", "storyLinks", "storyInfo", "storyViewerSearch", "hideStoriesTray")));
@@ -1670,7 +1670,43 @@ public class DialogUtils {
                 flagSwitch(context, R.drawable.ic_tune, "#64D2FF", R.string.ig_feat_hide_feed_made_with_edits, "hideFeedMadeWithEdits"),
                 flagSwitch(context, R.drawable.ic_chat, "#64D2FF", R.string.ig_feat_hide_feed_captions, "hideFeedCaptions")));
 
+        layout.addView(sectionHeader(context, I18n.t(context, R.string.ig_dialog_feed_video_controls)));
+        View skipRow = createActionRow(context, R.drawable.ic_timer, feedSkipLabel(context), "#64D2FF",
+                v -> showFeedSkipDialog(context, (TextView) findFirstText(v)));
+        setRowEnabled(skipRow, FeatureFlags.feedVideoDoubleTapSkip);
+        layout.addView(cardOf(context,
+                flagSwitch(context, R.drawable.ic_movie, "#64D2FF", R.string.ig_dialog_feed_video_tap_pause, "feedVideoTapPause"),
+                flagSwitch(context, R.drawable.ic_movie, "#64D2FF", R.string.ig_dialog_feed_video_seek_bar, "feedVideoSeekBar"),
+                flagSwitch(context, R.drawable.ic_movie, "#64D2FF", R.string.ig_dialog_feed_video_hold_2x, "feedVideoHold2x"),
+                flagSwitch(context, R.drawable.ic_movie, "#64D2FF", R.string.ig_dialog_feed_video_double_tap_skip, "feedVideoDoubleTapSkip",
+                        () -> setRowEnabled(skipRow, FeatureFlags.feedVideoDoubleTapSkip)),
+                skipRow));
+
         showSectionDialog(context, I18n.t(context, R.string.menu_feed), layout, () -> {});
+    }
+
+    public static final int[] FEED_SKIP_SECONDS = {5, 10, 15, 30};
+
+    private static String feedSkipLabel(Context context) {
+        return I18n.t(context, R.string.ig_feed_video_skip_seconds) + "  ·  " + FeatureFlags.feedVideoSkipSeconds + "s";
+    }
+
+    /** How far a feed-video double-tap seeks. */
+    private static void showFeedSkipDialog(Context context, TextView label) {
+        CharSequence[] rows = new CharSequence[FEED_SKIP_SECONDS.length];
+        int checked = 0;
+        for (int i = 0; i < rows.length; i++) {
+            rows[i] = FEED_SKIP_SECONDS[i] + "s";
+            if (FEED_SKIP_SECONDS[i] == FeatureFlags.feedVideoSkipSeconds) checked = i;
+        }
+        new IeDialog(context)
+                .title(I18n.t(context, R.string.ig_feed_video_skip_seconds))
+                .choices(rows, checked, which -> {
+                    FeatureFlags.feedVideoSkipSeconds = FEED_SKIP_SECONDS[which];
+                    SettingsManager.saveAllFlags();
+                    if (label != null) label.setText(feedSkipLabel(context));
+                })
+                .show();
     }
 
     public static final int[] FEED_CORNER_RADII = {0, 8, 12, 16, 20, 24};

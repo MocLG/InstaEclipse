@@ -1245,7 +1245,36 @@ public class FeaturesFragment extends Fragment {
                 createSwitch(R.drawable.ic_chat, "#64D2FF", getString(R.string.ig_feat_hide_feed_captions), "hideFeedCaptions")
         ));
 
+        defs.add(getString(R.string.ig_dialog_feed_video_controls));
+        defs.add(Arrays.asList(
+                createSwitch(R.drawable.ic_movie, "#64D2FF", getString(R.string.ig_dialog_feed_video_tap_pause), "feedVideoTapPause"),
+                createSwitch(R.drawable.ic_movie, "#64D2FF", getString(R.string.ig_dialog_feed_video_seek_bar), "feedVideoSeekBar"),
+                createSwitch(R.drawable.ic_movie, "#64D2FF", getString(R.string.ig_dialog_feed_video_hold_2x), "feedVideoHold2x"),
+                createSwitch(R.drawable.ic_movie, "#64D2FF", getString(R.string.ig_dialog_feed_video_double_tap_skip), "feedVideoDoubleTapSkip"),
+                createClickable(R.drawable.ic_timer, "#64D2FF", feedSkipText(), this::chooseFeedSkip)
+        ));
+
         return defs;
+    }
+
+    private String feedSkipText() {
+        int s = localCache.getInt("feedVideoSkipSeconds", 10);
+        return getString(R.string.ig_feed_video_skip_seconds) + "  ·  " + s + "s";
+    }
+
+    private void chooseFeedSkip() {
+        int[] secs = ps.reso.instaeclipse.utils.dialog.DialogUtils.FEED_SKIP_SECONDS;
+        String[] labels = new String[secs.length];
+        int current = localCache.getInt("feedVideoSkipSeconds", 10), selected = 0;
+        for (int i = 0; i < secs.length; i++) {
+            labels[i] = secs[i] + "s";
+            if (secs[i] == current) selected = i;
+        }
+        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.ig_feed_video_skip_seconds)
+                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
+                    putIntPref("feedVideoSkipSeconds", secs[which]);
+                    dialog.dismiss(); loadFeedMenu();
+                }).setNegativeButton(android.R.string.cancel, null).show();
     }
 
     private String feedCornerText() {

@@ -132,6 +132,11 @@ public class SettingsManager {
         editor.putBoolean("maxUploadQuality", FeatureFlags.maxUploadQuality);
         editor.putBoolean("forceReelScrubber", FeatureFlags.forceReelScrubber);
         editor.putBoolean("holdLeftSlowMotion", FeatureFlags.holdLeftSlowMotion);
+        editor.putBoolean("feedVideoTapPause", FeatureFlags.feedVideoTapPause);
+        editor.putBoolean("feedVideoSeekBar", FeatureFlags.feedVideoSeekBar);
+        editor.putBoolean("feedVideoHold2x", FeatureFlags.feedVideoHold2x);
+        editor.putBoolean("feedVideoDoubleTapSkip", FeatureFlags.feedVideoDoubleTapSkip);
+        editor.putInt("feedVideoSkipSeconds", FeatureFlags.feedVideoSkipSeconds);
         editor.putBoolean("keepEditHistory", FeatureFlags.keepEditHistory);
         editor.putBoolean("jumpToFirstMessage", FeatureFlags.jumpToFirstMessage);
         editor.putBoolean("translateMessages", FeatureFlags.translateMessages);
@@ -399,6 +404,11 @@ public class SettingsManager {
         FeatureFlags.maxUploadQuality = prefs.getBoolean("maxUploadQuality", false);
         FeatureFlags.forceReelScrubber = prefs.getBoolean("forceReelScrubber", false);
         FeatureFlags.holdLeftSlowMotion = prefs.getBoolean("holdLeftSlowMotion", false);
+        FeatureFlags.feedVideoTapPause = prefs.getBoolean("feedVideoTapPause", false);
+        FeatureFlags.feedVideoSeekBar = prefs.getBoolean("feedVideoSeekBar", false);
+        FeatureFlags.feedVideoHold2x = prefs.getBoolean("feedVideoHold2x", false);
+        FeatureFlags.feedVideoDoubleTapSkip = prefs.getBoolean("feedVideoDoubleTapSkip", false);
+        FeatureFlags.feedVideoSkipSeconds = prefs.getInt("feedVideoSkipSeconds", 10);
         FeatureFlags.keepEditHistory = prefs.getBoolean("keepEditHistory", false);
         FeatureFlags.jumpToFirstMessage = prefs.getBoolean("jumpToFirstMessage", false);
         FeatureFlags.translateMessages = prefs.getBoolean("translateMessages", false);

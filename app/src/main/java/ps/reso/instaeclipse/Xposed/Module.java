@@ -589,6 +589,13 @@ public class Module {
                         ModuleLog.line("(InstaEclipse | VideoPiP): ❌ Failed to hook");
                     }
 
+                    // In-feed video controls: tap-pause, seek bar, hold-for-2x, double-tap-to-skip
+                    try {
+                        if (!skip("FeedVideoControlsHook")) new ps.reso.instaeclipse.mods.extras.FeedVideoControlsHook().install(dexKitBridge, hostClassLoader);
+                    } catch (Throwable ignored) {
+                        ModuleLog.line("(InstaEclipse | FeedVideo): ❌ Failed to hook");
+                    }
+
                     // Hide the DM Notes tray (#241)
                     try {
                         if (!skip("HideNotesTrayHook")) new ps.reso.instaeclipse.mods.ui.HideNotesTrayHook().install(dexKitBridge);
