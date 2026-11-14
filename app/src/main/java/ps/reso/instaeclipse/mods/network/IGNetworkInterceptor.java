@@ -80,9 +80,63 @@ public class IGNetworkInterceptor {
         }
     }
 
+    /**
+     * Freeze the "active now" green dot. In {@code RealtimeClientManager.createMqttClient} (both
+     * names stable/unobfuscated) IG checks one static {@code boolean(UserSession)} gate and, when it
+     * returns true, adds the subscription {@code "/disable_presence_reporting"} so the server stops
+     * reporting this account's presence to others. That gate is normally a server QE (off by
+     * default), its class/number change every release, so we anchor on the stable string, take the
+     * single matching invoke, and force it true while SpoofLastSeen is on — IG's own mechanism, so
+     * the user still receives others' presence. Takes effect on the next realtime (re)connect.
+     */
+    private static void hookPresenceReporting(ClassLoader classLoader) {
+        try {
+            if (ps.reso.instaeclipse.Xposed.Module.dexKitBridge == null) return;
+            java.util.List<org.luckypray.dexkit.result.MethodData> found =
+                    ps.reso.instaeclipse.Xposed.Module.dexKitBridge.findMethod(
+                            org.luckypray.dexkit.query.FindMethod.create().matcher(
+                                    org.luckypray.dexkit.query.matchers.MethodMatcher.create()
+                                            .usingStrings("/disable_presence_reporting")));
+            XC_MethodHook gateHook = new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) {
+                    if (FeatureFlags.spoofLastSeen) param.setResult(Boolean.TRUE);
+                }
+            };
+            int n = 0;
+            for (org.luckypray.dexkit.result.MethodData createMqtt : found) {
+                for (org.luckypray.dexkit.result.MethodData inv : createMqtt.getInvokes()) {
+                    Method gate;
+                    try {
+                        gate = inv.getMethodInstance(classLoader);
+                    } catch (Throwable t) {
+                        continue;
+                    }
+                    Class<?>[] pt = gate.getParameterTypes();
+                    if (!java.lang.reflect.Modifier.isStatic(gate.getModifiers())) continue;
+                    if (gate.getReturnType() != boolean.class) continue;
+                    if (pt.length != 1
+                            || !pt[0].getName().equals("com.instagram.common.session.UserSession")) continue;
+                    XposedBridge.hookMethod(gate, gateHook);
+                    n++;
+                }
+            }
+            if (n > 0) FeatureStatusTracker.setHooked("SpoofLastSeen");
+            ModuleLog.line("(InstaEclipse | Interceptor): presence-reporting gate hooks: " + n);
+        } catch (Throwable t) {
+            ModuleLog.line("(InstaEclipse | Interceptor): ⚠️ presence-reporting hook: " + t.getMessage());
+        }
+    }
+
     public void handleInterceptor(XC_LoadPackage.LoadPackageParam lpparam) {
         try {
             ClassLoader classLoader = lpparam.classLoader;
+
+            // Freeze "last seen" (the live "active now" green dot). Modern IG no longer reports
+            // presence over HTTP (the /push/setForegroundState/ endpoint is gone), so the URL drops
+            // below can't stop it — presence now rides the realtime MQTT connection. Make IG add its
+            // OWN "/disable_presence_reporting" subscription instead. See hookPresenceReporting.
+            hookPresenceReporting(classLoader);
 
             // Locate the TigonServiceLayer class dynamically
             Class<?> tigonClass = classLoader.loadClass("com.instagram.api.tigon.TigonServiceLayer");
