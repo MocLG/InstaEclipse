@@ -25,28 +25,51 @@ public final class PatchInstaller {
     private PatchInstaller() {
     }
 
+    /** Turns the internal work name ("0_base-patched.apk") into something readable ("base.apk"). */
+    private static String friendlyName(String name) {
+        if (name == null) return "Instagram";
+        String n = name.replaceFirst("^\\d+_", "");
+        n = n.replace("-patched.apk", ".apk").replace("-signed.apk", ".apk");
+        return n;
+    }
+
     public static void install(Context ctx, List<File> apks, PatchLogger log) throws IOException {
         if (apks == null || apks.isEmpty()) throw new IOException("Nothing to install");
         PackageInstaller installer = ctx.getPackageManager().getPackageInstaller();
         PackageInstaller.SessionParams params =
                 new PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL);
 
+        // Total bytes across the set, so the determinate bar is weighted by size: the ~285 MB base
+        // dominates and the bar moves smoothly through it instead of freezing on a single step.
+        long total = 0;
+        for (File apk : apks) total += Math.max(0, apk.length());
+        if (total <= 0) total = 1;
+
         int sessionId = installer.createSession(params);
         PackageInstaller.Session session = installer.openSession(sessionId);
         try {
             byte[] buffer = new byte[65536];
-            int staged = 0;
+            long written = 0;
+            int lastPct = -1;
             for (File apk : apks) {
-                log.log("Staging " + apk.getName());
+                log.log("Installing " + friendlyName(apk.getName()));
                 try (InputStream in = new FileInputStream(apk);
                      OutputStream out = session.openWrite(apk.getName(), 0, apk.length())) {
                     int read;
-                    while ((read = in.read(buffer)) != -1) out.write(buffer, 0, read);
+                    while ((read = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, read);
+                        written += read;
+                        // Byte-weighted staging fills the 70..90 band; throttle UI to whole percents
+                        // so a 285 MB write doesn't post thousands of updates to the main thread.
+                        int pct = 70 + (int) (20L * written / total);
+                        if (pct != lastPct) {
+                            lastPct = pct;
+                            log.progress(pct);
+                            try { session.setStagingProgress((float) written / total); } catch (Throwable ignored) {}
+                        }
+                    }
                     session.fsync(out);
                 }
-                staged++;
-                // Staging spans the 72..90 band across every APK in the set.
-                log.progress(72 + (int) Math.round(18.0 * staged / apks.size()));
             }
 
             Intent intent = new Intent(ctx, PatchInstallReceiver.class).setAction(ACTION_STATUS);
