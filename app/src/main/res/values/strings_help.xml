@@ -56,7 +56,7 @@
     <string name="patch_links_enabling">Enabling Instagram links…</string>
     <string name="patch_links_enabled">Instagram links enabled</string>
     <string name="shizuku_prompt_title">Enable links in one tap</string>
-    <string name="shizuku_prompt_msg">With Shizuku running, InstaEclipse can turn on all of Instagram\'s supported web addresses at once — no manual toggling, and it sticks after every re-patch. Start Shizuku, then tap this again. Without it, you can set them manually in system settings.</string>
+    <string name="shizuku_prompt_msg">With Shizuku running, InstaEclipse can turn on all of Instagram\'s supported web addresses at once, with no manual toggling, and it sticks after every re-patch. Start Shizuku, then tap this again. Without it, you can set them manually in system settings.</string>
     <string name="shizuku_open">Open Shizuku</string>
     <string name="shizuku_get">Get Shizuku</string>
     <string name="link_set_manually">Set manually</string>
