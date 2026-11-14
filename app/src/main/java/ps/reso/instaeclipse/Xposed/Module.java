@@ -847,6 +847,13 @@ public class Module {
                         ModuleLog.line("(InstaEclipse | CallConfirm): ❌ Failed to hook");
                     }
 
+                    // Block incoming calls (4 modes: everyone/nobody/only list/except list)
+                    try {
+                        if (!skip("CallBlockerHook")) ps.reso.instaeclipse.mods.ghost.CallBlockerHook.install(dexKitBridge, hostClassLoader);
+                    } catch (Throwable ignored) {
+                        ModuleLog.line("(InstaEclipse | CallBlocker): ❌ Failed to hook");
+                    }
+
                     // Don't save searches (#280)
                     try {
                         if (!skip("SearchHistoryHook")) ps.reso.instaeclipse.mods.ghost.SearchHistoryHook.install(dexKitBridge, hostClassLoader);

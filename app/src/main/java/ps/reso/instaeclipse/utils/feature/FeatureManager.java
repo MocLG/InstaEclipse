@@ -341,6 +341,7 @@ public class FeatureManager {
         reg(FeatureFlags.feedCornerRadius > 0, "RoundedFeedPosts",     R.string.ig_feed_corner_radius);
         reg(FeatureFlags.disableSearchHistory, "DisableSearchHistory", R.string.ig_disable_search_history);
         reg(FeatureFlags.confirmCalls,         "ConfirmCalls",         R.string.ig_call_confirm);
+        reg(FeatureFlags.callBlockMode != 0,   "CallBlocker",          R.string.ig_call_block_title);
         reg(FeatureFlags.enableDmMediaDownload, "DmMediaDownload",     R.string.ig_dialog_downloader_dm_media);
         reg(FeatureFlags.maxUploadQuality,     "MaxUploadQuality",     R.string.ig_feat_max_upload_quality);
         reg(FeatureFlags.enableCaptionCopy,    "CaptionCopy",          R.string.ig_caption_copy_title);
