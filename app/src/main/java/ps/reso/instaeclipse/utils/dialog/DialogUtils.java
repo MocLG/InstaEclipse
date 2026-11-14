@@ -197,7 +197,7 @@ public class DialogUtils {
         mainLayout.addView(sectionHeader(context, I18n.t(context, R.string.feat_group_social)));
         LinearLayout social = createGroupCard(context);
         social.addView(createMenuRow(context, R.drawable.ic_heart, I18n.t(context, R.string.menu_likes_comments), A_SOCIAL, () -> showLikesCommentsOptions(context), onCount(context, "disableDoubleTapLike", "likeUndo", "confirmLikes", "enableCopyComment", "commentSearch", "enableCaptionCopy", "disableRepost")));
-        social.addView(createMenuRow(context, R.drawable.ic_eye, I18n.t(context, R.string.menu_profiles), A_SOCIAL, () -> showProfilesOptions(context), onCount(context, "profileMenuTools", "postCountSpoof", "profileSpoofer", "profileAnalyzer", "confirmFollows", "profileFollowsYouLabel", "fancyBioFont", "showFollowerToast", "followListExport", "followersHistory", "savedOnProfile", "hideThreadsButton")));
+        social.addView(createMenuRow(context, R.drawable.ic_eye, I18n.t(context, R.string.menu_profiles), A_SOCIAL, () -> showProfilesOptions(context), onCount(context, "profileMenuTools", "postCountSpoof", "profileSpoofer", "profileAnalyzer", "confirmFollows", "profileFollowsYouLabel", "fancyBioFont", "showFollowerToast", "followListExport", "followersHistory", "savedOnProfile", "hideThreadsButton", "hideProfileHighlights", "hideProfileSong", "hideProfileBioLinks", "hideProfileInterests", "hideProfileBanners")));
         mainLayout.addView(social);
 
         // ---- TOOLS ---- app & account, developer, backup, restart, cache, about
@@ -1905,7 +1905,12 @@ public class DialogUtils {
                 flagSwitch(context, R.drawable.ic_notification, A_SOCIAL, R.string.ig_dialog_misc_show_follower_toast, "showFollowerToast"),
                 flagSwitch(context, R.drawable.ic_download, A_SOCIAL, R.string.ig_dialog_misc_follow_export, "followListExport"),
                 flagSwitch(context, R.drawable.ic_eye, A_SOCIAL, R.string.ig_feat_followers_history, "followersHistory"),
-                flagSwitch(context, R.drawable.ic_save, A_SOCIAL, R.string.ig_saved_on_profile, "savedOnProfile")));
+                flagSwitch(context, R.drawable.ic_save, A_SOCIAL, R.string.ig_saved_on_profile, "savedOnProfile"),
+                flagSwitch(context, R.drawable.ic_story_ring, A_SOCIAL, R.string.ig_dialog_hide_profile_highlights, "hideProfileHighlights"),
+                flagSwitch(context, R.drawable.ic_sparkle, A_SOCIAL, R.string.ig_dialog_hide_profile_song, "hideProfileSong"),
+                flagSwitch(context, R.drawable.ic_link, A_SOCIAL, R.string.ig_dialog_hide_profile_bio_links, "hideProfileBioLinks"),
+                flagSwitch(context, R.drawable.ic_sparkle, A_SOCIAL, R.string.ig_dialog_hide_profile_interests, "hideProfileInterests"),
+                flagSwitch(context, R.drawable.ic_block, A_SOCIAL, R.string.ig_dialog_hide_profile_banners, "hideProfileBanners")));
         showSectionDialog(context, I18n.t(context, R.string.menu_profiles), layout, () -> {});
     }
 
