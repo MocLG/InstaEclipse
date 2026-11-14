@@ -57,12 +57,12 @@
 
     <!-- faq -->
     <string name="frequently_asked_questions">Frequently Asked Questions</string>
-    <string name="faq_1"><b>1. Not working/crashes when using Google Play Version?</b>\n- Use APKMirror APKs</string>
-    <string name="faq_2"><b>2. Module not enabled?</b>\n- Disable and re-enable the module in Vector.</string>
-    <string name="faq_3"><b>3. Features not working?</b>\n- Force stop and restart Instagram.</string>
-    <string name="faq_4"><b>4. Developer options cause crashes?</b>\n- Follow the developer options guide.</string>
-    <string name="faq_5"><b>5. Developer options have weird labels or numbers?</b>\n- Use Beta or Alpha versions as Stable versions have obfuscation.</string>
-    <string name="faq_6"><b>6. Distraction Free enabled but content still appears?</b>\n- Force stop Instagram and clear its cache.</string>
+    <string name="faq_1"><b>1. Crashes or won\'t open after a Play Store update?</b>\n- Install Instagram from APKMirror instead of the Play Store.</string>
+    <string name="faq_2"><b>2. Module not loading?</b>\n- Turn InstaEclipse off and on again in Vector, then restart Instagram.</string>
+    <string name="faq_3"><b>3. A feature stopped working?</b>\n- Force stop Instagram and open it again.</string>
+    <string name="faq_4"><b>4. Developer Options crash Instagram?</b>\n- Follow the Developer Options guide in this Help tab.</string>
+    <string name="faq_5"><b>5. Developer Options show odd labels or numbers?</b>\n- Use a Beta or Alpha build. Stable builds are obfuscated.</string>
+    <string name="faq_6"><b>6. Distraction Free is on but content still shows?</b>\n- Force stop Instagram, then clear its cache.</string>
 
     <!-- guide -->
     <string name="module_not_working_title">Module still isn\'t working?</string>
