@@ -33,13 +33,17 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import ps.reso.instaeclipse.R;
+import ps.reso.instaeclipse.utils.core.CommonUtils;
+import ps.reso.instaeclipse.utils.core.ExportBrand;
 import ps.reso.instaeclipse.utils.log.ModuleLog;
 import ps.reso.instaeclipse.utils.toast.IeToast;
 
 /**
  * No-root patcher screen. The user picks their Instagram APK(s), the pipeline patches and re-signs
  * them keeping Instagram's original signature, and the system installer is fired on success. All
- * heavy work runs off the UI thread; failures are shown, never crash the app.
+ * heavy work runs off the UI thread; failures are shown, never crash the app. The determinate
+ * progress bar tracks the pipeline, and the final install result (delivered asynchronously by the
+ * system) flips the screen into an "installed" state with an Open Instagram shortcut.
  */
 public class PatchInstagramActivity extends AppCompatActivity {
 
@@ -48,15 +52,26 @@ public class PatchInstagramActivity extends AppCompatActivity {
 
     private TextView logView;
     private TextView selectionView;
+    private TextView stepView;
+    private TextView percentView;
     private MaterialButton runButton;
     private MaterialButton chooseButton;
+    private MaterialButton getApkButton;
+    private MaterialButton openButton;
+    private View progressRow;
+    private View successCard;
     private LinearProgressIndicator progress;
 
     private final List<Uri> chosen = new ArrayList<>();
     private boolean busy;
+    /** True between committing the install session and the system reporting its result. */
+    private boolean awaitingInstall;
 
     private final ActivityResultLauncher<String[]> picker =
             registerForActivityResult(new ActivityResultContracts.OpenMultipleDocuments(), this::onPicked);
+
+    private final PatchInstallReceiver.StatusCallback installStatus = (success, message) ->
+            main.post(() -> onInstallFinished(success, message));
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,8 +83,14 @@ public class PatchInstagramActivity extends AppCompatActivity {
 
         logView = findViewById(R.id.patch_log);
         selectionView = findViewById(R.id.patch_selection);
+        stepView = findViewById(R.id.patch_step);
+        percentView = findViewById(R.id.patch_percent);
         runButton = findViewById(R.id.patch_run_button);
         chooseButton = findViewById(R.id.patch_choose_button);
+        getApkButton = findViewById(R.id.patch_get_apk_button);
+        openButton = findViewById(R.id.patch_open_button);
+        progressRow = findViewById(R.id.patch_progress_row);
+        successCard = findViewById(R.id.patch_success_card);
         progress = findViewById(R.id.patch_progress);
 
         chooseButton.setOnClickListener(v -> {
@@ -78,6 +99,16 @@ public class PatchInstagramActivity extends AppCompatActivity {
         runButton.setOnClickListener(v -> {
             if (!busy) start();
         });
+        getApkButton.setOnClickListener(v -> {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(ExportBrand.TESTED_INSTAGRAM_APK)));
+            } catch (Throwable t) {
+                IeToast.makeText(this, getString(R.string.patch_failed, String.valueOf(t)), Toast.LENGTH_SHORT).show();
+            }
+        });
+        openButton.setOnClickListener(v -> openInstagram());
+
+        PatchInstallReceiver.setCallback(installStatus);
     }
 
     private void onPicked(@NonNull List<Uri> uris) {
@@ -88,6 +119,9 @@ public class PatchInstagramActivity extends AppCompatActivity {
             runButton.setEnabled(false);
             return;
         }
+        // A fresh pick clears any previous "installed" state so the user can patch again.
+        successCard.setVisibility(View.GONE);
+        runButton.setText(R.string.patch_run);
         StringBuilder names = new StringBuilder();
         for (Uri uri : chosen) {
             if (names.length() > 0) names.append(", ");
@@ -103,9 +137,14 @@ public class PatchInstagramActivity extends AppCompatActivity {
             return;
         }
         busy = true;
+        awaitingInstall = false;
         runButton.setEnabled(false);
         chooseButton.setEnabled(false);
+        getApkButton.setEnabled(false);
+        successCard.setVisibility(View.GONE);
+        progressRow.setVisibility(View.VISIBLE);
         progress.setVisibility(View.VISIBLE);
+        updateProgress(0);
         logView.setText("");
         final List<Uri> inputs = new ArrayList<>(chosen);
 
@@ -116,30 +155,94 @@ public class PatchInstagramActivity extends AppCompatActivity {
                 if (!work.mkdirs() && !work.isDirectory()) throw new Exception("Cannot create work folder");
 
                 log(getString(R.string.patch_step_copy));
+                uiLogger.progress(3);
                 List<File> apks = materialize(inputs, work);
                 if (apks.isEmpty()) throw new Exception(getString(R.string.patch_err_no_apk));
+                uiLogger.progress(8);
 
-                List<File> patched = ApkPatcher.patch(this, apks, this::log);
+                List<File> patched = ApkPatcher.patch(this, apks, uiLogger);
                 log(getString(R.string.patch_step_install));
-                PatchInstaller.install(this, patched, this::log);
+                PatchInstaller.install(this, patched, uiLogger);
+                // The session is committed; the real result arrives later via installStatus.
                 log(getString(R.string.patch_step_done));
+                awaitingInstall = true;
+                main.post(() -> stepView.setText(R.string.patch_step_waiting));
             } catch (Throwable t) {
                 ModuleLog.line("(IE|Patch) failed", t);
                 String reason = t.getMessage() != null ? t.getMessage() : t.toString();
                 log(getString(R.string.patch_failed, reason));
-                main.post(() -> IeToast.makeText(this,
-                        getString(R.string.patch_failed, reason), Toast.LENGTH_LONG).show());
+                main.post(() -> {
+                    stepView.setText(R.string.patch_state_failed);
+                    IeToast.makeText(this, getString(R.string.patch_failed, reason), Toast.LENGTH_LONG).show();
+                });
             } finally {
                 ApkPatcher.deleteRecursively(work);
                 main.post(() -> {
-                    busy = false;
-                    progress.setVisibility(View.GONE);
-                    chooseButton.setEnabled(true);
-                    runButton.setEnabled(true);
+                    // When waiting on the installer, keep the UI locked until the result lands.
+                    if (!awaitingInstall) {
+                        busy = false;
+                        progressRow.setVisibility(View.GONE);
+                        progress.setVisibility(View.GONE);
+                        chooseButton.setEnabled(true);
+                        getApkButton.setEnabled(true);
+                        runButton.setEnabled(true);
+                    }
                 });
             }
         });
     }
+
+    /** Called on the main thread when the system reports the install result. */
+    private void onInstallFinished(boolean success, String message) {
+        awaitingInstall = false;
+        busy = false;
+        chooseButton.setEnabled(true);
+        getApkButton.setEnabled(true);
+        if (success) {
+            updateProgress(100);
+            stepView.setText(R.string.patch_installed_title);
+            successCard.setVisibility(View.VISIBLE);
+            runButton.setText(R.string.patch_installed);
+            runButton.setEnabled(false);
+        } else {
+            progressRow.setVisibility(View.GONE);
+            progress.setVisibility(View.GONE);
+            runButton.setEnabled(true);
+            String reason = message == null ? "" : message;
+            log(getString(R.string.patch_install_failed, reason));
+        }
+    }
+
+    private void openInstagram() {
+        for (String pkg : CommonUtils.SUPPORTED_PACKAGES) {
+            Intent launch = getPackageManager().getLaunchIntentForPackage(pkg);
+            if (launch != null) {
+                startActivity(launch);
+                return;
+            }
+        }
+        IeToast.makeText(this, getString(R.string.not_installed_instagram), Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateProgress(int percent) {
+        int clamped = Math.max(0, Math.min(100, percent));
+        progress.setProgressCompat(clamped, true);
+        percentView.setText(getString(R.string.patch_percent, clamped));
+    }
+
+    /** Logger handed to the pipeline: appends a step line and advances the determinate bar. */
+    private final PatchLogger uiLogger = new PatchLogger() {
+        @Override
+        public void log(String line) {
+            PatchInstagramActivity.this.log(line);
+            main.post(() -> stepView.setText(line));
+        }
+
+        @Override
+        public void progress(int percent) {
+            main.post(() -> updateProgress(percent));
+        }
+    };
 
     /**
      * Copies each picked document to a cache file. A bundle (.apkm/.apks/.xapk, i.e. a zip whose
@@ -243,6 +346,7 @@ public class PatchInstagramActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        PatchInstallReceiver.clearCallback(installStatus);
         worker.shutdownNow();
     }
 }

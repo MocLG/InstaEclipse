@@ -13,6 +13,26 @@ import ps.reso.instaeclipse.utils.toast.IeToast;
 /** Handles {@link PackageInstaller} session status for the patched Instagram install. */
 public class PatchInstallReceiver extends BroadcastReceiver {
 
+    /** The patch screen listens here (while alive) so it can show the installed/failed state. */
+    public interface StatusCallback {
+        void onInstallStatus(boolean success, String message);
+    }
+
+    private static volatile StatusCallback callback;
+
+    public static void setCallback(StatusCallback cb) {
+        callback = cb;
+    }
+
+    public static void clearCallback(StatusCallback cb) {
+        if (callback == cb) callback = null;
+    }
+
+    private static void dispatch(boolean success, String message) {
+        StatusCallback cb = callback;
+        if (cb != null) cb.onInstallStatus(success, message);
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         int status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
@@ -33,12 +53,14 @@ public class PatchInstallReceiver extends BroadcastReceiver {
             case PackageInstaller.STATUS_SUCCESS:
                 ModuleLog.line("(IE|Patch) install succeeded");
                 IeToast.makeText(context, context.getString(R.string.patch_install_success), Toast.LENGTH_LONG).show();
+                dispatch(true, null);
                 break;
             default:
                 ModuleLog.line("(IE|Patch) install failed: " + status + " " + message);
                 IeToast.makeText(context,
                         context.getString(R.string.patch_install_failed, message == null ? "" : message),
                         Toast.LENGTH_LONG).show();
+                dispatch(false, message);
                 break;
         }
     }

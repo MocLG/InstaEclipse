@@ -35,6 +35,7 @@ public final class PatchInstaller {
         PackageInstaller.Session session = installer.openSession(sessionId);
         try {
             byte[] buffer = new byte[65536];
+            int staged = 0;
             for (File apk : apks) {
                 log.log("Staging " + apk.getName());
                 try (InputStream in = new FileInputStream(apk);
@@ -43,6 +44,9 @@ public final class PatchInstaller {
                     while ((read = in.read(buffer)) != -1) out.write(buffer, 0, read);
                     session.fsync(out);
                 }
+                staged++;
+                // Staging spans the 72..90 band across every APK in the set.
+                log.progress(72 + (int) Math.round(18.0 * staged / apks.size()));
             }
 
             Intent intent = new Intent(ctx, PatchInstallReceiver.class).setAction(ACTION_STATUS);
@@ -51,6 +55,7 @@ public final class PatchInstaller {
             PendingIntent pending = PendingIntent.getBroadcast(ctx.getApplicationContext(), sessionId, intent, flags);
 
             log.log("Opening the system installer");
+            log.progress(92);
             session.commit(pending.getIntentSender());
         } catch (IOException e) {
             session.abandon();

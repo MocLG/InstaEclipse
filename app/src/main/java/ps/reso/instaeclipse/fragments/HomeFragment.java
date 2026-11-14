@@ -200,7 +200,7 @@ public class HomeFragment extends Fragment {
 
         launchInstagramButton = view.findViewById(R.id.launch_instagram_button);
         restartInstagramButton = view.findViewById(R.id.restart_instagram_button);
-        MaterialButton downloadButton = view.findViewById(R.id.download_instagram_button);
+        MaterialButton patchButton = view.findViewById(R.id.patch_instagram_button);
 
         instagramStatusCard = view.findViewById(R.id.instagram_status_card);
         instagramStatusText = view.findViewById(R.id.instagram_status_text);
@@ -232,10 +232,8 @@ public class HomeFragment extends Fragment {
         checkInstagramStatus();
 
         restartInstagramButton.setOnClickListener(v -> restartInstagram());
-        downloadButton.setOnClickListener(v -> {
-            String url = ps.reso.instaeclipse.utils.core.ExportBrand.TESTED_INSTAGRAM_APK;
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-        });
+        patchButton.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), ps.reso.instaeclipse.patcher.PatchInstagramActivity.class)));
         view.findViewById(R.id.home_shortcuts_edit).setOnClickListener(v -> showEditShortcutsDialog());
 
         setupContributorsAndSpecialThanks(view);

@@ -39,4 +39,18 @@
     <string name="patch_step_install">Starting the installer</string>
     <string name="patch_step_done">Done. Confirm the install when prompted.</string>
     <string name="patch_err_no_apk">No APK found in the selection.</string>
+
+    <!-- Get-APK shortcut moved into the patcher. -->
+    <string name="patch_get_apk">Get Instagram APK</string>
+    <string name="patch_get_apk_hint">Don\'t have the APK? Download the tested version, then pick it above.</string>
+
+    <!-- Determinate progress + terminal states. -->
+    <string name="patch_percent">%1$d%%</string>
+    <string name="patch_status_idle">Idle</string>
+    <string name="patch_step_waiting">Waiting for you to confirm the install…</string>
+    <string name="patch_installed_title">Instagram patched &amp; installed</string>
+    <string name="patch_installed_sub">InstaEclipse loads the next time Instagram starts.</string>
+    <string name="patch_open_instagram">Open Instagram</string>
+    <string name="patch_installed">Installed</string>
+    <string name="patch_state_failed">Patch failed — check the steps below.</string>
 </resources>

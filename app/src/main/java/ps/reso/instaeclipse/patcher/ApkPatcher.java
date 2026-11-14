@@ -82,16 +82,23 @@ public final class ApkPatcher {
         if (!workDir.mkdirs() && !workDir.isDirectory()) throw new IOException("Cannot create work folder");
 
         File base = pickBase(inputs);
+        int splitCount = Math.max(0, inputs.size() - 1);
+        int splitsDone = 0;
         List<File> outputs = new ArrayList<>();
         for (File input : inputs) {
             if (input.equals(base)) {
                 log.log("Patching base: " + input.getName());
+                log.progress(10);
                 outputs.add(patchBase(ctx, input, new File(workDir, outName(input, "patched")), log));
             } else {
                 log.log("Re-signing split: " + input.getName());
                 outputs.add(resign(ctx, input, new File(workDir, outName(input, "signed"))));
+                splitsDone++;
+                // Splits re-sign across the 60..70 band, proportional to how many are done.
+                log.progress(60 + (int) Math.round(10.0 * splitsDone / Math.max(1, splitCount)));
             }
         }
+        log.progress(70);
         return outputs;
     }
 
@@ -100,18 +107,26 @@ public final class ApkPatcher {
     private static File patchBase(Context ctx, File input, File output, PatchLogger log) throws Exception {
         // original signing certificate, hex, before touching anything.
         log.log("Reading the original Instagram signature");
+        log.progress(14);
         String originalSignature = SignatureReader.originalCertHex(input);
         if (originalSignature == null) {
             throw new IOException("Could not read the original Instagram signature from " + input.getName());
         }
 
-        String config = buildConfig(originalSignature);
+        // IG sets its own appComponentFactory (Ig4aAppComponentFactory) that installs IG's custom
+        // class loader; the loader must restore THAT, not a hardcoded default, or IG's classes verify
+        // without the framework on the path (VerifyError: unresolved android.* references).
+        String appComponentFactory = readAppComponentFactory(ctx, input);
+        log.log("Original appComponentFactory: " + appComponentFactory);
+        log.progress(18);
+        String config = buildConfig(originalSignature, appComponentFactory);
         byte[] configBytes = config.getBytes(StandardCharsets.UTF_8);
 
         // output ZFile with the LSPatch alignment rules.
         ZFileOptions options = new ZFileOptions();
         options.setAlignmentRule(AlignmentRules.compose(
                 AlignmentRules.constantForSuffix(".so", 16384),
+                AlignmentRules.constantForSuffix("resources.arsc", 4),
                 AlignmentRules.constantForSuffix(ORIGIN_APK, 4096)));
 
         if (output.exists() && !output.delete()) throw new IOException("Cannot overwrite " + output.getName());
@@ -122,10 +137,12 @@ public final class ApkPatcher {
 
             // embed the original APK as a nested, stored zip.
             log.log("Embedding the original APK");
+            log.progress(24);
             NestedZip src = dst.addNestedZip(zf -> ORIGIN_APK, input, false);
 
             // patch the original manifest, write it as the output manifest.
             log.log("Patching the manifest");
+            log.progress(30);
             StoredEntry manifestEntry = src.get(MANIFEST);
             if (manifestEntry == null) throw new IOException("The APK has no AndroidManifest.xml");
             byte[] patchedManifest = patchManifest(manifestEntry.read(), configBytes);
@@ -136,6 +153,7 @@ public final class ApkPatcher {
 
             // the loader dex.
             log.log("Adding the loader");
+            log.progress(36);
             addAsset(ctx, dst, LOADER_DEX, SRC + "dexes/loader.dex");
 
             // native libraries, stored and aligned.
@@ -146,6 +164,7 @@ public final class ApkPatcher {
 
             // embed the module (this app's own installed APK).
             log.log("Embedding the module");
+            log.progress(44);
             File self = new File(ctx.getApplicationInfo().sourceDir);
             try (InputStream in = new FileInputStream(self)) {
                 dst.add(MODULES_DIR + ctx.getPackageName() + ".apk", in);
@@ -153,6 +172,7 @@ public final class ApkPatcher {
 
             // link every remaining entry from the original APK.
             log.log("Linking remaining files");
+            log.progress(52);
             for (StoredEntry entry : src.entries()) {
                 String name = entry.getCentralDirectoryHeader().getName();
                 if (MANIFEST.equals(name)) continue;
@@ -168,8 +188,10 @@ public final class ApkPatcher {
             // realign; closing the ZFile writes and signs the output.
             dst.realign();
             log.log("Signing");
+            log.progress(58);
         }
         log.log("Base ready: " + output.getName());
+        log.progress(60);
         return output;
     }
 
@@ -177,7 +199,11 @@ public final class ApkPatcher {
 
     private static File resign(Context ctx, File input, File output) throws Exception {
         ZFileOptions options = new ZFileOptions();
-        options.setAlignmentRule(AlignmentRules.constantForSuffix(".so", 16384));
+        // R+ requires resources.arsc stored uncompressed and 4-byte aligned; keep it aligned when
+        // the split is re-packed, or the installer rejects it (-124).
+        options.setAlignmentRule(AlignmentRules.compose(
+                AlignmentRules.constantForSuffix(".so", 16384),
+                AlignmentRules.constantForSuffix("resources.arsc", 4)));
         if (output.exists() && !output.delete()) throw new IOException("Cannot overwrite " + output.getName());
         try (ZFile dst = ZFile.openReadWrite(output, options)) {
             registerSigning(ctx, dst);
@@ -255,7 +281,22 @@ public final class ApkPatcher {
 
     // ---- config -------------------------------------------------------------------------------
 
-    private static String buildConfig(String originalSignature) throws Exception {
+    /** The original app's appComponentFactory (read from its manifest), or the AndroidX default. */
+    private static String readAppComponentFactory(Context ctx, File apk) {
+        try {
+            android.content.pm.PackageInfo pi =
+                    ctx.getPackageManager().getPackageArchiveInfo(apk.getAbsolutePath(), 0);
+            if (pi != null && pi.applicationInfo != null
+                    && pi.applicationInfo.appComponentFactory != null
+                    && !pi.applicationInfo.appComponentFactory.isEmpty()) {
+                return pi.applicationInfo.appComponentFactory;
+            }
+        } catch (Throwable ignored) {
+        }
+        return ORIGINAL_APP_COMPONENT_FACTORY;
+    }
+
+    private static String buildConfig(String originalSignature, String appComponentFactory) throws Exception {
         JSONObject lsp = new JSONObject();
         lsp.put("API_CODE", 93);
         lsp.put("VERSION_CODE", 430);
@@ -269,7 +310,7 @@ public final class ApkPatcher {
         config.put("overrideVersionCode", false);
         config.put("sigBypassLevel", 2);
         config.put("originalSignature", originalSignature);
-        config.put("appComponentFactory", ORIGINAL_APP_COMPONENT_FACTORY);
+        config.put("appComponentFactory", appComponentFactory);
         config.put("lspConfig", lsp);
         return config.toString();
     }
