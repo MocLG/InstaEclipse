@@ -70,8 +70,11 @@ public final class CallBlockerHook {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) { ps.reso.instaeclipse.utils.core.JitGuard.tick(param.method);
                     try {
-                        if (FeatureFlags.callBlockMode == 0) return;
+                        // drop() handles both the global mode and the per-chat list, so don't bail on
+                        // mode==0 here (that would skip per-chat blocks while the global mode is off).
                         if (param.args == null || call >= param.args.length) return;
+                        // drop() handles both the global mode and the per-chat list, so don't bail on
+                        // mode==0 here (that would skip per-chat blocks while the global mode is off).
                         if (CallBlocker.drop(param.args[call])) {
                             param.setResult(null); // void: the call never rings
                             ModuleLog.line(TAG + "blocked an incoming call");

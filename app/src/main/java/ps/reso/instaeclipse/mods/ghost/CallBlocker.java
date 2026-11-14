@@ -34,9 +34,8 @@ public final class CallBlocker {
     /** How a ringing call's text starts; the class name that says it's a call at all. */
     private static final String RINGING = "RtcCallConnectionEntity(state=Incoming,";
 
-    private static final String CALLER_ID   = ", callerId=";
-    private static final String CALLER_NAME = ", callerName=";
-    private static final String AFTER_NAME  = ", displayUri=";
+    /** Matches the start of the next ", field=" pair in the data-class toString. */
+    private static final java.util.regex.Pattern NEXT_FIELD = java.util.regex.Pattern.compile(", [A-Za-z0-9]+=");
 
     private CallBlocker() {}
 
@@ -64,10 +63,10 @@ public final class CallBlocker {
 
     /** Whether this ringing call's caller (name or id) is in {@code list}. */
     static boolean matchesCaller(String text, List<String> list) {
-        String rawName = between(text, CALLER_NAME, AFTER_NAME);
-        String name = rawName == null ? null : rawName.toLowerCase(Locale.ROOT);
-        String id = between(text, CALLER_ID, ", ");
-        return (name != null && list.contains(name)) || (id != null && list.contains(id));
+        String name = field(text, "callerName");
+        String id = field(text, "callerId");
+        return (name != null && list.contains(name.toLowerCase(Locale.ROOT)))
+                || (id != null && list.contains(id.toLowerCase(Locale.ROOT)));
     }
 
     // ---- Per-chat block list (thread menu) ---------------------------------------------------
@@ -94,23 +93,27 @@ public final class CallBlocker {
     /** Whether a ringing call with this text stays quiet. A caller the list can't be checked against rings. */
     static boolean drops(int mode, String text, List<String> list) {
         if (mode == NOBODY) return true;
-        String rawName = between(text, CALLER_NAME, AFTER_NAME);
-        String name = rawName == null ? null : rawName.toLowerCase(Locale.ROOT);
-        String id = between(text, CALLER_ID, ", ");
-        boolean known = name != null || id != null;
-        if (!known) return false; // caller unreadable → let it ring
-        boolean listed = (name != null && list.contains(name)) || (id != null && list.contains(id));
+        String name = field(text, "callerName");
+        String id = field(text, "callerId");
+        if (name == null && id == null) return false; // caller unreadable → let it ring
+        boolean listed = (name != null && list.contains(name.toLowerCase(Locale.ROOT)))
+                || (id != null && list.contains(id.toLowerCase(Locale.ROOT)));
         return mode == ONLY_LIST ? !listed : listed;
     }
 
-    /** What sits between two markers in {@code text}, or null when there's nothing there or it says null. */
-    static String between(String text, String start, String end) {
-        int from = text.indexOf(start);
+    /**
+     * Value of {@code <key>=} in the call's data-class toString, read up to the next ", field="
+     * boundary (values like callerName can be followed by other fields such as callTarget, so a fixed
+     * end-marker is wrong). Null when absent, empty, or literally "null".
+     */
+    static String field(String text, String key) {
+        String marker = ", " + key + "=";
+        int from = text.indexOf(marker);
         if (from < 0) return null;
-        from += start.length();
-        int to = text.indexOf(end, from);
-        if (to <= from) return null;
-        String value = text.substring(from, to).trim();
+        from += marker.length();
+        java.util.regex.Matcher m = NEXT_FIELD.matcher(text);
+        int to = m.find(from) ? m.start() : text.length();
+        String value = text.substring(from, Math.max(from, to)).trim();
         return value.isEmpty() || "null".equals(value) ? null : value;
     }
 
