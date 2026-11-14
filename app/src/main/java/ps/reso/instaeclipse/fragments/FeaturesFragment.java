@@ -2465,7 +2465,21 @@ public class FeaturesFragment extends Fragment {
     }
 
     private void restartInstagram() {
-        ps.reso.instaeclipse.utils.toast.IeToast.makeText(requireContext(), getString(R.string.ig_toast_restart_manual), Toast.LENGTH_LONG).show();
+        // Non-root restart: the module inside Instagram relaunches its host; no su / manual kill.
+        try {
+            ps.reso.instaeclipse.utils.core.CommonUtils.broadcastToInstagram(requireContext(),
+                    new Intent(ps.reso.instaeclipse.utils.core.CommonUtils.ACTION_RESTART));
+        } catch (Throwable ignored) { }
+        ps.reso.instaeclipse.utils.toast.IeToast.makeText(requireContext(), getString(R.string.home_restart_done), Toast.LENGTH_SHORT).show();
+        // Bring Instagram up in case it wasn't running.
+        try {
+            Intent launch = requireContext().getPackageManager().getLaunchIntentForPackage("com.instagram.android");
+            if (launch != null) {
+                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                new android.os.Handler(android.os.Looper.getMainLooper())
+                        .postDelayed(() -> { try { startActivity(launch); } catch (Throwable ignored) { } }, 1200);
+            }
+        } catch (Throwable ignored) { }
     }
 
     private void importDevConfig() {

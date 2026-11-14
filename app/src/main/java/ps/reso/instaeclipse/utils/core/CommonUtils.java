@@ -15,6 +15,7 @@ public class CommonUtils {
     public static final String ACTION_REQUEST_LOGS = "ps.reso.instaeclipse.ACTION_REQUEST_LOGS";
     public static final String ACTION_LOGS_REPLY = "ps.reso.instaeclipse.ACTION_LOGS_REPLY";
     public static final String ACTION_CLEAR_LOGS = "ps.reso.instaeclipse.ACTION_CLEAR_LOGS";
+    public static final String ACTION_RESTART = "ps.reso.instaeclipse.ACTION_RESTART";
     public static final String EXTRA_LOG_TEXT = "log_text";
     public static final String EXTRA_LOG_SOURCE = "source_package";
     public static final String EXTRA_LOG_ERROR = "error";

@@ -44,7 +44,6 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import ps.reso.instaeclipse.R;
 import ps.reso.instaeclipse.utils.core.CommonUtils;
@@ -464,9 +463,9 @@ public class HomeFragment extends Fragment {
     // =========================================================
 
     /**
-     * FeaturesFragment's "Restart App" only asks the user to kill Instagram manually. Here we
-     * first try a root force-stop + relaunch; without root we fall back to that same message and
-     * open Instagram's App info page, where the Force stop button lives.
+     * Restarts Instagram without root (like the no-root mods): asks the module running inside
+     * Instagram to relaunch its own host — the same self-restart the in-app overlay uses — then
+     * makes sure Instagram is up in case it wasn't running. No su / am force-stop.
      */
     private void restartInstagram() {
         final String pkg = activePackage;
@@ -474,37 +473,16 @@ public class HomeFragment extends Fragment {
             ps.reso.instaeclipse.utils.toast.IeToast.makeText(requireContext(), getString(R.string.not_installed_instagram), Toast.LENGTH_SHORT).show();
             return;
         }
-        restartInstagramButton.setEnabled(false);
-        new Thread(() -> {
-            boolean ok = false;
-            try {
-                Process p = Runtime.getRuntime().exec(new String[]{"su", "-c", "am force-stop " + pkg});
-                if (p.waitFor(15, TimeUnit.SECONDS)) {
-                    ok = p.exitValue() == 0;
-                } else {
-                    p.destroy();
-                }
-            } catch (Throwable ignored) { }
-            final boolean rooted = ok;
-            mainHandler.post(() -> {
-                if (!isAdded() || getView() == null) return;
-                restartInstagramButton.setEnabled(true);
-                if (rooted) {
-                    moduleConfirmed = false;
-                    updateStatusPill();
-                    ps.reso.instaeclipse.utils.toast.IeToast.makeText(requireContext(), getString(R.string.home_restart_done), Toast.LENGTH_SHORT).show();
-                    mainHandler.postDelayed(() -> launchPackage(pkg), 400);
-                } else {
-                    ps.reso.instaeclipse.utils.toast.IeToast.makeText(requireContext(), getString(R.string.ig_toast_restart_manual), Toast.LENGTH_LONG).show();
-                    try {
-                        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        intent.setData(Uri.parse("package:" + pkg));
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    } catch (Throwable ignored) { }
-                }
-            });
-        }, "ie-restart-ig").start();
+        try {
+            Intent b = new Intent(ps.reso.instaeclipse.utils.core.CommonUtils.ACTION_RESTART);
+            b.setPackage(pkg);
+            ps.reso.instaeclipse.utils.core.CommonUtils.broadcastToInstagram(requireContext(), b);
+        } catch (Throwable ignored) { }
+        moduleConfirmed = false;
+        updateStatusPill();
+        ps.reso.instaeclipse.utils.toast.IeToast.makeText(requireContext(), getString(R.string.home_restart_done), Toast.LENGTH_SHORT).show();
+        // If Instagram was running it restarts itself above; this also brings it up if it was closed.
+        mainHandler.postDelayed(() -> launchPackage(pkg), 1200);
     }
 
     // =========================================================

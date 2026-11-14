@@ -1162,6 +1162,24 @@ public class Module {
                     } catch (Exception e) {
                         ModuleLog.line("(InstaEclipse) Failed to create backup: " + e.getMessage());
                     }
+
+                } else if (CommonUtils.ACTION_RESTART.equals(action)) {
+                    // Non-root restart: the module relaunches its own host (Instagram) and exits,
+                    // so the manager's "Restart" works without root — the same self-restart the
+                    // in-app overlay uses. No su / am force-stop needed.
+                    ModuleLog.line("(InstaEclipse) Sync: restart requested — relaunching host");
+                    try {
+                        final Context app = ctx.getApplicationContext();
+                        Intent launch = app.getPackageManager().getLaunchIntentForPackage(app.getPackageName());
+                        if (launch != null) {
+                            launch.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            app.startActivity(launch);
+                            new android.os.Handler(android.os.Looper.getMainLooper())
+                                    .postDelayed(() -> Runtime.getRuntime().exit(0), 300);
+                        }
+                    } catch (Throwable t) {
+                        ModuleLog.line("(InstaEclipse) restart failed: " + t);
+                    }
                 }
             }
         };
@@ -1175,6 +1193,7 @@ public class Module {
         filter.addAction("ps.reso.instaeclipse.ACTION_REQUEST_PREFS");
         filter.addAction("ps.reso.instaeclipse.ACTION_EXPORT_CONFIG");
         filter.addAction("ps.reso.instaeclipse.ACTION_BACKUP_SETTINGS");
+        filter.addAction(CommonUtils.ACTION_RESTART);
 
         // Only the companion (holding the signature permission) can reach this receiver.
         ps.reso.instaeclipse.utils.core.IpcSecurity.registerCompanionOnlyReceiver(context, receiver, filter);
