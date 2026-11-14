@@ -25,6 +25,16 @@ import ps.reso.instaeclipse.utils.log.ModuleLog;
  */
 public class CacheAutoClear {
 
+    /**
+     * Data subdirs (under the app data dir, not getCacheDir()) that are pure telemetry/analytics and
+     * safe to wipe — IG regenerates them and nothing functional is lost. app_analytics alone is
+     * routinely the single biggest consumer (hundreds of MB), and the OS counts it as "data", not
+     * "cache", so it's invisible to the cache figure; we size and clear it explicitly.
+     */
+    private static final String[] JUNK_DATA_DIRS = {
+            "app_analytics", "app_errorreporting", "app_qpl", "app_call_stats_v2",
+            "app_file_poolreports", "app_file_poolcollector", "insta_crash_log", "crash_log"};
+
     private static volatile boolean installed = false;
     private static int startedActivities = 0;           // >0 = app in foreground
     private static long lastClear = 0;                  // throttle rapid background/foreground flips
@@ -74,7 +84,8 @@ public class CacheAutoClear {
                 long osCache = osCacheBytes(app);
                 long dirTotal = 0;
                 for (File t : targets) dirTotal += dirSize(t);
-                long measured = osCache > 0 ? osCache : dirTotal;
+                // Include the junk-data dirs (app_analytics etc.) the OS cache figure leaves out.
+                long measured = Math.max(osCache, dirTotal);
 
                 ModuleLog.line("(IE|CacheAutoClear) backgrounded — cache=" + (measured / (1024 * 1024))
                         + "MB (limit " + limitMb + "MB)");
@@ -109,7 +120,47 @@ public class CacheAutoClear {
                 }
             }
         } catch (Throwable ignored) {}
+        // Telemetry/analytics data dirs (app_analytics is the big one) under the app data dir.
+        File dataDir = dataDir(app);
+        if (dataDir != null) {
+            for (String name : JUNK_DATA_DIRS) addIfDir(out, new File(dataDir, name));
+        }
         return out.toArray(new File[0]);
+    }
+
+    /** The app's /data/data/<pkg> dir (parent of getCacheDir), for reaching data-side junk dirs. */
+    private static File dataDir(Context app) {
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N && app.getDataDir() != null) {
+                return app.getDataDir();
+            }
+        } catch (Throwable ignored) {}
+        File cache = app.getCacheDir();
+        return cache != null ? cache.getParentFile() : null;
+    }
+
+    /**
+     * Clear Instagram's media cache + telemetry/analytics junk now (manual "Clear now"), off the UI
+     * thread; {@code onDone} runs on the main thread when finished (e.g. to restart Instagram).
+     */
+    public static void clearNow(Context ctx, Runnable onDone) {
+        if (ctx == null) return;
+        final Context app = ctx.getApplicationContext();
+        new Thread(() -> {
+            try {
+                long freed = 0;
+                for (File t : cacheTargets(app)) { freed += dirSize(t); clearContents(t); }
+                ModuleLog.line("(IE|CacheAutoClear) ✅ manual clear freed ~" + (freed / (1024 * 1024)) + "MB");
+            } catch (Throwable t) {
+                ModuleLog.line("(IE|CacheAutoClear) ❌ manual clear: " + t);
+            } finally {
+                if (onDone != null) {
+                    try {
+                        new android.os.Handler(android.os.Looper.getMainLooper()).post(onDone);
+                    } catch (Throwable ignored) {}
+                }
+            }
+        }, "ie-cacheclear-now").start();
     }
 
     private static void addIfDir(java.util.Set<File> set, File d) {

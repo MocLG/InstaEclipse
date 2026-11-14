@@ -3221,6 +3221,8 @@ public class DialogUtils {
         LinearLayout card = card(context);
         card.addView(autoClear);
         card.addView(sizeRow);
+        card.addView(createActionRow(context, R.drawable.ic_delete, I18n.t(context, R.string.ig_dialog_clear_cache_now), "#FF453A", v ->
+                ps.reso.instaeclipse.utils.core.CacheAutoClear.clearNow(context, () -> restartApp(context))));
         layout.addView(card);
 
         showSectionDialog(context, I18n.t(context, R.string.ig_dialog_section_auto_clear_cache), layout, () -> {});

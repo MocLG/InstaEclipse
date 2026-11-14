@@ -358,7 +358,7 @@
     <string name="ig_dialog_auto_clear_cache">Auto-clear cache when large</string>
     <string name="ig_dialog_auto_clear_cache_size">Clear above: %1$d MB (tap to change)</string>
     <string name="ig_dialog_section_auto_clear_cache">Auto-Clear Cache</string>
-    <string name="ig_dialog_auto_clear_cache_desc">Clears Instagram\'s media cache when you leave the app, if it\'s over the chosen size. Only cache is cleared (Instagram rebuilds it) — your data, logins and downloads are never touched.</string>
+    <string name="ig_dialog_auto_clear_cache_desc">Clears Instagram\'s media cache and its analytics/telemetry junk (app_analytics — often the biggest storage hog) when you leave the app, if it\'s over the chosen size. Instagram regenerates all of it — your data, logins and downloads are never touched. Use Clear now to clear and restart immediately.</string>
     <string name="ig_dialog_misc_remove_meta_ai">Remove Meta AI</string>
     <string name="ig_dialog_misc_lock_dms">Lock DMs</string>
     <string name="ig_dialog_misc_lock_dms_set">Set / change code</string>
