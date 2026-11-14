@@ -47,7 +47,7 @@ public class ProfileDeclutterHook {
     private static int idMusic;
     private static int idLinksView, idLinksInsetBanner;
     private static int idInterestsRow, idAfiContainer, idBusinessCategory;
-    private static int idBannerItemIcon, idProfileHeaderFixedList, idProfileHeaderContainer;
+    private static int idBannerItemIcon, idBannerRow, idProfileHeaderFixedList, idProfileHeaderContainer;
 
     public void install(ClassLoader cl) {
         try {
@@ -93,6 +93,7 @@ public class ProfileDeclutterHook {
             idAfiContainer = r.getIdentifier("afi_view_container", "id", pkg);
             idBusinessCategory = r.getIdentifier("profile_header_business_category", "id", pkg);
             idBannerItemIcon = r.getIdentifier("profile_header_banner_item_icon", "id", pkg);
+            idBannerRow = r.getIdentifier("banner_row", "id", pkg);
             idProfileHeaderFixedList = r.getIdentifier("profile_header_fixed_list", "id", pkg);
             idProfileHeaderContainer = r.getIdentifier("profile_header_container", "id", pkg);
             resolved = true;
@@ -138,6 +139,8 @@ public class ProfileDeclutterHook {
      * several banners is cleared completely.
      */
     private static void hideBanners(View decor) {
+        // Preferred: the whole cross-app banner row is a real view (banner_row) in modern builds.
+        hideById(decor, idBannerRow);
         if (idBannerItemIcon == 0) return;
         View root = idProfileHeaderFixedList != 0 ? decor.findViewById(idProfileHeaderFixedList) : null;
         if (root == null && idProfileHeaderContainer != 0) root = decor.findViewById(idProfileHeaderContainer);

@@ -59,8 +59,10 @@ public class FeedDeclutterHook {
 
     // Follow / Subscribe (inside the header).
     private static int idInlineFollow, idHeaderFollow, idSubscribe, idSubscribeShortcut, idSubscribeShortcutStub;
-    // Save / Like (inside the buttons row).
+    // Save / Like (inside the buttons row). Modern builds render save_button/like_button/like_count;
+    // the row_feed_button_* ids are legacy and kept as fallbacks for older clients.
     private static int idSaveButton, idLikeButton, idLikeCount;
+    private static int idSaveButtonNew, idSaveCount, idLikeButtonNew;
     // Activity bubbles.
     private static int idCollabFacepileStub, idSuEndCardFacepile, idAdditionalFacepiles;
     // Audio icon.
@@ -120,6 +122,9 @@ public class FeedDeclutterHook {
             idSaveButton = r.getIdentifier("row_feed_button_save", "id", pkg);
             idLikeButton = r.getIdentifier("row_feed_button_like", "id", pkg);
             idLikeCount = r.getIdentifier("row_feed_like_count", "id", pkg);
+            idSaveButtonNew = r.getIdentifier("save_button", "id", pkg);
+            idSaveCount = r.getIdentifier("save_count", "id", pkg);
+            idLikeButtonNew = r.getIdentifier("like_button", "id", pkg);
 
             idCollabFacepileStub = r.getIdentifier("row_feed_collaborative_profile_facepile_stub", "id", pkg);
             idSuEndCardFacepile = r.getIdentifier("feed_su_end_card_facepile_view", "id", pkg);
@@ -145,14 +150,19 @@ public class FeedDeclutterHook {
             resolve(decor);
 
             if (FeatureFlags.hideFeedFollowButton) {
-                hideWithin(decor, idFeedHeader, idInlineFollow, idHeaderFollow, idSubscribe,
-                        idSubscribeShortcut, idSubscribeShortcutStub);
+                // Prefer scoping to the feed row header; fall back to whole-tree if that container
+                // isn't in this build's live view tree (modern feed may not expose it).
+                if (!hideWithin(decor, idFeedHeader, idInlineFollow, idHeaderFollow, idSubscribe,
+                        idSubscribeShortcut, idSubscribeShortcutStub)) {
+                    hideAll(decor, idInlineFollow, idHeaderFollow, idSubscribe, idSubscribeShortcut, idSubscribeShortcutStub);
+                }
             }
             if (FeatureFlags.hideFeedSaveButton) {
-                hideWithin(decor, idButtonsRow, idSaveButton);
+                // save_button/save_count are feed-specific real views; hide them anywhere in the feed.
+                hideAll(decor, idSaveButton, idSaveButtonNew, idSaveCount);
             }
             if (FeatureFlags.hideFeedLikeButton) {
-                hideWithin(decor, idButtonsRow, idLikeButton, idLikeCount);
+                hideAll(decor, idLikeButton, idLikeButtonNew, idLikeCount);
             }
             if (FeatureFlags.hideFeedActivityBubbles) {
                 hideAll(decor, idCollabFacepileStub, idSuEndCardFacepile, idAdditionalFacepiles);
@@ -183,10 +193,11 @@ public class FeedDeclutterHook {
      * Hides every descendant matching any of {@code targetIds}, but only inside containers whose id
      * is {@code containerId}. A feed is a list, so there are many such containers; each is searched.
      */
-    private static void hideWithin(View root, int containerId, int... targetIds) {
-        if (containerId == 0) return;
+    private static boolean hideWithin(View root, int containerId, int... targetIds) {
+        if (containerId == 0) return false;
         List<View> containers = new ArrayList<>();
         collectById(root, containerId, containers);
+        if (containers.isEmpty()) return false;
         for (View container : containers) {
             for (int id : targetIds) {
                 if (id == 0) continue;
@@ -195,7 +206,9 @@ public class FeedDeclutterHook {
                 for (View v : found) gone(v);
             }
         }
+        return true;
     }
+
 
     private static void collectById(View v, int id, List<View> out) {
         if (v.getId() == id) out.add(v);
