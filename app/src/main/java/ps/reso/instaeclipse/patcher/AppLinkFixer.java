@@ -8,6 +8,8 @@ import android.os.Build;
 import android.provider.Settings;
 import android.widget.Toast;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import ps.reso.instaeclipse.R;
 import ps.reso.instaeclipse.utils.core.CommonUtils;
 import ps.reso.instaeclipse.utils.toast.IeToast;
@@ -24,6 +26,9 @@ import rikka.shizuku.Shizuku;
 public final class AppLinkFixer {
 
     private AppLinkFixer() {}
+
+    private static final String SHIZUKU_PKG = "moe.shizuku.privileged.api";
+    private static final String SHIZUKU_URL = "https://shizuku.rikka.app/guide/setup/";
 
     /** The installed Instagram-family package, or null if none is installed. */
     public static String installedHost(Activity a) {
@@ -46,7 +51,36 @@ public final class AppLinkFixer {
         }
         if (ShizukuLinks.hasPermission()) { enableViaShizuku(activity, pkg); return; }
         if (ShizukuLinks.available()) { requestThenEnable(activity, pkg); return; }
-        openSettings(activity, pkg);
+        promptShizuku(activity, pkg);
+    }
+
+    /**
+     * Shizuku isn't running: offer to start/install it for the one-tap path, or set the links
+     * manually. With Shizuku every supported web address can be enabled at once; without it the
+     * user has to toggle them in system settings (and the ones another Meta app verifies won't stick).
+     */
+    private static void promptShizuku(Activity activity, String pkg) {
+        boolean installed = installed(activity, SHIZUKU_PKG);
+        new MaterialAlertDialogBuilder(activity)
+                .setTitle(R.string.shizuku_prompt_title)
+                .setMessage(R.string.shizuku_prompt_msg)
+                .setPositiveButton(installed ? R.string.shizuku_open : R.string.shizuku_get, (d, w) -> {
+                    if (installed) {
+                        Intent launch = activity.getPackageManager().getLaunchIntentForPackage(SHIZUKU_PKG);
+                        if (launch != null) { try { activity.startActivity(launch); } catch (Throwable ignored) {} }
+                    } else {
+                        try { activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(SHIZUKU_URL))); }
+                        catch (Throwable ignored) {}
+                    }
+                })
+                .setNeutralButton(R.string.link_set_manually, (d, w) -> openSettings(activity, pkg))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private static boolean installed(Activity a, String pkg) {
+        try { a.getPackageManager().getPackageInfo(pkg, 0); return true; }
+        catch (Throwable t) { return false; }
     }
 
     private static void requestThenEnable(Activity activity, String pkg) {

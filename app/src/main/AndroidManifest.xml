@@ -184,6 +184,8 @@
         <package android:name="com.instagram2.android" />
         <package android:name="com.instagramclone.android" />
         <package android:name="com.instaclone.android" />
+        <!-- Shizuku: so the app can detect it and offer to open it for one-tap link enabling. -->
+        <package android:name="moe.shizuku.privileged.api" />
     </queries>
     <uses-permission android:name="android.permission.INTERNET" />
 
