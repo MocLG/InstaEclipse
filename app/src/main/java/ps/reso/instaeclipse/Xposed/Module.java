@@ -462,6 +462,13 @@ public class Module {
                         ModuleLog.line("(InstaEclipse | ExpandCaptions): ❌ Failed to hook");
                     }
 
+                    // Show hidden like counts (reveal "liked by X and others" as a number)
+                    try {
+                        if (!skip("ShowHiddenLikesHook")) new ps.reso.instaeclipse.mods.feed.ShowHiddenLikesHook().install(dexKitBridge, hostClassLoader);
+                    } catch (Throwable ignored) {
+                        ModuleLog.line("(InstaEclipse | ShowHiddenLikes): ❌ Failed to hook");
+                    }
+
                     // Hide community notes (#259)
                     try {
                         if (!skip("HideCommunityNotesHook")) new ps.reso.instaeclipse.mods.feed.HideCommunityNotesHook().install(dexKitBridge, hostClassLoader);
