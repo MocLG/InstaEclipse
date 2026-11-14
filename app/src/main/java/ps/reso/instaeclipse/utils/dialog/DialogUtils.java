@@ -167,9 +167,9 @@ public class DialogUtils {
         mainLayout.addView(sectionHeader(context, I18n.t(context, R.string.feat_group_appearance)));
         LinearLayout appearance = createGroupCard(context);
         appearance.addView(createMenuRow(context, R.drawable.ic_palette, I18n.t(context, R.string.ig_dialog_menu_theme), A_APPEARANCE, () -> showThemeOptions(context), onCount(context, "customThemeEnabled", "customFontEnabled", "customEmojiEnabled", "themeDynamicAccent", "themeOledSurfaces", "themeAccentOnly")));
-        appearance.addView(createMenuRow(context, R.drawable.ic_sparkle, I18n.t(context, R.string.menu_feed), A_APPEARANCE, () -> showFeedOptions(context), onCount(context, "hideSuggestionsInFeed", "hideThreadsSuggestions", "hideSuggestionsInReels", "hidePaidPartnerships", "hideLikedPosts", "confirmFeedRefresh", "hideCommunityNotes", "followingOnlyFeed", "disableDiscoverPeople", "hideExploreGrid", "exploreNoPersonalization", "hideSearchSuggestions", "expandCaptions", "exactTimestamps", "enablePhotoZoom", "disableVideoAutoPlay", "feedVideoTapPause", "feedVideoSeekBar", "feedVideoHold2x", "feedVideoDoubleTapSkip", "hideFeedFollowButton", "hideFeedSaveButton", "hideFeedLikeButton", "hideFeedActivityBubbles", "hideFeedAudioIcon", "hideFeedMadeWithEdits", "hideFeedCaptions")));
+        appearance.addView(createMenuRow(context, R.drawable.ic_sparkle, I18n.t(context, R.string.menu_feed), A_APPEARANCE, () -> showFeedOptions(context), onCount(context, "hideSuggestionsInFeed", "hideThreadsSuggestions", "hideSuggestionsInReels", "hidePaidPartnerships", "hideLikedPosts", "confirmFeedRefresh", "hideCommunityNotes", "followingOnlyFeed", "disableDiscoverPeople", "hideExploreGrid", "exploreNoPersonalization", "hideSearchSuggestions", "expandCaptions", "exactTimestamps", "enablePhotoZoom", "disableVideoAutoPlay", "feedVideoSeekBar", "feedVideoHold2x", "feedVideoDoubleTapSkip", "hideFeedFollowButton")));
         appearance.addView(createMenuRow(context, R.drawable.ic_tune, I18n.t(context, R.string.menu_navigation), A_APPEARANCE, () -> showNavigationOptions(context), navCount(context)));
-        appearance.addView(createMenuRow(context, R.drawable.ic_movie, I18n.t(context, R.string.menu_reels), A_APPEARANCE, () -> showReelsOptions(context), onCount(context, "reelsAutoScroll", "reelsLockScroll", "forceReelScrubber", "holdLeftSlowMotion", "offerPlaybackSpeed", "keepVideoPlayingBackground", "videoPictureInPicture", "reelsBlurBars", "roundReelCorners", "reelsHideFollow", "reelsHideMetaAi", "reelsHidePills", "reelsHideCommentBar", "hideAiReels", "hideReelsByCaption", "hideReelsByLanguage", "hideLowViewReels")));
+        appearance.addView(createMenuRow(context, R.drawable.ic_movie, I18n.t(context, R.string.menu_reels), A_APPEARANCE, () -> showReelsOptions(context), onCount(context, "reelsAutoScroll", "reelsLockScroll", "forceReelScrubber", "holdLeftSlowMotion", "offerPlaybackSpeed", "keepVideoPlayingBackground", "videoPictureInPicture", "reelsBlurBars", "roundReelCorners", "reelsHideFollow", "reelsHideMetaAi", "reelsHidePills", "reelsHideCommentBar", "hideReelsByCaption", "hideReelsByLanguage", "hideLowViewReels")));
         appearance.addView(createMenuRow(context, R.drawable.ic_story_ring, I18n.t(context, R.string.menu_stories), A_APPEARANCE, () -> showStoriesOptions(context), onCount(context, "disableStoryFlipping", "enableStoryMentions", "storyLinks", "storyInfo", "storyViewerSearch", "hideStoriesTray")));
         mainLayout.addView(appearance);
 
@@ -197,7 +197,7 @@ public class DialogUtils {
         mainLayout.addView(sectionHeader(context, I18n.t(context, R.string.feat_group_social)));
         LinearLayout social = createGroupCard(context);
         social.addView(createMenuRow(context, R.drawable.ic_heart, I18n.t(context, R.string.menu_likes_comments), A_SOCIAL, () -> showLikesCommentsOptions(context), onCount(context, "disableDoubleTapLike", "likeUndo", "confirmLikes", "enableCopyComment", "commentSearch", "enableCaptionCopy", "disableRepost")));
-        social.addView(createMenuRow(context, R.drawable.ic_eye, I18n.t(context, R.string.menu_profiles), A_SOCIAL, () -> showProfilesOptions(context), onCount(context, "profileMenuTools", "postCountSpoof", "profileSpoofer", "profileAnalyzer", "confirmFollows", "profileFollowsYouLabel", "fancyBioFont", "showFollowerToast", "followListExport", "followersHistory", "savedOnProfile", "hideThreadsButton", "hideProfileHighlights", "hideProfileSong", "hideProfileBioLinks", "hideProfileInterests", "hideProfileBanners")));
+        social.addView(createMenuRow(context, R.drawable.ic_eye, I18n.t(context, R.string.menu_profiles), A_SOCIAL, () -> showProfilesOptions(context), onCount(context, "profileMenuTools", "postCountSpoof", "profileSpoofer", "profileAnalyzer", "confirmFollows", "profileFollowsYouLabel", "fancyBioFont", "showFollowerToast", "followListExport", "followersHistory", "savedOnProfile", "hideThreadsButton", "hideProfileHighlights", "hideProfileBanners")));
         mainLayout.addView(social);
 
         // ---- TOOLS ---- app & account, developer, backup, restart, cache, about
@@ -1660,22 +1660,19 @@ public class DialogUtils {
                 createActionRow(context, R.drawable.ic_sparkle, feedCornerLabel(context), "#64D2FF",
                         v -> showFeedCornerDialog(context, (TextView) findFirstText(v)))));
 
+        // Only Hide Follow is kept: on IG 452 the other feed elements (save/like/caption/audio/…)
+        // are Litho-drawn and can't be hidden by view id, so those toggles were no-ops and removed.
         layout.addView(sectionHeader(context, I18n.t(context, R.string.ig_dialog_feed_declutter)));
         layout.addView(cardOf(context,
-                flagSwitch(context, R.drawable.ic_eye_off, "#64D2FF", R.string.ig_feat_hide_feed_follow, "hideFeedFollowButton"),
-                flagSwitch(context, R.drawable.ic_save, "#64D2FF", R.string.ig_feat_hide_feed_save, "hideFeedSaveButton"),
-                flagSwitch(context, R.drawable.ic_heart, "#64D2FF", R.string.ig_feat_hide_feed_like, "hideFeedLikeButton"),
-                flagSwitch(context, R.drawable.ic_sparkle, "#64D2FF", R.string.ig_feat_hide_feed_activity_bubbles, "hideFeedActivityBubbles"),
-                flagSwitch(context, R.drawable.ic_movie, "#64D2FF", R.string.ig_feat_hide_feed_audio_icon, "hideFeedAudioIcon"),
-                flagSwitch(context, R.drawable.ic_tune, "#64D2FF", R.string.ig_feat_hide_feed_made_with_edits, "hideFeedMadeWithEdits"),
-                flagSwitch(context, R.drawable.ic_chat, "#64D2FF", R.string.ig_feat_hide_feed_captions, "hideFeedCaptions")));
+                flagSwitch(context, R.drawable.ic_eye_off, "#64D2FF", R.string.ig_feat_hide_feed_follow, "hideFeedFollowButton")));
 
         layout.addView(sectionHeader(context, I18n.t(context, R.string.ig_dialog_feed_video_controls)));
         View skipRow = createActionRow(context, R.drawable.ic_timer, feedSkipLabel(context), "#64D2FF",
                 v -> showFeedSkipDialog(context, (TextView) findFirstText(v)));
         setRowEnabled(skipRow, FeatureFlags.feedVideoDoubleTapSkip);
+        // Tap-to-pause removed: its play/pause anchor drifted on IG 452 (no-op). Seek bar, hold-2x
+        // and double-tap-to-skip work and are kept.
         layout.addView(cardOf(context,
-                flagSwitch(context, R.drawable.ic_movie, "#64D2FF", R.string.ig_dialog_feed_video_tap_pause, "feedVideoTapPause"),
                 flagSwitch(context, R.drawable.ic_movie, "#64D2FF", R.string.ig_dialog_feed_video_seek_bar, "feedVideoSeekBar"),
                 flagSwitch(context, R.drawable.ic_movie, "#64D2FF", R.string.ig_dialog_feed_video_hold_2x, "feedVideoHold2x"),
                 flagSwitch(context, R.drawable.ic_movie, "#64D2FF", R.string.ig_dialog_feed_video_double_tap_skip, "feedVideoDoubleTapSkip",
@@ -1759,9 +1756,10 @@ public class DialogUtils {
                 extraSwitch(context, "#FF375F", "reelsHidePills"),
                 extraSwitch(context, "#FF375F", "reelsHideCommentBar")));
 
+        // "Hide AI-labeled reels" removed: the attribution-label getter isn't present on IG 452
+        // (no-op). Caption / language / view-threshold filters work and are kept.
         layout.addView(sectionHeader(context, I18n.t(context, R.string.ig_reels_filter_section)));
         layout.addView(cardOf(context,
-                flagSwitch(context, R.drawable.ic_sparkle, "#FF375F", R.string.ig_reels_filter_ai, "hideAiReels"),
                 flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_reels_filter_caption, "hideReelsByCaption"),
                 createActionRow(context, R.drawable.ic_search, I18n.t(context, R.string.ig_reels_filter_caption_title), "#FF375F",
                         v -> showReelCaptionWords(context)),
@@ -2050,9 +2048,8 @@ public class DialogUtils {
                 flagSwitch(context, R.drawable.ic_eye, A_SOCIAL, R.string.ig_feat_followers_history, "followersHistory"),
                 flagSwitch(context, R.drawable.ic_save, A_SOCIAL, R.string.ig_saved_on_profile, "savedOnProfile"),
                 flagSwitch(context, R.drawable.ic_story_ring, A_SOCIAL, R.string.ig_dialog_hide_profile_highlights, "hideProfileHighlights"),
-                flagSwitch(context, R.drawable.ic_sparkle, A_SOCIAL, R.string.ig_dialog_hide_profile_song, "hideProfileSong"),
-                flagSwitch(context, R.drawable.ic_link, A_SOCIAL, R.string.ig_dialog_hide_profile_bio_links, "hideProfileBioLinks"),
-                flagSwitch(context, R.drawable.ic_sparkle, A_SOCIAL, R.string.ig_dialog_hide_profile_interests, "hideProfileInterests"),
+                // song / bio-links / interests removed: they live in profile_user_info_compose_view
+                // (Jetpack Compose) on IG 452 and can't be hidden by view id, so those toggles were no-ops.
                 flagSwitch(context, R.drawable.ic_block, A_SOCIAL, R.string.ig_dialog_hide_profile_banners, "hideProfileBanners")));
         showSectionDialog(context, I18n.t(context, R.string.menu_profiles), layout, () -> {});
     }
@@ -2245,9 +2242,9 @@ public class DialogUtils {
         hideCard.addView(flagSwitch(context, R.drawable.ic_eye_off, A_PRIVACY,
                 R.string.ie_show_hide_button, "showHideChatButton",
                 ps.reso.instaeclipse.mods.ghost.ConversationMenuHook::refreshAll));
-        hideCard.addView(createActionRow(context, R.drawable.ic_chat,
-                I18n.t(context, R.string.ie_chat_actions), A_PRIVACY,
-                v -> ps.reso.instaeclipse.mods.ghost.ConversationMenuHook.show(activityOf(context))));
+        // "Chat actions" row removed from this general menu: it opens the per-chat actions, which
+        // need a chat on screen — from here there's no current chat, so it only said
+        // "Couldn't identify this chat". Those actions live on the chat's own header button.
         hideCard.addView(createActionRow(context, R.drawable.ic_eye,
                 I18n.t(context, R.string.ig_hide_chats_manage), A_PRIVACY, v -> showHiddenChats(context)));
         layout.addView(hideCard);

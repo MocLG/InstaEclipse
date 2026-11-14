@@ -79,7 +79,7 @@ public class HomeFragment extends Fragment {
             // Clean feed
             "hideSuggestionsInFeed", "hideThreadsSuggestions", "hideSuggestionsInReels", "hidePaidPartnerships", "hideLikedPosts", "confirmFeedRefresh", "hideCommunityNotes", "followingOnlyFeed",
             "hideExploreGrid", "exploreNoPersonalization", "hideSearchSuggestions",
-            "hideAiReels", "hideReelsByCaption", "hideReelsByLanguage", "hideLowViewReels",
+            "hideReelsByCaption", "hideReelsByLanguage", "hideLowViewReels",
             "hidePlusUpsells", "freeAppIcons", "glassTabBar", "expandCaptions",
             // Distraction-free
             "disableStories", "disableFeed", "disableReels", "disableReelsExceptDM", "disableExplore",
@@ -92,8 +92,8 @@ public class HomeFragment extends Fragment {
             "disableDoubleTapLike", "enableCaptionCopy", "enablePhotoZoom", "removeMetaAI",
             "hideShareCreateGroup", "exactTimestamps", "likeUndo", "confirmLikes", "confirmFollows", "profileMenuTools", "postCountSpoof", "profileSpoofer", "profileAnalyzer", "profileFollowsYouLabel", "fancyBioFont", "savedOnProfile",
             "storyViewerSearch", "storyLinks", "storyInfo", "commentSearch", "followListExport", "followersHistory",
-            "hideProfileHighlights", "hideProfileSong", "hideProfileBioLinks", "hideProfileInterests", "hideProfileBanners",
-            "hideFeedFollowButton", "hideFeedSaveButton", "hideFeedLikeButton", "hideFeedActivityBubbles", "hideFeedAudioIcon", "hideFeedMadeWithEdits", "hideFeedCaptions",
+            "hideProfileHighlights", "hideProfileBanners",
+            "hideFeedFollowButton",
             // Lock / hide chats
             "lockDirectMessages", "lockWholeApp", "lockSavedCollections", "lockUseFingerprint",
             "hideSpecificChats",
@@ -105,7 +105,7 @@ public class HomeFragment extends Fragment {
             "downloaderUsernameFolder", "downloaderAddTimestamp", "copyMediaLink", "offerAudioDownload",
             "enableVoiceDownload", "enableStickerDownload", "enableDmMediaDownload", "offerCopyImage", "offerMediaInfo", "offerPlaybackSpeed",
             "keepVideoPlayingBackground", "videoPictureInPicture",
-            "forceReelScrubber", "holdLeftSlowMotion", "feedVideoTapPause", "feedVideoSeekBar", "feedVideoHold2x", "feedVideoDoubleTapSkip",
+            "forceReelScrubber", "holdLeftSlowMotion", "feedVideoSeekBar", "feedVideoHold2x", "feedVideoDoubleTapSkip",
             "maxUploadQuality", "saveInstants", "keepInstantHistory", "uploadInstants", "cacheStories",
             // Battery (stop background wake-ups)
             "stopBackgroundHeartbeat", "stopUploadAlarm", "stopBackgroundPrefetch",

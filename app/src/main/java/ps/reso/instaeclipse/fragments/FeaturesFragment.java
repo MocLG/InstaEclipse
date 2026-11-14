@@ -1236,18 +1236,11 @@ public class FeaturesFragment extends Fragment {
 
         defs.add(getString(R.string.ig_dialog_feed_declutter));
         defs.add(Arrays.asList(
-                createSwitch(R.drawable.ic_eye_off, "#64D2FF", getString(R.string.ig_feat_hide_feed_follow), "hideFeedFollowButton"),
-                createSwitch(R.drawable.ic_save, "#64D2FF", getString(R.string.ig_feat_hide_feed_save), "hideFeedSaveButton"),
-                createSwitch(R.drawable.ic_heart, "#64D2FF", getString(R.string.ig_feat_hide_feed_like), "hideFeedLikeButton"),
-                createSwitch(R.drawable.ic_sparkle, "#64D2FF", getString(R.string.ig_feat_hide_feed_activity_bubbles), "hideFeedActivityBubbles"),
-                createSwitch(R.drawable.ic_movie, "#64D2FF", getString(R.string.ig_feat_hide_feed_audio_icon), "hideFeedAudioIcon"),
-                createSwitch(R.drawable.ic_tune, "#64D2FF", getString(R.string.ig_feat_hide_feed_made_with_edits), "hideFeedMadeWithEdits"),
-                createSwitch(R.drawable.ic_chat, "#64D2FF", getString(R.string.ig_feat_hide_feed_captions), "hideFeedCaptions")
+                createSwitch(R.drawable.ic_eye_off, "#64D2FF", getString(R.string.ig_feat_hide_feed_follow), "hideFeedFollowButton")
         ));
 
         defs.add(getString(R.string.ig_dialog_feed_video_controls));
         defs.add(Arrays.asList(
-                createSwitch(R.drawable.ic_movie, "#64D2FF", getString(R.string.ig_dialog_feed_video_tap_pause), "feedVideoTapPause"),
                 createSwitch(R.drawable.ic_movie, "#64D2FF", getString(R.string.ig_dialog_feed_video_seek_bar), "feedVideoSeekBar"),
                 createSwitch(R.drawable.ic_movie, "#64D2FF", getString(R.string.ig_dialog_feed_video_hold_2x), "feedVideoHold2x"),
                 createSwitch(R.drawable.ic_movie, "#64D2FF", getString(R.string.ig_dialog_feed_video_double_tap_skip), "feedVideoDoubleTapSkip"),
@@ -1718,9 +1711,6 @@ public class FeaturesFragment extends Fragment {
                 createSwitch(R.drawable.ic_eye, A_SOCIAL, getString(R.string.ig_feat_followers_history), "followersHistory"),
                 createSwitch(R.drawable.ic_save, A_SOCIAL, getString(R.string.ig_saved_on_profile), "savedOnProfile"),
                 createSwitch(R.drawable.ic_story_ring, A_SOCIAL, getString(R.string.ig_dialog_hide_profile_highlights), "hideProfileHighlights"),
-                createSwitch(R.drawable.ic_sparkle, A_SOCIAL, getString(R.string.ig_dialog_hide_profile_song), "hideProfileSong"),
-                createSwitch(R.drawable.ic_link, A_SOCIAL, getString(R.string.ig_dialog_hide_profile_bio_links), "hideProfileBioLinks"),
-                createSwitch(R.drawable.ic_sparkle, A_SOCIAL, getString(R.string.ig_dialog_hide_profile_interests), "hideProfileInterests"),
                 createSwitch(R.drawable.ic_block, A_SOCIAL, getString(R.string.ig_dialog_hide_profile_banners), "hideProfileBanners")
         ));
 
@@ -2146,7 +2136,6 @@ public class FeaturesFragment extends Fragment {
 
         defs.add(getString(R.string.ig_reels_filter_section));
         defs.add(Arrays.asList(
-                createSwitch(R.drawable.ic_sparkle, "#32D74B", getString(R.string.ig_reels_filter_ai), "hideAiReels"),
                 createSwitch(R.drawable.ic_movie, "#32D74B", getString(R.string.ig_reels_filter_caption), "hideReelsByCaption"),
                 createClickable(R.drawable.ic_search, "#32D74B", getString(R.string.ig_reels_filter_caption_title),
                         () -> ps.reso.instaeclipse.utils.dialog.DialogUtils.showReelCaptionWords(requireContext())),
