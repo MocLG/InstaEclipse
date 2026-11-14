@@ -483,6 +483,13 @@ public class Module {
                         ModuleLog.line("(InstaEclipse | ReelsBlur): ❌ Failed to hook: " + t);
                     }
 
+                    // Extras: round the reel video's corners (HushGram rounded reel corners)
+                    try {
+                        if (!skip("RoundedReelsHook")) new ps.reso.instaeclipse.mods.extras.RoundedReelsHook().install(dexKitBridge, hostClassLoader);
+                    } catch (Throwable t) {
+                        ModuleLog.line("(InstaEclipse | RoundedReels): ❌ Failed to hook: " + t);
+                    }
+
                     // Extras: Clean up Reels (#279)
                     try {
                         if (!skip("ReelsCleanupHook")) new ps.reso.instaeclipse.mods.extras.ReelsCleanupHook().install(dexKitBridge, hostClassLoader);

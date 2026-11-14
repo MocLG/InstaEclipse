@@ -89,7 +89,8 @@ public class ReelsBlurBarsHook {
         ModuleLog.line(TAG + "✅ video layout " + layout.getName());
     }
 
-    private static Class<?> findLayoutClass(DexKitBridge bridge, ClassLoader cl) {
+    /** Package-visible so {@link RoundedReelsHook} can reuse the same reel-container discovery. */
+    static Class<?> findLayoutClass(DexKitBridge bridge, ClassLoader cl) {
         String name = DexKitCache.isCacheValid() ? DexKitCache.loadString(CACHE_KEY) : null;
         if ("missing".equals(name)) return null;
         if (name == null) {

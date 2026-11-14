@@ -29,6 +29,7 @@ public final class ExtrasFeatures {
             new Entry("reelsAutoScroll", R.string.ig_dialog_extras_reels_auto_scroll, R.drawable.ic_movie),
             new Entry("reelsLockScroll", R.string.ig_dialog_extras_reels_lock_scroll, R.drawable.ic_movie),
             new Entry("reelsBlurBars", R.string.ig_dialog_extras_reels_blur_bars, R.drawable.ic_palette),
+            new Entry("roundReelCorners", R.string.ig_dialog_extras_round_reel_corners, R.drawable.ic_sparkle),
             new Entry("reelsHideFollow", R.string.ig_dialog_extras_reels_hide_follow, R.drawable.ic_eye_off),
             new Entry("reelsHideMetaAi", R.string.ig_dialog_extras_reels_hide_meta_ai, R.drawable.ic_sparkle),
             new Entry("reelsHidePills", R.string.ig_dialog_extras_reels_hide_pills, R.drawable.ic_eye_off),

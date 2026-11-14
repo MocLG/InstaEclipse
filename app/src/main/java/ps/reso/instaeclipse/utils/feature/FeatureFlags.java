@@ -10,6 +10,7 @@ public class FeatureFlags {
     public static volatile boolean downloaderUseOriginal = true;
     public static volatile int downloaderQualityMaxShortSide = 0;
     public static volatile int feedCornerRadius = 0;       // rounded feed post corners in dp (#276), 0 = square
+    public static volatile boolean roundReelCorners = false; // round the reel video's corners too (HushGram); uses feedCornerRadius, or 24dp when that's 0
     public static volatile int storyTrayScale = 100;       // story tray size in percent (#283), 100 = Instagram's
     public static volatile String storyRingColor = "";     // unseen story ring: "#RRGGBB" or "#RRGGBB,#RRGGBB", "" = Instagram's (#283)
     public static volatile boolean downloaderCompatibility = false;
