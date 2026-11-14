@@ -105,6 +105,7 @@ public class FeatureFlags {
     public static volatile boolean followingOnlyFeed = false; // home feed shows only accounts you follow
     public static volatile boolean confirmFeedRefresh = false; // ask before pull-to-refresh reloads the home feed (#278)
     public static volatile boolean hideLikedPosts = false; // drop already-liked posts from the feed at parse time (#249)
+    public static volatile boolean showHiddenLikes = false; // reveal the real like count when IG hides it as "liked by X and others"
     public static volatile boolean hideSpecificChats = false; // hide chosen DM threads from the inbox (per-thread)
 
     // Which ghost mode features the quick toggle will control
