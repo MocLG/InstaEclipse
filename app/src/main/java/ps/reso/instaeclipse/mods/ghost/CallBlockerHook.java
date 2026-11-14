@@ -48,7 +48,7 @@ public final class CallBlockerHook {
             int argIndex = parseInt(DexKitCache.isCacheValid() ? DexKitCache.loadString(CACHE_KEY_ARG) : null);
 
             if (ring == null || argIndex < 0) {
-                MethodData found = resolve(bridge);
+                MethodData found = resolve(bridge, cl);
                 if (found == null) {
                     ModuleLog.line(TAG + "❌ incoming-call ring method not found");
                     if (FeatureFlags.callBlockMode != 0) FeatureStatusTracker.setBroken("CallBlocker");
@@ -89,18 +89,25 @@ public final class CallBlockerHook {
         }
     }
 
-    /** The one void method using the incoming-call string and taking an RtcConnectionEntity. */
-    private static MethodData resolve(DexKitBridge bridge) {
+    /**
+     * The one void method using the incoming-call string and taking an RtcConnectionEntity. Each
+     * candidate is resolved to a java.lang.reflect.Method and filtered by reflection (return void +
+     * an RtcConnectionEntity parameter) — DexKit's own type-string forms vary by version and aren't
+     * reliable to compare against.
+     */
+    private static MethodData resolve(DexKitBridge bridge, ClassLoader cl) {
         List<MethodData> candidates = DexKitQueryCache.findMethod(bridge, FindMethod.create()
                 .matcher(MethodMatcher.create().usingStrings(INCOMING_CALL_ACTION)));
         MethodData match = null;
         for (MethodData m : candidates) {
-            if (!"void".equals(String.valueOf(m.getReturnType()))) continue;
-            boolean hasEntity = false;
-            for (Object pt : m.getParamTypes()) {
-                if (CALL_ENTITY.equals(normalizeType(String.valueOf(pt)))) { hasEntity = true; break; }
+            Method jm;
+            try {
+                jm = m.getMethodInstance(cl);
+            } catch (Throwable t) {
+                continue;
             }
-            if (!hasEntity) continue;
+            if (jm.getReturnType() != void.class) continue;
+            if (entityArgIndex(jm) < 0) continue;
             if (match != null) {
                 ModuleLog.line(TAG + "⚠️ more than one candidate; using first: " + match.getClassName() + "." + match.getName());
                 break;
@@ -108,14 +115,6 @@ public final class CallBlockerHook {
             match = m;
         }
         return match;
-    }
-
-    /** Normalizes a DexKit param-type string to a dotted class name ("Lp/kg;" and "p/kg" → "p.kg"). */
-    private static String normalizeType(String raw) {
-        if (raw == null) return "";
-        String s = raw.trim();
-        if (s.startsWith("L") && s.endsWith(";")) s = s.substring(1, s.length() - 1);
-        return s.replace('/', '.');
     }
 
     private static int parseInt(String s) {
