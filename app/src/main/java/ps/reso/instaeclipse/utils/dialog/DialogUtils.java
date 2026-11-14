@@ -677,9 +677,11 @@ public class DialogUtils {
 
             if (launchIntent != null) {
                 clearAppCache(context);
-                launchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(launchIntent);
-                Runtime.getRuntime().exit(0);
+                // Delegate to the shared relaunch: it delays exit(0) on the main thread so the new
+                // task starts first. The old inline immediate exit killed the process before the
+                // relaunch could start, which left Instagram closed instead of restarted (the
+                // in-app dialog restart "not working" that the module UI restart didn't have).
+                ps.reso.instaeclipse.utils.core.CommonUtils.relaunchSelf(context);
             } else {
                 ps.reso.instaeclipse.utils.toast.IeToast.makeText(context, I18n.t(context, R.string.ig_dialog_restart_not_found), Toast.LENGTH_SHORT).show();
             }

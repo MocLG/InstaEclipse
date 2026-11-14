@@ -1168,18 +1168,7 @@ public class Module {
                     // so the manager's "Restart" works without root — the same self-restart the
                     // in-app overlay uses. No su / am force-stop needed.
                     ModuleLog.line("(InstaEclipse) Sync: restart requested — relaunching host");
-                    try {
-                        final Context app = ctx.getApplicationContext();
-                        Intent launch = app.getPackageManager().getLaunchIntentForPackage(app.getPackageName());
-                        if (launch != null) {
-                            launch.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            app.startActivity(launch);
-                            new android.os.Handler(android.os.Looper.getMainLooper())
-                                    .postDelayed(() -> Runtime.getRuntime().exit(0), 300);
-                        }
-                    } catch (Throwable t) {
-                        ModuleLog.line("(InstaEclipse) restart failed: " + t);
-                    }
+                    CommonUtils.relaunchSelf(ctx);
                 }
             }
         };

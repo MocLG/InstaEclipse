@@ -96,6 +96,28 @@ public class CommonUtils {
         } catch (Throwable ignored) {}
     }
 
+    /**
+     * Non-root self-restart: relaunch the current host (Instagram) and exit. Runs inside the hooked
+     * process, so no root / {@code am force-stop} is needed. The exit is delayed on the main thread
+     * so the relaunch activity has time to start first — calling {@code exit(0)} immediately after
+     * {@code startActivity} kills the process before the new task launches and leaves the app closed.
+     * Used by both the in-app dialog restart and the companion's ACTION_RESTART receiver, so the two
+     * can never drift apart.
+     */
+    public static void relaunchSelf(Context context) {
+        try {
+            Context app = context.getApplicationContext();
+            Intent launch = app.getPackageManager().getLaunchIntentForPackage(app.getPackageName());
+            if (launch == null) return;
+            launch.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            app.startActivity(launch);
+            new android.os.Handler(android.os.Looper.getMainLooper())
+                    .postDelayed(() -> Runtime.getRuntime().exit(0), 300);
+        } catch (Throwable t) {
+            ps.reso.instaeclipse.utils.log.ModuleLog.line("(InstaEclipse) relaunchSelf failed: " + t);
+        }
+    }
+
     /** Sends commands only to an explicitly trusted installed host signing identity. */
     public static void broadcastToInstagram(Context context, Intent intent) {
         stampSetting(context, intent);
