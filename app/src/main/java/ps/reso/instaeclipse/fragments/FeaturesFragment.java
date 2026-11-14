@@ -1979,6 +1979,15 @@ public class FeaturesFragment extends Fragment {
                                 this::pickLightModeTheme)
         ));
 
+        // Theme extras: Material You accent + OLED surfaces layer on the custom theme; accent-only
+        // recolor works on its own. The accent color itself is picked inside Instagram.
+        defs.add(getString(R.string.theme_section_extras));
+        defs.add(Arrays.asList(
+                createSwitch(R.drawable.ic_palette, "#FF375F", getString(R.string.theme_dynamic_accent), "themeDynamicAccent"),
+                createSwitch(R.drawable.ic_palette, "#FF375F", getString(R.string.theme_oled_surfaces), "themeOledSurfaces"),
+                createSwitch(R.drawable.ic_palette, "#FF375F", getString(R.string.theme_accent_only), "themeAccentOnly")
+        ));
+
         // Fonts & Emoji now live under Custom Theme (mirrors the in-IG dialog). File pickers run
         // inside Instagram; here the companion app only toggles the flags.
         defs.add(getString(R.string.theme_section_fonts));

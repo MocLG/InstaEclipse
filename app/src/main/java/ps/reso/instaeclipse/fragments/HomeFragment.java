@@ -99,6 +99,7 @@ public class HomeFragment extends Fragment {
             "hideSpecificChats",
             // Location / theme
             "spoofLocation", "customThemeEnabled", "customFontEnabled", "customEmojiEnabled",
+            "themeDynamicAccent", "themeOledSurfaces", "themeAccentOnly",
             // Downloader
             "enablePostDownload", "enableStoryDownload", "enableReelDownload", "enableProfileDownload",
             "downloaderUsernameFolder", "downloaderAddTimestamp", "copyMediaLink", "offerAudioDownload",

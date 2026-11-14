@@ -256,6 +256,10 @@ public class SettingsManager {
         editor.putInt("themePresetId", FeatureFlags.themePresetId);
         editor.putInt("themeLightPresetId", FeatureFlags.themeLightPresetId);
         editor.putString("themePaletteJson", FeatureFlags.themePaletteJson);
+        editor.putBoolean("themeDynamicAccent", FeatureFlags.themeDynamicAccent);
+        editor.putBoolean("themeOledSurfaces", FeatureFlags.themeOledSurfaces);
+        editor.putBoolean("themeAccentOnly", FeatureFlags.themeAccentOnly);
+        editor.putInt("themeAccentColor", FeatureFlags.themeAccentColor);
 
         for (String flag : ExtrasFeatures.flags()) editor.putBoolean(flag, ExtrasFeatures.get(flag));
 
@@ -530,6 +534,10 @@ public class SettingsManager {
                     .apply();
         }
         FeatureFlags.themePaletteJson = prefs.getString("themePaletteJson", "");
+        FeatureFlags.themeDynamicAccent = prefs.getBoolean("themeDynamicAccent", false);
+        FeatureFlags.themeOledSurfaces = prefs.getBoolean("themeOledSurfaces", false);
+        FeatureFlags.themeAccentOnly = prefs.getBoolean("themeAccentOnly", false);
+        FeatureFlags.themeAccentColor = prefs.getInt("themeAccentColor", 0xFF3897F0);
 
         for (String flag : ExtrasFeatures.flags()) ExtrasFeatures.set(flag, prefs.getBoolean(flag, false));
 

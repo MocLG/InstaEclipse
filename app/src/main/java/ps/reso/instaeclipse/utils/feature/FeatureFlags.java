@@ -234,6 +234,12 @@ public class FeatureFlags {
     public static volatile int themeLightPresetId = -1; // #251: theme in dark mode only by default (light stays stock)
     public static volatile String themePaletteJson = "";
 
+    // Advanced Theme Extras — layer on top of the custom-theme engine; all default off.
+    public static volatile boolean themeDynamicAccent = false; // Material You: accent follows the Android system/wallpaper colors (API 31+)
+    public static volatile boolean themeOledSurfaces = false;   // force the theme's backgrounds / sheets / menus to true black (OLED)
+    public static volatile boolean themeAccentOnly = false;     // recolor ONLY Instagram's blue accent (badges/icons/rings/links), no full theme
+    public static volatile int themeAccentColor = 0xFF3897F0;   // the accent used by themeAccentOnly (default = Instagram blue)
+
     // Clean Feed
     public static volatile boolean hideSuggestionsInFeed = false;
     public static volatile boolean hideThreadsSuggestions = false;

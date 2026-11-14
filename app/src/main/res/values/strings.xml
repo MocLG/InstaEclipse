@@ -214,6 +214,13 @@
     <string name="theme_saved">Theme saved</string>
     <string name="theme_pick_color">Pick a color</string>
     <string name="theme_apply_color">Apply</string>
+    <!-- Advanced Theme Extras -->
+    <string name="theme_section_extras">Theme extras</string>
+    <string name="theme_dynamic_accent">Material You accent</string>
+    <string name="theme_oled_surfaces">Pure black (OLED) surfaces</string>
+    <string name="theme_accent_only">Recolor accent only</string>
+    <string name="theme_accent_color">Accent color</string>
+    <string name="theme_dynamic_accent_unsupported">Material You needs Android 12 or newer</string>
     <string name="theme_rgba_format">R %1$d  G %2$d  B %3$d  A %4$d</string>
     <string name="theme_alpha_format">Opacity: %1$d%%</string>
     <string name="theme_slot_background">Background</string>

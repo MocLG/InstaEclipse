@@ -166,7 +166,7 @@ public class DialogUtils {
         // ---- APPEARANCE ---- look & feel: theme, feed, navigation bar, reels & stories
         mainLayout.addView(sectionHeader(context, I18n.t(context, R.string.feat_group_appearance)));
         LinearLayout appearance = createGroupCard(context);
-        appearance.addView(createMenuRow(context, R.drawable.ic_palette, I18n.t(context, R.string.ig_dialog_menu_theme), A_APPEARANCE, () -> showThemeOptions(context), onCount(context, "customThemeEnabled", "customFontEnabled", "customEmojiEnabled")));
+        appearance.addView(createMenuRow(context, R.drawable.ic_palette, I18n.t(context, R.string.ig_dialog_menu_theme), A_APPEARANCE, () -> showThemeOptions(context), onCount(context, "customThemeEnabled", "customFontEnabled", "customEmojiEnabled", "themeDynamicAccent", "themeOledSurfaces", "themeAccentOnly")));
         appearance.addView(createMenuRow(context, R.drawable.ic_sparkle, I18n.t(context, R.string.menu_feed), A_APPEARANCE, () -> showFeedOptions(context), onCount(context, "hideSuggestionsInFeed", "hideThreadsSuggestions", "hideSuggestionsInReels", "hidePaidPartnerships", "hideLikedPosts", "confirmFeedRefresh", "hideCommunityNotes", "followingOnlyFeed", "disableDiscoverPeople", "hideExploreGrid", "exploreNoPersonalization", "hideSearchSuggestions", "expandCaptions", "exactTimestamps", "enablePhotoZoom", "disableVideoAutoPlay", "hideFeedFollowButton", "hideFeedSaveButton", "hideFeedLikeButton", "hideFeedActivityBubbles", "hideFeedAudioIcon", "hideFeedMadeWithEdits", "hideFeedCaptions")));
         appearance.addView(createMenuRow(context, R.drawable.ic_tune, I18n.t(context, R.string.menu_navigation), A_APPEARANCE, () -> showNavigationOptions(context), navCount(context)));
         appearance.addView(createMenuRow(context, R.drawable.ic_movie, I18n.t(context, R.string.menu_reels), A_APPEARANCE, () -> showReelsOptions(context), onCount(context, "reelsAutoScroll", "reelsLockScroll", "forceReelScrubber", "holdLeftSlowMotion", "offerPlaybackSpeed", "keepVideoPlayingBackground", "videoPictureInPicture", "reelsBlurBars", "reelsHideFollow", "reelsHideMetaAi", "reelsHidePills", "reelsHideCommentBar", "hideAiReels", "hideReelsByCaption", "hideReelsByLanguage", "hideLowViewReels")));
@@ -2608,6 +2608,23 @@ public class DialogUtils {
         layout.addView(sectionHeader(context, I18n.t(context, R.string.theme_section_colors)));
         layout.addView(colorsCard);
 
+        // ---- Theme extras (layer on the engine; all default off) ----
+        // Material You accent + OLED surfaces modify the active custom theme; accent-only recolor
+        // works on its own (no full theme). Each applies live via invalidate + refresh.
+        Runnable refreshTheme = () -> {
+            ps.reso.instaeclipse.mods.ui.theme.IgThemeEngine.invalidate();
+            ps.reso.instaeclipse.mods.ui.theme.IgThemeHook.refreshCurrentActivity();
+        };
+        LinearLayout extrasCard = card(context);
+        extrasCard.addView(flagSwitch(context, R.drawable.ic_palette, "#FF2D55", R.string.theme_dynamic_accent, "themeDynamicAccent", refreshTheme));
+        extrasCard.addView(flagSwitch(context, R.drawable.ic_palette, "#FF2D55", R.string.theme_oled_surfaces, "themeOledSurfaces", refreshTheme));
+        extrasCard.addView(flagSwitch(context, R.drawable.ic_palette, "#FF2D55", R.string.theme_accent_only, "themeAccentOnly", refreshTheme));
+        extrasCard.addView(createActionRow(context, R.drawable.ic_palette,
+                I18n.t(context, R.string.theme_accent_color) + ": " + accentColorLabel(context, FeatureFlags.themeAccentColor),
+                "#FF2D55", v -> pickAccentColor(context)));
+        layout.addView(sectionHeader(context, I18n.t(context, R.string.theme_section_extras)));
+        layout.addView(extrasCard);
+
         // ---- Fonts & Emoji ----
         // Custom Font + Custom Emoji now live under Custom Theme (moved out of Misc). Both apply on
         // the next Instagram start (Typeface cache). Emoji uses the font-fallback method, so any
@@ -2628,6 +2645,38 @@ public class DialogUtils {
     private static String darkModeLabel(Context context, int value) {
         if (value == 0) return I18n.t(context, R.string.theme_section_custom);
         return ps.reso.instaeclipse.mods.ui.theme.ThemePresets.getDisplayName(context, value);
+    }
+
+    // Curated accent colors for the "Recolor accent only" picker (names, parallel RGB).
+    private static final String[] ACCENT_NAMES = {"Instagram Blue", "Purple", "Pink", "Red",
+            "Orange", "Green", "Teal", "Indigo", "Magenta", "Amber"};
+    private static final int[] ACCENT_COLORS = {0xFF3897F0, 0xFF7638FA, 0xFFD6005A, 0xFFE0010D,
+            0xFFD95700, 0xFF118841, 0xFF00838F, 0xFF5E5CE6, 0xFFFF2D92, 0xFFFFB300};
+
+    private static String accentColorLabel(Context context, int color) {
+        int rgb = color | 0xFF000000;
+        for (int i = 0; i < ACCENT_COLORS.length; i++) if (ACCENT_COLORS[i] == rgb) return ACCENT_NAMES[i];
+        return String.format("#%06X", rgb & 0xFFFFFF);
+    }
+
+    /** Accent color used by the "Recolor accent only" layer (also the dynamic-accent fallback). */
+    private static void pickAccentColor(Context context) {
+        int sel = 0;
+        int current = FeatureFlags.themeAccentColor | 0xFF000000;
+        for (int i = 0; i < ACCENT_COLORS.length; i++) if (ACCENT_COLORS[i] == current) sel = i;
+        new IeDialog(context)
+                .title(I18n.t(context, R.string.theme_accent_color))
+                .choices(ACCENT_NAMES, sel, which -> {
+                    FeatureFlags.themeAccentColor = ACCENT_COLORS[which];
+                    SettingsManager.saveAllFlags();
+                    if (currentDialog != null) {
+                        try { currentDialog.dismiss(); } catch (Exception ignored) {}
+                        currentDialog = null;
+                    }
+                    ps.reso.instaeclipse.mods.ui.theme.IgThemeEngine.invalidate();
+                    ps.reso.instaeclipse.mods.ui.theme.IgThemeHook.refreshCurrentActivity();
+                })
+                .show();
     }
 
     /** Dark-mode theme: one of the dark presets, or the custom palette when that is in use. */
