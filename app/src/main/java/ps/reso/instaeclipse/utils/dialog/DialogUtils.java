@@ -1229,6 +1229,8 @@ public class DialogUtils {
                 flagSwitch(context, R.drawable.ic_chat, "#5E5CE6", R.string.ig_dialog_ghost_edit_history, "keepEditHistory"),
                 flagSwitch(context, R.drawable.ic_jump_first, "#5E5CE6", R.string.ig_dialog_ghost_jump_first, "jumpToFirstMessage"),
                 flagSwitch(context, R.drawable.ic_shield, "#5E5CE6", R.string.ig_call_confirm, "confirmCalls"),
+                createActionRow(context, R.drawable.ic_block, I18n.t(context, R.string.ig_call_block_title), "#5E5CE6",
+                        v -> showCallBlockerOptions(context)),
                 flagSwitch(context, R.drawable.ic_camera, "#5E5CE6", R.string.ig_dialog_ghost_allow_screenshots_dms, "allowScreenshots"),
                 flagSwitch(context, R.drawable.ic_chat, "#5E5CE6", R.string.ig_dialog_translate_messages, "translateMessages"),
                 flagSwitch(context, R.drawable.ic_chat, "#5E5CE6", R.string.ig_dialog_bulk_unsend, "bulkUnsend"),
@@ -1242,6 +1244,67 @@ public class DialogUtils {
         showSectionDialog(context, I18n.t(context, R.string.menu_messages), layout, () -> {});
     }
 
+
+    private static String[] callBlockModeNames(Context context) {
+        return new String[]{
+                I18n.t(context, R.string.ig_call_block_mode_everyone),
+                I18n.t(context, R.string.ig_call_block_mode_nobody),
+                I18n.t(context, R.string.ig_call_block_mode_only),
+                I18n.t(context, R.string.ig_call_block_mode_except)};
+    }
+
+    /** Incoming-call blocker: pick one of the 4 modes and edit the account list. */
+    private static void showCallBlockerOptions(Context context) {
+        try {
+            IeDialog dlg = new IeDialog(context)
+                    .title(I18n.t(context, R.string.ig_call_block_title))
+                    .message(I18n.t(context, R.string.ig_call_block_note));
+
+            final String[] names = callBlockModeNames(context);
+            final int[] mode = { Math.max(0, Math.min(3, FeatureFlags.callBlockMode)) };
+
+            // Tappable row showing the current mode; opens a single-choice picker without closing this dialog.
+            final TextView modeRow = new TextView(context);
+            modeRow.setTextColor(dlg.text);
+            modeRow.setTextSize(15);
+            modeRow.setPadding(dlg.dp(16), dlg.dp(13), dlg.dp(14), dlg.dp(13));
+            modeRow.setBackground(dlg.cardBg());
+            modeRow.setText(I18n.t(context, R.string.ig_call_block_mode) + "  ·  " + names[mode[0]]);
+            modeRow.setOnClickListener(v -> new IeDialog(context)
+                    .title(I18n.t(context, R.string.ig_call_block_mode))
+                    .choices(names, mode[0], which -> {
+                        mode[0] = which;
+                        modeRow.setText(I18n.t(context, R.string.ig_call_block_mode) + "  ·  " + names[which]);
+                    })
+                    .show());
+            dlg.view(modeRow);
+
+            // Multi-line account list (caller names or user ids, one per line).
+            final android.widget.EditText accounts = new android.widget.EditText(context);
+            accounts.setHint(I18n.t(context, R.string.ig_call_block_accounts_hint));
+            accounts.setSingleLine(false);
+            accounts.setMinLines(3);
+            accounts.setGravity(Gravity.TOP | Gravity.START);
+            accounts.setInputType(android.text.InputType.TYPE_CLASS_TEXT
+                    | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                    | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            accounts.setTextColor(dlg.text);
+            accounts.setHintTextColor(dlg.sub);
+            accounts.setTextSize(15);
+            accounts.setBackground(dlg.round(dlg.field, 14));
+            accounts.setPadding(dlg.dp(16), dlg.dp(13), dlg.dp(16), dlg.dp(13));
+            accounts.setText(FeatureFlags.callBlockAccounts);
+            dlg.view(accounts);
+
+            dlg.secondary(context.getString(android.R.string.cancel), null);
+            dlg.primary(I18n.t(context, R.string.ig_profile_spoofer_save), () -> {
+                FeatureFlags.callBlockMode = mode[0];
+                FeatureFlags.callBlockAccounts = accounts.getText().toString().trim();
+                SettingsManager.saveAllFlags();
+            });
+            dlg.show();
+        } catch (Throwable ignored) {}
+    }
 
     private static void showAdOptions(Context context) {
         LinearLayout layout = createSwitchLayout(context);

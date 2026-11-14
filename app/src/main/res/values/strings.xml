@@ -875,6 +875,15 @@ Stay on this screen until it finishes.</string>
     <string name="ig_call_confirm_audio">Start an audio call?</string>
     <string name="ig_call_confirm_video">Start a video call?</string>
     <string name="ig_call_confirm_call">Call</string>
+    <string name="ig_call_block_title">Block Incoming Calls</string>
+    <string name="ig_call_block_note">Choose who can ring your phone with an Instagram call. A blocked call just goes unanswered for the caller — nothing is sent to Instagram.</string>
+    <string name="ig_call_block_mode">Who can call you</string>
+    <string name="ig_call_block_mode_everyone">Everyone (off)</string>
+    <string name="ig_call_block_mode_nobody">Nobody</string>
+    <string name="ig_call_block_mode_only">Only people on the list</string>
+    <string name="ig_call_block_mode_except">Everyone except the list</string>
+    <string name="ig_call_block_accounts">Accounts (one per line)</string>
+    <string name="ig_call_block_accounts_hint">Caller name or user id, one per line</string>
     <string name="ig_confirm_refresh">Ask Before Refreshing the Feed</string>
     <string name="ig_confirm_refresh_question">Refresh the feed?</string>
     <string name="ig_confirm_refresh_action">Refresh</string>
