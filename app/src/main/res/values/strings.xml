@@ -482,6 +482,20 @@
     <string name="ig_explore_hide_grid">Hide Explore Grid</string>
     <string name="ig_explore_no_personalization">Explore Without Personalization</string>
     <string name="ig_explore_hide_search_suggestions">Hide Search Suggestions</string>
+
+    <!-- Reel content filters -->
+    <string name="ig_reels_filter_section">Content filters</string>
+    <string name="ig_reels_filter_ai">Hide AI-labeled reels</string>
+    <string name="ig_reels_filter_caption">Hide reels by caption words</string>
+    <string name="ig_reels_filter_caption_hint">Words or phrases, one per line or comma-separated</string>
+    <string name="ig_reels_filter_language">Hide reels by language</string>
+    <string name="ig_reels_filter_language_hint">Languages to hide (e.g. Arabic, hi, Spanish)</string>
+    <string name="ig_reels_filter_low_views">Hide low-view / low-like reels</string>
+    <string name="ig_reels_filter_min_views">Minimum views</string>
+    <string name="ig_reels_filter_min_likes">Minimum likes</string>
+    <string name="ig_reels_filter_caption_title">Caption word filter</string>
+    <string name="ig_reels_filter_language_title">Language filter</string>
+    <string name="ig_reels_filter_threshold_title">View / like thresholds</string>
     <string name="ig_nav_settings_title">Navigation settings</string>
     <string name="ig_nav_tabs_title">Hide navigation tabs</string>
     <string name="ig_nav_name_home">Home</string>

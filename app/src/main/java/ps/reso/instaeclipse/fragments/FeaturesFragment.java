@@ -2105,6 +2105,20 @@ public class FeaturesFragment extends Fragment {
                 createExtrasSwitch("#32D74B", "reelsHideCommentBar")
         ));
 
+        defs.add(getString(R.string.ig_reels_filter_section));
+        defs.add(Arrays.asList(
+                createSwitch(R.drawable.ic_sparkle, "#32D74B", getString(R.string.ig_reels_filter_ai), "hideAiReels"),
+                createSwitch(R.drawable.ic_movie, "#32D74B", getString(R.string.ig_reels_filter_caption), "hideReelsByCaption"),
+                createClickable(R.drawable.ic_search, "#32D74B", getString(R.string.ig_reels_filter_caption_title),
+                        () -> ps.reso.instaeclipse.utils.dialog.DialogUtils.showReelCaptionWords(requireContext())),
+                createSwitch(R.drawable.ic_movie, "#32D74B", getString(R.string.ig_reels_filter_language), "hideReelsByLanguage"),
+                createClickable(R.drawable.ic_search, "#32D74B", getString(R.string.ig_reels_filter_language_title),
+                        () -> ps.reso.instaeclipse.utils.dialog.DialogUtils.showReelLanguages(requireContext())),
+                createSwitch(R.drawable.ic_movie, "#32D74B", getString(R.string.ig_reels_filter_low_views), "hideLowViewReels"),
+                createClickable(R.drawable.ic_movie, "#32D74B", getString(R.string.ig_reels_filter_threshold_title),
+                        () -> ps.reso.instaeclipse.utils.dialog.DialogUtils.showReelThresholds(requireContext()))
+        ));
+
         return defs;
     }
 

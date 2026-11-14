@@ -244,6 +244,15 @@ public class FeatureFlags {
     public static volatile boolean hideExploreGrid = false;          // drop the topical Explore grid fetch (Search tab)
     public static volatile boolean exploreNoPersonalization = false; // force IG's non-personalized Explore grid (EU/DSA param)
     public static volatile boolean hideSearchSuggestions = false;    // drop the search null-state suggested accounts/searches
+    // Reel content filters: drop reels from the Reels tab at parse time (fail-open)
+    public static volatile boolean hideAiReels = false;          // hide reels IG labeled as AI content
+    public static volatile boolean hideReelsByCaption = false;   // hide reels whose caption holds a blocked word
+    public static volatile String  reelsBlockedWords = "";       // caption words / phrases, comma- or newline-separated
+    public static volatile boolean hideReelsByLanguage = false;  // hide reels whose caption is in a listed language
+    public static volatile String  reelsBlockedLanguages = "";   // language codes / names to hide, comma- or newline-separated
+    public static volatile boolean hideLowViewReels = false;     // hide reels under the view / like thresholds
+    public static volatile int     reelMinViews = 0;             // minimum play/view count; 0 = ignore views
+    public static volatile int     reelMinLikes = 0;             // minimum like count; 0 = ignore likes
 
     // Downloader
     public static volatile boolean enablePostDownload = false;

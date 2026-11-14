@@ -169,7 +169,7 @@ public class DialogUtils {
         appearance.addView(createMenuRow(context, R.drawable.ic_palette, I18n.t(context, R.string.ig_dialog_menu_theme), A_APPEARANCE, () -> showThemeOptions(context), onCount(context, "customThemeEnabled", "customFontEnabled", "customEmojiEnabled")));
         appearance.addView(createMenuRow(context, R.drawable.ic_sparkle, I18n.t(context, R.string.menu_feed), A_APPEARANCE, () -> showFeedOptions(context), onCount(context, "hideSuggestionsInFeed", "hideThreadsSuggestions", "hideSuggestionsInReels", "hidePaidPartnerships", "hideLikedPosts", "confirmFeedRefresh", "hideCommunityNotes", "followingOnlyFeed", "disableDiscoverPeople", "hideExploreGrid", "exploreNoPersonalization", "hideSearchSuggestions", "expandCaptions", "exactTimestamps", "enablePhotoZoom", "disableVideoAutoPlay", "hideFeedFollowButton", "hideFeedSaveButton", "hideFeedLikeButton", "hideFeedActivityBubbles", "hideFeedAudioIcon", "hideFeedMadeWithEdits", "hideFeedCaptions")));
         appearance.addView(createMenuRow(context, R.drawable.ic_tune, I18n.t(context, R.string.menu_navigation), A_APPEARANCE, () -> showNavigationOptions(context), navCount(context)));
-        appearance.addView(createMenuRow(context, R.drawable.ic_movie, I18n.t(context, R.string.menu_reels), A_APPEARANCE, () -> showReelsOptions(context), onCount(context, "reelsAutoScroll", "reelsLockScroll", "forceReelScrubber", "holdLeftSlowMotion", "offerPlaybackSpeed", "keepVideoPlayingBackground", "videoPictureInPicture", "reelsBlurBars", "reelsHideFollow", "reelsHideMetaAi", "reelsHidePills", "reelsHideCommentBar")));
+        appearance.addView(createMenuRow(context, R.drawable.ic_movie, I18n.t(context, R.string.menu_reels), A_APPEARANCE, () -> showReelsOptions(context), onCount(context, "reelsAutoScroll", "reelsLockScroll", "forceReelScrubber", "holdLeftSlowMotion", "offerPlaybackSpeed", "keepVideoPlayingBackground", "videoPictureInPicture", "reelsBlurBars", "reelsHideFollow", "reelsHideMetaAi", "reelsHidePills", "reelsHideCommentBar", "hideAiReels", "hideReelsByCaption", "hideReelsByLanguage", "hideLowViewReels")));
         appearance.addView(createMenuRow(context, R.drawable.ic_story_ring, I18n.t(context, R.string.menu_stories), A_APPEARANCE, () -> showStoriesOptions(context), onCount(context, "disableStoryFlipping", "enableStoryMentions", "storyLinks", "storyInfo", "storyViewerSearch", "hideStoriesTray")));
         mainLayout.addView(appearance);
 
@@ -1722,7 +1722,96 @@ public class DialogUtils {
                 extraSwitch(context, "#FF375F", "reelsHidePills"),
                 extraSwitch(context, "#FF375F", "reelsHideCommentBar")));
 
+        layout.addView(sectionHeader(context, I18n.t(context, R.string.ig_reels_filter_section)));
+        layout.addView(cardOf(context,
+                flagSwitch(context, R.drawable.ic_sparkle, "#FF375F", R.string.ig_reels_filter_ai, "hideAiReels"),
+                flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_reels_filter_caption, "hideReelsByCaption"),
+                createActionRow(context, R.drawable.ic_search, I18n.t(context, R.string.ig_reels_filter_caption_title), "#FF375F",
+                        v -> showReelCaptionWords(context)),
+                flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_reels_filter_language, "hideReelsByLanguage"),
+                createActionRow(context, R.drawable.ic_search, I18n.t(context, R.string.ig_reels_filter_language_title), "#FF375F",
+                        v -> showReelLanguages(context)),
+                flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_reels_filter_low_views, "hideLowViewReels"),
+                createActionRow(context, R.drawable.ic_movie, I18n.t(context, R.string.ig_reels_filter_threshold_title), "#FF375F",
+                        v -> showReelThresholds(context))));
+
         showSectionDialog(context, I18n.t(context, R.string.menu_reels), layout, () -> {});
+    }
+
+    /** Multi-line caption word / phrase list for the reel caption filter. */
+    public static void showReelCaptionWords(Context context) {
+        try {
+            IeDialog dlg = new IeDialog(context).title(I18n.t(context, R.string.ig_reels_filter_caption_title));
+            final android.widget.EditText words = new android.widget.EditText(context);
+            words.setHint(I18n.t(context, R.string.ig_reels_filter_caption_hint));
+            words.setSingleLine(false);
+            words.setMinLines(3);
+            words.setGravity(Gravity.TOP | Gravity.START);
+            words.setInputType(android.text.InputType.TYPE_CLASS_TEXT
+                    | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                    | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            words.setTextColor(dlg.text);
+            words.setHintTextColor(dlg.sub);
+            words.setTextSize(15);
+            words.setBackground(dlg.round(dlg.field, 14));
+            words.setPadding(dlg.dp(16), dlg.dp(13), dlg.dp(16), dlg.dp(13));
+            words.setText(FeatureFlags.reelsBlockedWords);
+            dlg.view(words);
+            dlg.secondary(context.getString(android.R.string.cancel), null);
+            dlg.primary(I18n.t(context, R.string.ig_profile_spoofer_save), () -> {
+                FeatureFlags.reelsBlockedWords = words.getText().toString().trim();
+                SettingsManager.saveAllFlags();
+            });
+            dlg.show();
+        } catch (Throwable ignored) {}
+    }
+
+    /** Multi-line language list (codes or names) for the reel language filter. */
+    public static void showReelLanguages(Context context) {
+        try {
+            IeDialog dlg = new IeDialog(context).title(I18n.t(context, R.string.ig_reels_filter_language_title));
+            final android.widget.EditText langs = new android.widget.EditText(context);
+            langs.setHint(I18n.t(context, R.string.ig_reels_filter_language_hint));
+            langs.setSingleLine(false);
+            langs.setMinLines(2);
+            langs.setGravity(Gravity.TOP | Gravity.START);
+            langs.setInputType(android.text.InputType.TYPE_CLASS_TEXT
+                    | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                    | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            langs.setTextColor(dlg.text);
+            langs.setHintTextColor(dlg.sub);
+            langs.setTextSize(15);
+            langs.setBackground(dlg.round(dlg.field, 14));
+            langs.setPadding(dlg.dp(16), dlg.dp(13), dlg.dp(16), dlg.dp(13));
+            langs.setText(FeatureFlags.reelsBlockedLanguages);
+            dlg.view(langs);
+            dlg.secondary(context.getString(android.R.string.cancel), null);
+            dlg.primary(I18n.t(context, R.string.ig_profile_spoofer_save), () -> {
+                FeatureFlags.reelsBlockedLanguages = langs.getText().toString().trim();
+                SettingsManager.saveAllFlags();
+            });
+            dlg.show();
+        } catch (Throwable ignored) {}
+    }
+
+    /** Minimum view and like thresholds for the low-view reel filter (0 = ignore that count). */
+    public static void showReelThresholds(Context context) {
+        try {
+            IeDialog dlg = new IeDialog(context).title(I18n.t(context, R.string.ig_reels_filter_threshold_title));
+            android.widget.EditText views = dlg.input(I18n.t(context, R.string.ig_reels_filter_min_views));
+            views.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+            views.setText(String.valueOf(FeatureFlags.reelMinViews));
+            android.widget.EditText likes = dlg.input(I18n.t(context, R.string.ig_reels_filter_min_likes));
+            likes.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+            likes.setText(String.valueOf(FeatureFlags.reelMinLikes));
+            dlg.secondary(context.getString(android.R.string.cancel), null);
+            dlg.primary(I18n.t(context, R.string.ig_profile_spoofer_save), () -> {
+                FeatureFlags.reelMinViews = Math.max(0, parseSpoofCount(views.getText().toString()));
+                FeatureFlags.reelMinLikes = Math.max(0, parseSpoofCount(likes.getText().toString()));
+                SettingsManager.saveAllFlags();
+            });
+            dlg.show();
+        } catch (Throwable ignored) {}
     }
 
     private static void showStoriesOptions(Context context) {

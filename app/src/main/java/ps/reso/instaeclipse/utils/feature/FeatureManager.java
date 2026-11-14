@@ -125,6 +125,29 @@ public class FeatureManager {
         reg(FeatureFlags.hideExploreGrid,          "HideExploreGrid",         R.string.ig_explore_hide_grid);
         reg(FeatureFlags.exploreNoPersonalization, "ExploreNoPersonalization", R.string.ig_explore_no_personalization);
         reg(FeatureFlags.hideSearchSuggestions,    "HideSearchSuggestions",   R.string.ig_explore_hide_search_suggestions);
+        if (FeatureFlags.hideAiReels) {
+            FeatureStatusTracker.setEnabled("HideAiReels", R.string.ig_reels_filter_ai);
+        } else {
+            FeatureStatusTracker.setDisabled("HideAiReels");
+        }
+
+        if (FeatureFlags.hideReelsByCaption) {
+            FeatureStatusTracker.setEnabled("HideReelsByCaption", R.string.ig_reels_filter_caption);
+        } else {
+            FeatureStatusTracker.setDisabled("HideReelsByCaption");
+        }
+
+        if (FeatureFlags.hideReelsByLanguage) {
+            FeatureStatusTracker.setEnabled("HideReelsByLanguage", R.string.ig_reels_filter_language);
+        } else {
+            FeatureStatusTracker.setDisabled("HideReelsByLanguage");
+        }
+
+        if (FeatureFlags.hideLowViewReels) {
+            FeatureStatusTracker.setEnabled("HideLowViewReels", R.string.ig_reels_filter_low_views);
+        } else {
+            FeatureStatusTracker.setDisabled("HideLowViewReels");
+        }
 
         if (FeatureFlags.expandCaptions) {
             FeatureStatusTracker.setEnabled("ExpandCaptions", R.string.ig_dialog_clean_feed_expand_captions);

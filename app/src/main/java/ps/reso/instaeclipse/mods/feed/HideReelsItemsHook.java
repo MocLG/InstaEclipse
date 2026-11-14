@@ -59,6 +59,7 @@ public class HideReelsItemsHook {
 
     public void install(DexKitBridge bridge, ClassLoader classLoader) {
         PaidPartnershipFilter.install(bridge, classLoader);
+        ReelContentFilter.install(bridge, classLoader);
 
         netegoClasses = classesUsing(bridge, "XDTNetEgoMediaItem");
         adClasses = classesUsing(bridge, "XDTAdMediaItem");
@@ -91,7 +92,8 @@ public class HideReelsItemsHook {
             @Override
             protected void afterHookedMethod(MethodHookParam param) {
                 ps.reso.instaeclipse.utils.core.JitGuard.tick(param.method);
-                if (!FeatureFlags.hideSuggestionsInReels && !FeatureFlags.hidePaidPartnerships) return;
+                if (!FeatureFlags.hideSuggestionsInReels && !FeatureFlags.hidePaidPartnerships
+                        && !ReelContentFilter.anyOn()) return;
                 Object item = param.getResult();
                 if (item == null) return;
                 try {
@@ -104,11 +106,16 @@ public class HideReelsItemsHook {
             @Override
             protected void afterHookedMethod(MethodHookParam param) {
                 ps.reso.instaeclipse.utils.core.JitGuard.tick(param.method);
-                if (!FeatureFlags.hidePaidPartnerships || LIST_DEPTH.get()[0] <= 0) return;
+                if (LIST_DEPTH.get()[0] <= 0) return;
+                boolean paid = FeatureFlags.hidePaidPartnerships;
+                boolean content = ReelContentFilter.anyOn();
+                if (!paid && !content) return;
                 Object item = param.getResult();
                 if (item == null) return;
                 try {
-                    if (PaidPartnershipFilter.shouldHide(mediaOf(item))) param.setResult(null);
+                    Object media = mediaOf(item);
+                    if ((paid && PaidPartnershipFilter.shouldHide(media))
+                            || (content && ReelContentFilter.shouldHide(media))) param.setResult(null);
                 } catch (Throwable ignored) {}
             }
         };
@@ -123,14 +130,21 @@ public class HideReelsItemsHook {
                 FeatureStatusTracker.setHooked("HideSuggestionsInReels");
             if (FeatureFlags.hidePaidPartnerships && PaidPartnershipFilter.isReady())
                 FeatureStatusTracker.setHooked("HidePaidPartnerships");
+            if (ReelContentFilter.isReady()) {
+                if (FeatureFlags.hideAiReels) FeatureStatusTracker.setHooked("HideAiReels");
+                if (FeatureFlags.hideReelsByCaption) FeatureStatusTracker.setHooked("HideReelsByCaption");
+                if (FeatureFlags.hideReelsByLanguage) FeatureStatusTracker.setHooked("HideReelsByLanguage");
+                if (FeatureFlags.hideLowViewReels) FeatureStatusTracker.setHooked("HideLowViewReels");
+            }
         }
     }
 
     private static boolean shouldDropUnion(Object item) {
         Object media = mediaOf(item);
         if (media != null) {
-            // Paid partnerships are only dropped inside a clips list (never a lone parsed reel).
-            return LIST_DEPTH.get()[0] > 0 && PaidPartnershipFilter.shouldHide(media);
+            // Reel-content and paid filters only drop inside a clips list (never a lone parsed reel).
+            if (LIST_DEPTH.get()[0] <= 0) return false;
+            return PaidPartnershipFilter.shouldHide(media) || ReelContentFilter.shouldHide(media);
         }
         // Only a media-or-unit item (declares a Media field) is ever dropped, never a container.
         if (mediaFields(item.getClass()).length == 0) return false;
