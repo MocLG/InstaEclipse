@@ -327,6 +327,20 @@ public class IGNetworkInterceptor {
                                                 || uri.getPath().contains("/discover/topical_explore_stream")
                                                 || (host != null && host.contains("i.instagram.com") && uri.getPath().contains("/api/v1/fbsearch/top_serp/"));
                                     }
+                                    // Explore cleanup: hide the Explore grid. The Search tab's grid is the
+                                    // topical_explore fetch (and its stream variant); search, recent searches
+                                    // and search results are other endpoints and stay. Fail-open.
+                                    if (FeatureFlags.hideExploreGrid) {
+                                        shouldDrop |= uri.getPath().contains("/discover/topical_explore");
+                                    }
+                                    // Explore cleanup: hide search suggestions. The "Suggested for you" null
+                                    // state shown when the search bar is tapped before typing comes from
+                                    // nullstate_dynamic_sections / accounts_recs; typed search and recent
+                                    // searches use other endpoints and stay. Fail-open.
+                                    if (FeatureFlags.hideSearchSuggestions) {
+                                        shouldDrop |= uri.getPath().contains("/fbsearch/nullstate_dynamic_sections/")
+                                                || uri.getPath().contains("/fbsearch/accounts_recs/");
+                                    }
                                     // Suggested accounts under the DM inbox (#282): the inbox's
                                     // "empty state" unit carries them; the chat list is unaffected.
                                     if (FeatureFlags.hideDmSuggestions) {
@@ -399,7 +413,8 @@ public class IGNetworkInterceptor {
                 hookChainEntry(classLoader, random_param_1, random_param_2, random_param_3, dropHook);
                 // These act on every matching request, so they are in place once the hook is.
                 for (String key : new String[]{"BlockAnalytics", "DisableStoriesSection", "DisableFeedSection",
-                        "DisableReelsSection", "DisableExploreSection", "DisableCommentsSection", "HideDmSuggestions"})
+                        "DisableReelsSection", "DisableExploreSection", "DisableCommentsSection", "HideDmSuggestions",
+                        "HideExploreGrid", "HideSearchSuggestions"})
                     FeatureStatusTracker.setHooked(key);
             } else {
                 ModuleLog.line("(InstaEclipse | Interceptor): Could not resolve required classes or fields.");

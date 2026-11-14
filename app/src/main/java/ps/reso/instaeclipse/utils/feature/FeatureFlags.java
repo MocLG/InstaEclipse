@@ -240,6 +240,11 @@ public class FeatureFlags {
     public static volatile boolean hideSuggestionsInReels = false; // drop suggested-account (netego) units from the Reels tab (#298)
     public static volatile boolean hidePaidPartnerships = false; // drop paid partnership / sponsored posts and reels at parse time (#275)
 
+    // Explore cleanup — hide the Explore grid, request the non-personalized grid, hide search suggestions
+    public static volatile boolean hideExploreGrid = false;          // drop the topical Explore grid fetch (Search tab)
+    public static volatile boolean exploreNoPersonalization = false; // force IG's non-personalized Explore grid (EU/DSA param)
+    public static volatile boolean hideSearchSuggestions = false;    // drop the search null-state suggested accounts/searches
+
     // Downloader
     public static volatile boolean enablePostDownload = false;
     public static volatile boolean enableStoryDownload = false;

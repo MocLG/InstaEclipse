@@ -943,6 +943,14 @@ public class Module {
                         ModuleLog.line("(InstaEclipse | StopWakeups): ❌ Failed to hook");
                     }
 
+                    // Explore cleanup: request the non-personalized Explore grid (param injection)
+                    try {
+                        if (!skip("ExploreNoPersonalizationHook"))
+                            ps.reso.instaeclipse.mods.network.ExploreNoPersonalizationHook.install(dexKitBridge, hostClassLoader);
+                    } catch (Throwable ignored) {
+                        ModuleLog.line("(InstaEclipse | ExploreNoPersonalization): ❌ Failed to hook");
+                    }
+
                     // Crash guard: drop tasks rejected by already-shut-down executors (carousel/
                     // realtime teardown race on IG 446+/447.0.0.39+) instead of letting AbortPolicy
                     // throw and hard-crash the app.

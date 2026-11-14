@@ -128,6 +128,9 @@ public class SettingsBackupManager {
         s.put("disableExplore",          FeatureFlags.disableExplore);
         s.put("disableComments",         FeatureFlags.disableComments);
         s.put("disableDiscoverPeople",   FeatureFlags.disableDiscoverPeople);
+        s.put("hideExploreGrid",         FeatureFlags.hideExploreGrid);
+        s.put("exploreNoPersonalization", FeatureFlags.exploreNoPersonalization);
+        s.put("hideSearchSuggestions",   FeatureFlags.hideSearchSuggestions);
 
         // Miscellaneous
         s.put("disableStoryFlipping",    FeatureFlags.disableStoryFlipping);
@@ -329,6 +332,9 @@ public class SettingsBackupManager {
         if (s.has("disableExplore"))         FeatureFlags.disableExplore         = s.getBoolean("disableExplore");
         if (s.has("disableComments"))        FeatureFlags.disableComments        = s.getBoolean("disableComments");
         if (s.has("disableDiscoverPeople"))  FeatureFlags.disableDiscoverPeople  = s.getBoolean("disableDiscoverPeople");
+        if (s.has("hideExploreGrid"))        FeatureFlags.hideExploreGrid        = s.getBoolean("hideExploreGrid");
+        if (s.has("exploreNoPersonalization")) FeatureFlags.exploreNoPersonalization = s.getBoolean("exploreNoPersonalization");
+        if (s.has("hideSearchSuggestions"))  FeatureFlags.hideSearchSuggestions  = s.getBoolean("hideSearchSuggestions");
 
         if (s.has("disableStoryFlipping"))   FeatureFlags.disableStoryFlipping   = s.getBoolean("disableStoryFlipping");
         if (s.has("disableVideoAutoPlay"))   FeatureFlags.disableVideoAutoPlay   = s.getBoolean("disableVideoAutoPlay");

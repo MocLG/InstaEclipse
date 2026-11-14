@@ -97,6 +97,9 @@ public class SettingsManager {
         editor.putBoolean("disableComments", FeatureFlags.disableComments);
 
         // Clean Feed
+        editor.putBoolean("hideExploreGrid", FeatureFlags.hideExploreGrid);
+        editor.putBoolean("exploreNoPersonalization", FeatureFlags.exploreNoPersonalization);
+        editor.putBoolean("hideSearchSuggestions", FeatureFlags.hideSearchSuggestions);
         editor.putBoolean("hideSuggestionsInFeed", FeatureFlags.hideSuggestionsInFeed);
         editor.putBoolean("hideThreadsSuggestions", FeatureFlags.hideThreadsSuggestions);
         editor.putBoolean("hideSuggestionsInReels", FeatureFlags.hideSuggestionsInReels);
@@ -349,6 +352,9 @@ public class SettingsManager {
         FeatureFlags.disableComments = prefs.getBoolean("disableComments", false);
 
         // Clean Feed
+        FeatureFlags.hideExploreGrid = prefs.getBoolean("hideExploreGrid", false);
+        FeatureFlags.exploreNoPersonalization = prefs.getBoolean("exploreNoPersonalization", false);
+        FeatureFlags.hideSearchSuggestions = prefs.getBoolean("hideSearchSuggestions", false);
         FeatureFlags.hideSuggestionsInFeed = prefs.getBoolean("hideSuggestionsInFeed", false);
         FeatureFlags.hideThreadsSuggestions = prefs.getBoolean("hideThreadsSuggestions", false);
         FeatureFlags.hideSuggestionsInReels = prefs.getBoolean("hideSuggestionsInReels", false);

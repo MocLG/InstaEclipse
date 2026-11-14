@@ -121,6 +121,11 @@ public class FeatureManager {
             FeatureStatusTracker.setDisabled("HidePaidPartnerships");
         }
 
+        // Explore cleanup
+        reg(FeatureFlags.hideExploreGrid,          "HideExploreGrid",         R.string.ig_explore_hide_grid);
+        reg(FeatureFlags.exploreNoPersonalization, "ExploreNoPersonalization", R.string.ig_explore_no_personalization);
+        reg(FeatureFlags.hideSearchSuggestions,    "HideSearchSuggestions",   R.string.ig_explore_hide_search_suggestions);
+
         if (FeatureFlags.expandCaptions) {
             FeatureStatusTracker.setEnabled("ExpandCaptions", R.string.ig_dialog_clean_feed_expand_captions);
         } else {

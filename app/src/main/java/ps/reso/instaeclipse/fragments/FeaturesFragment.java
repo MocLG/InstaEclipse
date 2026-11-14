@@ -1216,6 +1216,13 @@ public class FeaturesFragment extends Fragment {
                 createSwitch(R.drawable.ic_block, "#64D2FF", getString(R.string.ig_dialog_misc_disable_discover_people), "disableDiscoverPeople")
         ));
 
+        defs.add(getString(R.string.ig_dialog_menu_explore));
+        defs.add(Arrays.asList(
+                createSwitch(R.drawable.ic_search, "#64D2FF", getString(R.string.ig_explore_hide_grid), "hideExploreGrid"),
+                createSwitch(R.drawable.ic_search, "#64D2FF", getString(R.string.ig_explore_no_personalization), "exploreNoPersonalization"),
+                createSwitch(R.drawable.ic_search, "#64D2FF", getString(R.string.ig_explore_hide_search_suggestions), "hideSearchSuggestions")
+        ));
+
         defs.add(getString(R.string.feat_options));
         defs.add(Arrays.asList(
                 createSwitch(R.drawable.ic_sparkle, "#64D2FF", getString(R.string.ig_dialog_clean_feed_expand_captions), "expandCaptions"),

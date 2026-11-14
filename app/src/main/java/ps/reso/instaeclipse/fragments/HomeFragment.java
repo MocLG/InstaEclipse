@@ -78,6 +78,7 @@ public class HomeFragment extends Fragment {
             "isAdBlockEnabled", "isAnalyticsBlocked", "disableTrackingLinks", "openLinksExternally",
             // Clean feed
             "hideSuggestionsInFeed", "hideThreadsSuggestions", "hideSuggestionsInReels", "hidePaidPartnerships", "hideLikedPosts", "confirmFeedRefresh", "hideCommunityNotes", "followingOnlyFeed",
+            "hideExploreGrid", "exploreNoPersonalization", "hideSearchSuggestions",
             "hidePlusUpsells", "freeAppIcons", "glassTabBar", "expandCaptions",
             // Distraction-free
             "disableStories", "disableFeed", "disableReels", "disableReelsExceptDM", "disableExplore",
