@@ -74,7 +74,12 @@ final class SignatureReader {
                 if (id == V2_BLOCK_ID) v2 = value;
                 else if (id == V3_BLOCK_ID) v3 = value;
             }
-            byte[] scheme = v2 != null ? v2 : v3;
+            // Prefer V3: on a key-rotated app the V2 block carries the OLD key (kept for
+            // backward compatibility) while V3 carries the CURRENT signer plus the rotation
+            // lineage. Reading V2 first would report a stale certificate (e.g. IG 455 rotated
+            // from the 2012 cert to a new one); the current signer is what the stock app reports
+            // to its own signature checks, so that's what the bypass must hand back.
+            byte[] scheme = v3 != null ? v3 : v2;
             return scheme == null ? null : firstCertificate(scheme);
         } catch (Throwable t) {
             return null;
