@@ -39,6 +39,10 @@ public final class CompanionBridge {
     // Official Instagram signing identity; never enroll a host by package name alone.
     // hasSigningCertificate also validates its signing-history descendants (APK v3 rotation).
     private static final String HOST_SIGNER_SHA256 = "5f3e50f435583c9ae626302a71f7340044087a7e2c60adacfc254205a993e305";
+    // SHA-256 of OUR no-root patcher's bundled signing key. A build we patched is re-signed with
+    // this key, so trusting it directly is rotation-proof (it never depends on Instagram's own
+    // certificate, which changes on key rotation) and spares the user a manual "trust" step.
+    private static final String PATCHER_SIGNER_SHA256 = "c081890cf2a1adf13e56d7b50a4f3d8edb35b7c46d6ccc732dd997b7e433be1d";
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static final ThreadPoolExecutor IPC = new ThreadPoolExecutor(2, 2, 30, TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(16), new ThreadPoolExecutor.AbortPolicy());
@@ -56,6 +60,13 @@ public final class CompanionBridge {
             for (int i = 0; i < expected.length; i++)
                 expected[i] = (byte) Integer.parseInt(HOST_SIGNER_SHA256.substring(i * 2, i * 2 + 2), 16);
             if (context.getPackageManager().hasSigningCertificate(packageName, expected, PackageManager.CERT_INPUT_SHA256))
+                return true;
+            // Trust a build re-signed with our own patcher key (what the no-root patcher produces),
+            // regardless of which original cert its sigbypass reports — so a patched Instagram works
+            // without the user approving it, and it keeps working across Instagram key rotations.
+            byte[] patcher = hex(PATCHER_SIGNER_SHA256);
+            if (patcher != null && context.getPackageManager()
+                    .hasSigningCertificate(packageName, patcher, PackageManager.CERT_INPUT_SHA256))
                 return true;
             if (lspatchOriginalSigner(context, packageName, expected)) return true;
             return userTrusted(context, packageName);
