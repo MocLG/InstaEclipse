@@ -65,6 +65,8 @@ public class SettingsBackupManager {
         s.put("offerCopyImage",             FeatureFlags.offerCopyImage);
         s.put("offerMediaInfo",             FeatureFlags.offerMediaInfo);
         s.put("offerPlaybackSpeed",         FeatureFlags.offerPlaybackSpeed);
+        s.put("keepVideoPlayingBackground", FeatureFlags.keepVideoPlayingBackground);
+        s.put("videoPictureInPicture",      FeatureFlags.videoPictureInPicture);
         s.put("maxUploadQuality",           FeatureFlags.maxUploadQuality);
         s.put("forceReelScrubber",          FeatureFlags.forceReelScrubber);
         s.put("holdLeftSlowMotion",         FeatureFlags.holdLeftSlowMotion);
@@ -252,6 +254,8 @@ public class SettingsBackupManager {
         if (s.has("offerCopyImage"))            FeatureFlags.offerCopyImage            = s.getBoolean("offerCopyImage");
         if (s.has("offerMediaInfo"))            FeatureFlags.offerMediaInfo            = s.getBoolean("offerMediaInfo");
         if (s.has("offerPlaybackSpeed"))        FeatureFlags.offerPlaybackSpeed        = s.getBoolean("offerPlaybackSpeed");
+        if (s.has("keepVideoPlayingBackground")) FeatureFlags.keepVideoPlayingBackground = s.getBoolean("keepVideoPlayingBackground");
+        if (s.has("videoPictureInPicture"))     FeatureFlags.videoPictureInPicture     = s.getBoolean("videoPictureInPicture");
         if (s.has("maxUploadQuality"))          FeatureFlags.maxUploadQuality          = s.getBoolean("maxUploadQuality");
         if (s.has("forceReelScrubber"))         FeatureFlags.forceReelScrubber         = s.getBoolean("forceReelScrubber");
         if (s.has("holdLeftSlowMotion"))        FeatureFlags.holdLeftSlowMotion        = s.getBoolean("holdLeftSlowMotion");

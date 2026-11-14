@@ -79,6 +79,8 @@ public class FeatureFlags {
     public static volatile boolean keepEditHistory = false; // show previous text of edited DMs (#243)
     public static volatile boolean offerMediaInfo = false; // "Media info" row in the post menu (#231)
     public static volatile boolean offerPlaybackSpeed = false; // "Playback speed" row for feed videos (#247)
+    public static volatile boolean keepVideoPlayingBackground = false; // keep feed/story/reel video audio playing when you leave the app
+    public static volatile boolean videoPictureInPicture = false; // force Instagram's native reel picture-in-picture window on exit
     public static volatile boolean forceReelScrubber = false; // always show IG's reel seek bar (#247)
     public static volatile boolean holdLeftSlowMotion = false; // hold the left half of a reel: 0.5x instead of IG's 2x
     public static volatile boolean offerCopyImage = false; // offer "Copy image to clipboard" when downloading a photo (#228)

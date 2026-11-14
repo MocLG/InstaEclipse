@@ -2070,6 +2070,8 @@ public class FeaturesFragment extends Fragment {
                 createSwitch(R.drawable.ic_movie, "#32D74B", getString(R.string.ig_dialog_downloader_reel_scrubber), "forceReelScrubber"),
                 createSwitch(R.drawable.ic_movie, "#32D74B", getString(R.string.ig_dialog_reels_hold_left_slow), "holdLeftSlowMotion"),
                 createSwitch(R.drawable.ic_movie, "#32D74B", getString(R.string.ig_dialog_downloader_offer_speed), "offerPlaybackSpeed"),
+                createSwitch(R.drawable.ic_movie, "#32D74B", getString(R.string.ig_background_play_title), "keepVideoPlayingBackground"),
+                createSwitch(R.drawable.ic_movie, "#32D74B", getString(R.string.ig_video_pip_title), "videoPictureInPicture"),
                 createExtrasSwitch("#32D74B", "reelsBlurBars")
         ));
         defs.add(getString(R.string.ig_dialog_reels_clean_up));

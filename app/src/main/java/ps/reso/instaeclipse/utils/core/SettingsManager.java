@@ -108,6 +108,8 @@ public class SettingsManager {
         editor.putBoolean("offerCopyImage", FeatureFlags.offerCopyImage);
         editor.putBoolean("offerMediaInfo", FeatureFlags.offerMediaInfo);
         editor.putBoolean("offerPlaybackSpeed", FeatureFlags.offerPlaybackSpeed);
+        editor.putBoolean("keepVideoPlayingBackground", FeatureFlags.keepVideoPlayingBackground);
+        editor.putBoolean("videoPictureInPicture", FeatureFlags.videoPictureInPicture);
         editor.putBoolean("maxUploadQuality", FeatureFlags.maxUploadQuality);
         editor.putBoolean("forceReelScrubber", FeatureFlags.forceReelScrubber);
         editor.putBoolean("holdLeftSlowMotion", FeatureFlags.holdLeftSlowMotion);
@@ -343,6 +345,8 @@ public class SettingsManager {
         FeatureFlags.offerCopyImage = prefs.getBoolean("offerCopyImage", false);
         FeatureFlags.offerMediaInfo = prefs.getBoolean("offerMediaInfo", false);
         FeatureFlags.offerPlaybackSpeed = prefs.getBoolean("offerPlaybackSpeed", false);
+        FeatureFlags.keepVideoPlayingBackground = prefs.getBoolean("keepVideoPlayingBackground", false);
+        FeatureFlags.videoPictureInPicture = prefs.getBoolean("videoPictureInPicture", false);
         FeatureFlags.maxUploadQuality = prefs.getBoolean("maxUploadQuality", false);
         FeatureFlags.forceReelScrubber = prefs.getBoolean("forceReelScrubber", false);
         FeatureFlags.holdLeftSlowMotion = prefs.getBoolean("holdLeftSlowMotion", false);

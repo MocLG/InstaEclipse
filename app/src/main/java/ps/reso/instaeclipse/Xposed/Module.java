@@ -568,6 +568,20 @@ public class Module {
                         ModuleLog.line("(InstaEclipse | PlaybackSpeed): ❌ Failed to hook");
                     }
 
+                    // Keep feed/story/reel video playing (audio) when you leave the app
+                    try {
+                        if (!skip("BackgroundPlayHook")) new ps.reso.instaeclipse.mods.media.BackgroundPlayHook().install(dexKitBridge, hostClassLoader);
+                    } catch (Throwable ignored) {
+                        ModuleLog.line("(InstaEclipse | BackgroundPlay): ❌ Failed to hook");
+                    }
+
+                    // Reels Picture-in-Picture: unlock Instagram's native floating reel window
+                    try {
+                        if (!skip("VideoPipHook")) new ps.reso.instaeclipse.mods.media.VideoPipHook().install(dexKitBridge, hostClassLoader);
+                    } catch (Throwable ignored) {
+                        ModuleLog.line("(InstaEclipse | VideoPiP): ❌ Failed to hook");
+                    }
+
                     // Hide the DM Notes tray (#241)
                     try {
                         if (!skip("HideNotesTrayHook")) new ps.reso.instaeclipse.mods.ui.HideNotesTrayHook().install(dexKitBridge);

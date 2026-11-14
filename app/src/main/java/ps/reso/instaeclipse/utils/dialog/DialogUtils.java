@@ -169,7 +169,7 @@ public class DialogUtils {
         appearance.addView(createMenuRow(context, R.drawable.ic_palette, I18n.t(context, R.string.ig_dialog_menu_theme), A_APPEARANCE, () -> showThemeOptions(context), onCount(context, "customThemeEnabled", "customFontEnabled", "customEmojiEnabled")));
         appearance.addView(createMenuRow(context, R.drawable.ic_sparkle, I18n.t(context, R.string.menu_feed), A_APPEARANCE, () -> showFeedOptions(context), onCount(context, "hideSuggestionsInFeed", "hideThreadsSuggestions", "hideSuggestionsInReels", "hidePaidPartnerships", "hideLikedPosts", "confirmFeedRefresh", "hideCommunityNotes", "followingOnlyFeed", "disableDiscoverPeople", "expandCaptions", "exactTimestamps", "enablePhotoZoom", "disableVideoAutoPlay")));
         appearance.addView(createMenuRow(context, R.drawable.ic_tune, I18n.t(context, R.string.menu_navigation), A_APPEARANCE, () -> showNavigationOptions(context), navCount(context)));
-        appearance.addView(createMenuRow(context, R.drawable.ic_movie, I18n.t(context, R.string.menu_reels), A_APPEARANCE, () -> showReelsOptions(context), onCount(context, "reelsAutoScroll", "reelsLockScroll", "forceReelScrubber", "holdLeftSlowMotion", "offerPlaybackSpeed", "reelsBlurBars", "reelsHideFollow", "reelsHideMetaAi", "reelsHidePills", "reelsHideCommentBar")));
+        appearance.addView(createMenuRow(context, R.drawable.ic_movie, I18n.t(context, R.string.menu_reels), A_APPEARANCE, () -> showReelsOptions(context), onCount(context, "reelsAutoScroll", "reelsLockScroll", "forceReelScrubber", "holdLeftSlowMotion", "offerPlaybackSpeed", "keepVideoPlayingBackground", "videoPictureInPicture", "reelsBlurBars", "reelsHideFollow", "reelsHideMetaAi", "reelsHidePills", "reelsHideCommentBar")));
         appearance.addView(createMenuRow(context, R.drawable.ic_story_ring, I18n.t(context, R.string.menu_stories), A_APPEARANCE, () -> showStoriesOptions(context), onCount(context, "disableStoryFlipping", "enableStoryMentions", "storyLinks", "storyInfo", "storyViewerSearch", "hideStoriesTray")));
         mainLayout.addView(appearance);
 
@@ -1695,6 +1695,8 @@ public class DialogUtils {
                 flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_dialog_downloader_reel_scrubber, "forceReelScrubber"),
                 flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_dialog_reels_hold_left_slow, "holdLeftSlowMotion"),
                 flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_dialog_downloader_offer_speed, "offerPlaybackSpeed"),
+                flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_background_play_title, "keepVideoPlayingBackground"),
+                flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_video_pip_title, "videoPictureInPicture"),
                 extraSwitch(context, "#FF375F", "reelsBlurBars")));
 
         layout.addView(sectionHeader(context, I18n.t(context, R.string.ig_dialog_reels_clean_up)));
