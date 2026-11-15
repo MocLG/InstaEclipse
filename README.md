@@ -328,8 +328,8 @@ All chat tools live in one InstaEclipse button in the chat header, next to the b
 
 | | |
 |---|---|
-| **Tested on** | Instagram `451.0.0.20.80` |
-| **Get this version** | [Instagram 451.0.0.20.80 on APKMirror](https://www.apkmirror.com/apk/instagram/instagram-instagram/instagram-451-0-0-20-80-release/) |
+| **Tested on** | Instagram `455.0.0.8.72` |
+| **Get this version** | [Instagram 455.0.0.8.72 on APKMirror](https://www.apkmirror.com/apk/instagram/instagram-instagram/instagram-455-0-0-8-72-release/) |
 | **Survives updates** | Yes, DexKit finds what it needs at runtime |
 | **Android** | 9 and newer |
 | **Frameworks** | Vector 2.2 or newer (root), LSPatch 1.0 or newer (no root); the Legacy build (`-L`) for LSPosed and other frameworks on the classic API |
@@ -340,7 +340,7 @@ A big Instagram update can still knock a feature out until it is patched. The me
 
 ## Installation
 
-> Get Instagram [451.0.0.20.80 from APKMirror](https://www.apkmirror.com/apk/instagram/instagram-instagram/instagram-451-0-0-20-80-release/) rather than the Play Store. The Play build is not always fully supported.
+> Get Instagram [455.0.0.8.72 from APKMirror](https://www.apkmirror.com/apk/instagram/instagram-instagram/instagram-455-0-0-8-72-release/) rather than the Play Store. The Play build is not always fully supported.
 
 Download the latest InstaEclipse APK from [**Releases**](https://github.com/ReSo7200/InstaEclipse/releases/latest), then follow the path for your phone. Each release has two builds with the same features:
 
@@ -423,7 +423,7 @@ That happens on Instagram's Stable build. Use a Beta or Alpha build from APKMirr
 Force stop Instagram and clear its cache, then open it again.
 
 **It does not work on the Play Store version.**
-Install [Instagram 451.0.0.20.80 from APKMirror](https://www.apkmirror.com/apk/instagram/instagram-instagram/instagram-451-0-0-20-80-release/) instead.
+Install [Instagram 455.0.0.8.72 from APKMirror](https://www.apkmirror.com/apk/instagram/instagram-instagram/instagram-455-0-0-8-72-release/) instead.
 
 **Still stuck?**
 Ask in the [Telegram group](https://t.me/Eclipse_Mods_Discussion). Someone will help.
