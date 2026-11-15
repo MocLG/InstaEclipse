@@ -137,6 +137,17 @@ public class InstantUploadHook {
         }
 
         static SwapBinding resolve(Class<?> vm, Class<?> contextType, Class<?> bitmapType) {
+            // ≤452 published the capture handoff as a STATIC helper that carries its own view-model
+            // in an argument slot (onCaptured$3$1 invoke-static). 455 moved the photo handoff onto
+            // the view model itself (onCaptured$3$1 invoke-virtual A15), so the view model is now the
+            // receiver and no longer a parameter. Prefer the static shape for the older builds; fall
+            // back to the instance shape only when no unique static handoff exists.
+            SwapBinding found = resolveStatic(vm, contextType, bitmapType);
+            if (found != null) return found;
+            return resolveInstance(vm, contextType, bitmapType);
+        }
+
+        private static SwapBinding resolveStatic(Class<?> vm, Class<?> contextType, Class<?> bitmapType) {
             SwapBinding found = null;
             for (Method method : ps.reso.instaeclipse.utils.core.SafeReflect.methods(vm)) {
                 if (!Modifier.isStatic(method.getModifiers()) || method.getReturnType() != Object.class) continue;
@@ -164,14 +175,49 @@ public class InstantUploadHook {
             return found;
         }
 
+        /**
+         * 455 handoff: an instance method on the view model
+         *   A15(Context, Bitmap, model, …, String, String, …, float, long, boolean) → Object
+         * taking the captured Bitmap at arg[1]. Because it is an instance method, the view model is
+         * the receiver (thisObject), not a parameter — so there is NO owner slot, which is exactly
+         * what tells the single photo handoff apart from the static video/File path (A06, which still
+         * carries a File + an owner slot). Anchored on: non-static, returns Object, Context+Bitmap
+         * lead, a model type at arg[2], a single Bitmap, zero owner slots, and no File. On 455 only
+         * A15 satisfies this, so the match is unique.
+         */
+        private static SwapBinding resolveInstance(Class<?> vm, Class<?> contextType, Class<?> bitmapType) {
+            SwapBinding found = null;
+            for (Method method : ps.reso.instaeclipse.utils.core.SafeReflect.methods(vm)) {
+                if (Modifier.isStatic(method.getModifiers()) || method.getReturnType() != Object.class) continue;
+                if (method.isSynthetic() || method.isBridge()) continue;
+                Class<?>[] p = method.getParameterTypes();
+                if (p.length < 4 || p[0] != contextType || p[1] != bitmapType) continue;
+                if (!modelType(p[2], bitmapType) || p[2] == vm) continue;
+                int bitmaps = 0, owners = 0;
+                boolean hasFile = false;
+                for (Class<?> type : p) {
+                    if (type == bitmapType) bitmaps++;
+                    if (type == vm) owners++;
+                    if (type == java.io.File.class) hasFile = true;
+                }
+                if (hasFile || bitmaps != 1 || owners != 0) continue;
+                if (found != null) return null;                 // ambiguous: bail, keep it safe
+                found = new SwapBinding(method, bitmapType, -1, -1); // no secondary, no owner slot
+            }
+            return found;
+        }
+
         private static boolean modelType(Class<?> type, Class<?> bitmapType) {
             return !type.isPrimitive() && type != bitmapType && type != String.class
                     && type != Object.class && type != java.io.File.class;
         }
 
         boolean accepts(Object[] args) {
+            // vmIndex < 0: instance handoff (455) — the view model is the receiver, not an argument,
+            // so there is no owner slot in args to validate.
             return args != null && args.length == method.getParameterCount()
-                    && bitmapType.isInstance(args[1]) && vmType.isInstance(args[vmIndex])
+                    && bitmapType.isInstance(args[1])
+                    && (vmIndex < 0 || vmType.isInstance(args[vmIndex]))
                     && (secondaryBitmapIndex < 0 || args[secondaryBitmapIndex] == null
                     || bitmapType.isInstance(args[secondaryBitmapIndex]));
         }

@@ -82,6 +82,9 @@ public class ChatExportHook {
     private static final Map<Object, Boolean> STORES = Collections.synchronizedMap(new WeakHashMap<>());
     private static Method messagesMethod, serializer, factoryWriterMethod;
     private static Class<?> factoryClass;
+    /** true when {@link #messagesMethod} is the 455+ static (store)->List helper rather than the
+     *  legacy instance (boolean)->ArrayList accessor; controls how it is invoked. */
+    private static boolean messagesStatic;
 
     public void install(DexKitBridge bridge, ClassLoader cl) {
         try {
@@ -92,9 +95,24 @@ public class ChatExportHook {
                 break;
             }
             if (store == null) { ModuleLog.line(TAG + "❌ message store not found"); return; }
+            // 452 and earlier: the thread store exposes a (boolean sort) -> ArrayList accessor that
+            // returns the loaded messages (confirmed + pending, optionally sorted). Preferred path.
             for (Method m : ps.reso.instaeclipse.utils.core.SafeReflect.methods(store)) {
                 Class<?>[] p = m.getParameterTypes();
-                if (p.length == 1 && p[0] == boolean.class && m.getReturnType() == java.util.ArrayList.class) messagesMethod = m;
+                if (p.length == 1 && p[0] == boolean.class && m.getReturnType() == java.util.ArrayList.class) { messagesMethod = m; messagesStatic = false; }
+            }
+            // 455+: that (boolean)->ArrayList accessor was inlined away (its body now lives inside
+            // the store's internal "rebuild sorted message list" method), so nothing matches above
+            // and messages=false. Fall back to the store's static get-messages helper: a static
+            // (store) -> List that returns the thread's confirmed messages. Resolved by shape only
+            // (static, declared on the store, one param of the store type, returns List) — this is
+            // unique on both 452 (X.04Km#A06) and 455 (X.02Sp#A06), never anchored on an obf name.
+            if (messagesMethod == null) {
+                for (Method m : ps.reso.instaeclipse.utils.core.SafeReflect.methods(store)) {
+                    if (!Modifier.isStatic(m.getModifiers()) || m.getDeclaringClass() != store) continue;
+                    Class<?>[] p = m.getParameterTypes();
+                    if (p.length == 1 && p[0] == store && m.getReturnType() == List.class) { messagesMethod = m; messagesStatic = true; break; }
+                }
             }
             for (Constructor<?> c : ps.reso.instaeclipse.utils.core.SafeReflect.constructors(store)) {
                 XposedBridge.hookMethod(c, new XC_MethodHook() {
@@ -128,6 +146,14 @@ public class ChatExportHook {
         } catch (Throwable t) {
             ModuleLog.line(TAG + "❌ " + t);
         }
+    }
+
+    /** Invokes the resolved messages accessor regardless of which build it came from: the legacy
+     *  instance {@code (boolean)->ArrayList} on 452, or the 455+ static {@code (store)->List}
+     *  fallback. Returns the thread's loaded messages, or null. */
+    private static List<?> invokeMessages(Object store) throws Exception {
+        Object r = messagesStatic ? messagesMethod.invoke(null, store) : messagesMethod.invoke(store, true);
+        return (List<?>) r;
     }
 
     /** Adds "Export chat" to the module's thread header menu. */
@@ -170,7 +196,7 @@ public class ChatExportHook {
         ps.reso.instaeclipse.utils.toast.IeToast.makeText(a, I18n.t(a, R.string.ig_chat_export_working), Toast.LENGTH_SHORT).show();
         new Thread(() -> {
             try {
-                List<?> msgs = (List<?>) messagesMethod.invoke(store, true);
+                List<?> msgs = invokeMessages(store);
                 Map<String, String> names = participants(store);
                 String title = threadId != null ? ThreadNames.resolve(threadId) : null;
                 if (title == null || title.isEmpty()) title = "chat";
@@ -857,7 +883,7 @@ public class ChatExportHook {
     static List<JSONObject> loadedMessages(Object store) {
         if (store == null || messagesMethod == null || serializer == null || factoryClass == null) return null;
         try {
-            List<?> msgs = (List<?>) messagesMethod.invoke(store, true);
+            List<?> msgs = invokeMessages(store);
             List<JSONObject> out = new ArrayList<>();
             if (msgs != null) for (Object m : msgs) {
                 JSONObject j = toJson(m);

@@ -19,6 +19,8 @@ import android.widget.ImageView;
 
 import org.luckypray.dexkit.DexKitBridge;
 import org.luckypray.dexkit.query.FindClass;
+import org.luckypray.dexkit.query.FindMethod;
+import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
 import org.luckypray.dexkit.query.matchers.MethodsMatcher;
@@ -48,9 +50,13 @@ import ps.reso.instaeclipse.xposedcompat.XposedBridge;
  * <p>Laid out at 1/{@value #SCALE} size and scaled up, so the blur layer is tiny; redraws only when
  * the cover bitmap changes (reference check on pre-draw). RenderEffect needs Android 12; older skipped.
  *
- * <p>Anchors: container constructor's purge marker
- * "android_purge_26_q2_LithoClipsViewerVideoLayout_init"; fallback: the class declaring
- * getImagePlaceHolder() + getVideoPlaceHolder(). Applies to reels opened after the switch is on.
+ * <p>Anchors (tried in order): (1) a constructor whose purge marker contains the stable tail
+ * "LithoClipsViewerVideoLayout_init" — the "android_purge_&lt;yy&gt;_q&lt;n&gt;_" quarter-stamp prefix
+ * rotates between IG versions (26_q2 on both 452 and 455), so a Contains match survives the rotation;
+ * (2) the exact legacy marker "android_purge_26_q2_LithoClipsViewerVideoLayout_init"; (3) the single
+ * class declaring getImagePlaceHolder()-&gt;IgImageView AND getVideoPlaceHolder()-&gt;SimpleVideoLayout
+ * (return types pinned so a rounded-corner sibling whose getVideoPlaceHolder() returns a TextureView
+ * can't mispick). Applies to reels opened after the switch is on.
  */
 public class ReelsBlurBarsHook {
 
@@ -95,17 +101,26 @@ public class ReelsBlurBarsHook {
         if ("missing".equals(name)) return null;
         if (name == null) {
             try {
-                for (MethodData md : ExtrasLookup.byStrings(bridge, "android_purge_26_q2_LithoClipsViewerVideoLayout_init")) {
-                    if (md.isConstructor()) {
-                        name = md.getClassName();
-                        break;
-                    }
+                // (1) Current marker, quarter-stamp-agnostic: match the stable tail with Contains so
+                //     a future "android_purge_26_q3/27_q1_..._init" rename still resolves. On 455 this
+                //     tail occurs only in LX/0Cj0's <init> (the LithoClipsViewerVideoLayout container).
+                name = constructorClassForMarker(bridge, "LithoClipsViewerVideoLayout_init", StringMatchType.Contains);
+                // (2) Legacy exact marker (how it resolved on 452's LX/08PR), kept as an explicit anchor.
+                if (name == null) {
+                    name = constructorClassForMarker(bridge, "android_purge_26_q2_LithoClipsViewerVideoLayout_init", StringMatchType.Equals);
                 }
+                // (3) Signature fallback, tightened with return types so it can't mispick: the reel
+                //     container exposes getImagePlaceHolder()->IgImageView and
+                //     getVideoPlaceHolder()->SimpleVideoLayout. The return types drop the rounded-corner
+                //     sibling whose getVideoPlaceHolder() returns a TextureView; if more than one class
+                //     still matches we take none rather than guess.
                 if (name == null) {
                     List<ClassData> found = DexKitQueryCache.findClass(bridge, FindClass.create().matcher(ClassMatcher.create()
                             .methods(MethodsMatcher.create()
-                                    .add(MethodMatcher.create().name("getImagePlaceHolder"))
-                                    .add(MethodMatcher.create().name("getVideoPlaceHolder")))));
+                                    .add(MethodMatcher.create().name("getImagePlaceHolder")
+                                            .returnType("com.instagram.common.ui.widget.imageview.IgImageView"))
+                                    .add(MethodMatcher.create().name("getVideoPlaceHolder")
+                                            .returnType("com.instagram.ui.simplevideolayout.SimpleVideoLayout")))));
                     if (found.size() == 1) name = found.get(0).getName();
                 }
             } catch (Throwable t) {
@@ -123,6 +138,19 @@ public class ReelsBlurBarsHook {
             ModuleLog.line(TAG + "❌ " + name + ": " + t);
             return null;
         }
+    }
+
+    /** Class of the first constructor whose body references {@code marker} (matched by {@code type}); null if none. */
+    private static String constructorClassForMarker(DexKitBridge bridge, String marker, StringMatchType type) {
+        try {
+            for (MethodData md : DexKitQueryCache.findMethod(bridge, FindMethod.create().matcher(
+                    MethodMatcher.create().usingStrings(java.util.List.of(marker), type, false)))) {
+                if (md.isConstructor()) return md.getClassName();
+            }
+        } catch (Throwable t) {
+            ModuleLog.line(TAG + "marker lookup failed (" + marker + "): " + t);
+        }
+        return null;
     }
 
     /**
