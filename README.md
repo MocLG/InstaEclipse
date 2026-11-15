@@ -386,7 +386,7 @@ Download the latest InstaEclipse APK from [**Releases**](https://github.com/ReSo
 5. **Enable the module.** In LSPatch, open Manage, pick Instagram, open Modules and enable InstaEclipse.
 6. **Open the menu.** Long press the Explore (search) tab.
 
-There is also a [step by step guide](https://t.me/Eclipse_Mods_Discussion) in the community.
+There is also a [step by step guide](https://t.me/Eclipsemods_discussion) in the community.
 
 ---
 
@@ -401,7 +401,7 @@ There is also a [step by step guide](https://t.me/Eclipse_Mods_Discussion) in th
 Updates and tips:
 
 - 📢 Announcements: [Telegram channel](https://t.me/Eclipse_mods_a)
-- 💬 Questions and help: [Telegram group](https://t.me/Eclipse_Mods_Discussion)
+- 💬 Questions and help: [Telegram group](https://t.me/Eclipsemods_discussion)
 
 ---
 
@@ -426,7 +426,7 @@ Force stop Instagram and clear its cache, then open it again.
 Install [Instagram 455.0.0.8.72 from APKMirror](https://www.apkmirror.com/apk/instagram/instagram-instagram/instagram-455-0-0-8-72-release/) instead.
 
 **Still stuck?**
-Ask in the [Telegram group](https://t.me/Eclipse_Mods_Discussion). Someone will help.
+Ask in the [Telegram group](https://t.me/Eclipsemods_discussion). Someone will help.
 
 ---
 
