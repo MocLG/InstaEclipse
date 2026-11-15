@@ -61,5 +61,16 @@
     <string name="shizuku_get">Get Shizuku</string>
     <string name="link_set_manually">Set manually</string>
     <string name="patch_installed">Installed</string>
-    <string name="patch_state_failed">Patch failed — check the steps below.</string>
+    <string name="patch_state_failed">Patch failed, check the steps below.</string>
+
+    <!-- Save patched APK (no install). -->
+    <string name="patch_save">Patch &amp; save APK (no install)</string>
+    <string name="patch_save_hint">Patch and keep the APK instead of installing. One file opens a Save dialog; a split set is written into an \"InstaEclipse-patched\" folder you choose.</string>
+    <string name="patch_save_copy">Save a copy of the APK</string>
+    <string name="patch_step_ready_save">Patched. Choose where to save.</string>
+    <string name="patch_step_saving">Saving the patched APK…</string>
+    <string name="patch_saved">Saved %1$d patched APK(s).</string>
+    <string name="patch_save_cancelled">Save cancelled.</string>
+    <string name="patch_save_failed">Couldn\'t save: %1$s</string>
+    <string name="patch_nothing_to_save">Nothing to save yet, run the patch first.</string>
 </resources>

@@ -26,7 +26,7 @@ public final class PatchInstaller {
     }
 
     /** Turns the internal work name ("0_base-patched.apk") into something readable ("base.apk"). */
-    private static String friendlyName(String name) {
+    public static String friendlyName(String name) {
         if (name == null) return "Instagram";
         String n = name.replaceFirst("^\\d+_", "");
         n = n.replace("-patched.apk", ".apk").replace("-signed.apk", ".apk");

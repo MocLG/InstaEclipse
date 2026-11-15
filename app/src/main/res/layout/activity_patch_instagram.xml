@@ -112,6 +112,28 @@
                 android:enabled="false"
                 android:text="@string/patch_run" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/patch_save_button"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:enabled="false"
+                android:text="@string/patch_save"
+                app:icon="@drawable/ic_download"
+                app:iconGravity="textStart" />
+
+            <TextView
+                android:id="@+id/patch_save_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="6dp"
+                android:lineSpacingMultiplier="1.1"
+                android:text="@string/patch_save_hint"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
             <!-- Determinate progress: current step on the left, percentage on the right. -->
             <LinearLayout
                 android:id="@+id/patch_progress_row"
@@ -227,6 +249,16 @@
                         android:text="@string/patch_fix_links_hint"
                         android:textAppearance="?attr/textAppearanceBodySmall"
                         android:textColor="?attr/colorOnSurfaceVariant" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/patch_save_copy_button"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/patch_save_copy"
+                        app:icon="@drawable/ic_download"
+                        app:iconGravity="textStart" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

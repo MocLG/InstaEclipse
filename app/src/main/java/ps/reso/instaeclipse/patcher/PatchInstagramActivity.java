@@ -16,12 +16,14 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.documentfile.provider.DocumentFile;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -55,21 +57,35 @@ public class PatchInstagramActivity extends AppCompatActivity {
     private TextView stepView;
     private TextView percentView;
     private MaterialButton runButton;
+    private MaterialButton saveButton;
     private MaterialButton chooseButton;
     private MaterialButton getApkButton;
     private MaterialButton openButton;
     private MaterialButton fixLinksButton;
+    private MaterialButton saveCopyButton;
     private View progressRow;
     private View successCard;
     private LinearProgressIndicator progress;
 
     private final List<Uri> chosen = new ArrayList<>();
+    /** The most recent patched, re-signed APK set, still sitting in the cache, ready to export. */
+    private final List<File> lastPatched = new ArrayList<>();
     private boolean busy;
     /** True between committing the install session and the system reporting its result. */
     private boolean awaitingInstall;
 
     private final ActivityResultLauncher<String[]> picker =
             registerForActivityResult(new ActivityResultContracts.OpenMultipleDocuments(), this::onPicked);
+
+    /** Save a single patched APK straight to a user-chosen file. */
+    private final ActivityResultLauncher<String> saveFileLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.CreateDocument("application/vnd.android.package-archive"),
+                    this::onSaveSingle);
+
+    /** Save a patched split set into a user-chosen folder (one raw .apk per split). */
+    private final ActivityResultLauncher<Uri> saveTreeLauncher =
+            registerForActivityResult(new ActivityResultContracts.OpenDocumentTree(), this::onSaveTree);
 
     private final PatchInstallReceiver.StatusCallback installStatus = (success, message) ->
             main.post(() -> onInstallFinished(success, message));
@@ -87,10 +103,12 @@ public class PatchInstagramActivity extends AppCompatActivity {
         stepView = findViewById(R.id.patch_step);
         percentView = findViewById(R.id.patch_percent);
         runButton = findViewById(R.id.patch_run_button);
+        saveButton = findViewById(R.id.patch_save_button);
         chooseButton = findViewById(R.id.patch_choose_button);
         getApkButton = findViewById(R.id.patch_get_apk_button);
         openButton = findViewById(R.id.patch_open_button);
         fixLinksButton = findViewById(R.id.patch_fix_links_button);
+        saveCopyButton = findViewById(R.id.patch_save_copy_button);
         progressRow = findViewById(R.id.patch_progress_row);
         successCard = findViewById(R.id.patch_success_card);
         progress = findViewById(R.id.patch_progress);
@@ -99,7 +117,13 @@ public class PatchInstagramActivity extends AppCompatActivity {
             if (!busy) picker.launch(new String[]{"application/vnd.android.package-archive", "*/*"});
         });
         runButton.setOnClickListener(v -> {
-            if (!busy) start();
+            if (!busy) start(true);
+        });
+        saveButton.setOnClickListener(v -> {
+            if (!busy) start(false);
+        });
+        saveCopyButton.setOnClickListener(v -> {
+            if (!busy) promptSave();
         });
         getApkButton.setOnClickListener(v -> {
             try {
@@ -120,6 +144,7 @@ public class PatchInstagramActivity extends AppCompatActivity {
         if (chosen.isEmpty()) {
             selectionView.setText(R.string.patch_no_selection);
             runButton.setEnabled(false);
+            saveButton.setEnabled(false);
             return;
         }
         // A fresh pick clears any previous "installed" state so the user can patch again.
@@ -132,9 +157,14 @@ public class PatchInstagramActivity extends AppCompatActivity {
         }
         selectionView.setText(getString(R.string.patch_selected, chosen.size(), names.toString()));
         runButton.setEnabled(true);
+        saveButton.setEnabled(true);
     }
 
-    private void start() {
+    /**
+     * Runs the patch pipeline. When {@code install} is true the system installer is fired on success;
+     * otherwise the patched APK set is kept and the user is asked where to save it.
+     */
+    private void start(boolean install) {
         if (chosen.isEmpty()) {
             IeToast.makeText(this, getString(R.string.patch_need_apk), Toast.LENGTH_SHORT).show();
             return;
@@ -142,6 +172,7 @@ public class PatchInstagramActivity extends AppCompatActivity {
         busy = true;
         awaitingInstall = false;
         runButton.setEnabled(false);
+        saveButton.setEnabled(false);
         chooseButton.setEnabled(false);
         getApkButton.setEnabled(false);
         successCard.setVisibility(View.GONE);
@@ -164,12 +195,26 @@ public class PatchInstagramActivity extends AppCompatActivity {
                 uiLogger.progress(8);
 
                 List<File> patched = ApkPatcher.patch(this, apks, uiLogger);
-                log(getString(R.string.patch_step_install));
-                PatchInstaller.install(this, patched, uiLogger);
-                // The session is committed; the real result arrives later via installStatus.
-                log(getString(R.string.patch_step_done));
-                awaitingInstall = true;
-                main.post(() -> stepView.setText(R.string.patch_step_waiting));
+                // Keep a handle to the patched set so it can be installed and/or saved.
+                synchronized (lastPatched) {
+                    lastPatched.clear();
+                    lastPatched.addAll(patched);
+                }
+                if (install) {
+                    log(getString(R.string.patch_step_install));
+                    PatchInstaller.install(this, patched, uiLogger);
+                    // The session is committed; the real result arrives later via installStatus.
+                    log(getString(R.string.patch_step_done));
+                    awaitingInstall = true;
+                    main.post(() -> stepView.setText(R.string.patch_step_waiting));
+                } else {
+                    uiLogger.progress(100);
+                    log(getString(R.string.patch_step_ready_save));
+                    main.post(() -> {
+                        stepView.setText(R.string.patch_step_ready_save);
+                        promptSave();
+                    });
+                }
             } catch (Throwable t) {
                 ModuleLog.line("(IE|Patch) failed", t);
                 String reason = t.getMessage() != null ? t.getMessage() : t.toString();
@@ -189,6 +234,7 @@ public class PatchInstagramActivity extends AppCompatActivity {
                         chooseButton.setEnabled(true);
                         getApkButton.setEnabled(true);
                         runButton.setEnabled(true);
+                        saveButton.setEnabled(true);
                     }
                 });
             }
@@ -225,6 +271,127 @@ public class PatchInstagramActivity extends AppCompatActivity {
             }
         }
         IeToast.makeText(this, getString(R.string.not_installed_instagram), Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Asks the user where to put the patched APK set. A single APK gets a "save as" file dialog; a
+     * split set gets a folder picker (each split is written as its own raw .apk).
+     */
+    private void promptSave() {
+        List<File> snapshot;
+        synchronized (lastPatched) {
+            snapshot = new ArrayList<>(lastPatched);
+        }
+        snapshot.removeIf(f -> f == null || !f.isFile());
+        if (snapshot.isEmpty()) {
+            IeToast.makeText(this, getString(R.string.patch_nothing_to_save), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            if (snapshot.size() == 1) {
+                saveFileLauncher.launch(PatchInstaller.friendlyName(snapshot.get(0).getName()));
+            } else {
+                saveTreeLauncher.launch(null);
+            }
+        } catch (Throwable t) {
+            IeToast.makeText(this, getString(R.string.patch_save_failed, String.valueOf(t)), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void onSaveSingle(@Nullable Uri dest) {
+        if (dest == null) {
+            IeToast.makeText(this, getString(R.string.patch_save_cancelled), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File source;
+        synchronized (lastPatched) {
+            source = lastPatched.isEmpty() ? null : lastPatched.get(0);
+        }
+        if (source == null || !source.isFile()) {
+            IeToast.makeText(this, getString(R.string.patch_nothing_to_save), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        exportAsync(() -> {
+            try (InputStream in = new FileInputStream(source);
+                 OutputStream out = getContentResolver().openOutputStream(dest)) {
+                if (out == null) throw new Exception("Cannot open destination");
+                copyStream(in, out);
+            }
+            return 1;
+        });
+    }
+
+    private void onSaveTree(@Nullable Uri treeUri) {
+        if (treeUri == null) {
+            IeToast.makeText(this, getString(R.string.patch_save_cancelled), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        List<File> sources;
+        synchronized (lastPatched) {
+            sources = new ArrayList<>(lastPatched);
+        }
+        sources.removeIf(f -> f == null || !f.isFile());
+        if (sources.isEmpty()) {
+            IeToast.makeText(this, getString(R.string.patch_nothing_to_save), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        exportAsync(() -> {
+            DocumentFile tree = DocumentFile.fromTreeUri(this, treeUri);
+            if (tree == null || !tree.canWrite()) throw new Exception("Folder is not writable");
+            DocumentFile dir = tree.createDirectory("InstaEclipse-patched");
+            if (dir == null) dir = tree; // Fall back to the chosen folder if the subfolder can't be made.
+            int saved = 0;
+            for (File source : sources) {
+                String name = PatchInstaller.friendlyName(source.getName());
+                DocumentFile file = dir.createFile("application/vnd.android.package-archive", name);
+                if (file == null) throw new Exception("Cannot create " + name);
+                try (InputStream in = new FileInputStream(source);
+                     OutputStream out = getContentResolver().openOutputStream(file.getUri())) {
+                    if (out == null) throw new Exception("Cannot write " + name);
+                    copyStream(in, out);
+                }
+                saved++;
+            }
+            return saved;
+        });
+    }
+
+    /** Runs an export off the UI thread, locking the buttons and reporting the result. */
+    private void exportAsync(java.util.concurrent.Callable<Integer> job) {
+        busy = true;
+        runButton.setEnabled(false);
+        saveButton.setEnabled(false);
+        saveCopyButton.setEnabled(false);
+        log(getString(R.string.patch_step_saving));
+        worker.execute(() -> {
+            try {
+                int count = job.call();
+                log(getString(R.string.patch_saved, count));
+                main.post(() -> IeToast.makeText(this, getString(R.string.patch_saved, count), Toast.LENGTH_LONG).show());
+            } catch (Throwable t) {
+                ModuleLog.line("(IE|Patch) save failed", t);
+                String reason = t.getMessage() != null ? t.getMessage() : t.toString();
+                log(getString(R.string.patch_save_failed, reason));
+                main.post(() -> IeToast.makeText(this, getString(R.string.patch_save_failed, reason), Toast.LENGTH_LONG).show());
+            } finally {
+                main.post(() -> {
+                    busy = false;
+                    // In the terminal "installed" state the run/save buttons stay as they are; a plain
+                    // save flow re-enables them so the user can patch or save again.
+                    boolean idle = successCard.getVisibility() != View.VISIBLE;
+                    runButton.setEnabled(idle && !chosen.isEmpty());
+                    saveButton.setEnabled(idle && !chosen.isEmpty());
+                    saveCopyButton.setEnabled(true);
+                });
+            }
+        });
+    }
+
+    private static void copyStream(InputStream in, OutputStream out) throws Exception {
+        byte[] buffer = new byte[65536];
+        int read;
+        while ((read = in.read(buffer)) != -1) out.write(buffer, 0, read);
+        out.flush();
     }
 
     private void updateProgress(int percent) {
