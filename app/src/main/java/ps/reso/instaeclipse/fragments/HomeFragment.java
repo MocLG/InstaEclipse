@@ -246,7 +246,26 @@ public class HomeFragment extends Fragment {
 
         setupContributorsAndSpecialThanks(view);
 
+        maybeHandleRestartRequest();
+
         return view;
+    }
+
+    /**
+     * Instagram's in-app restart hands the relaunch to us (see CommonUtils.restartViaCompanion),
+     * because a dying Instagram process can't bring itself back to the foreground on Android 12+.
+     * This fragment is the foreground UI, so our normal {@link #restartInstagram()} (broadcast
+     * ACTION_RESTART, then relaunch) brings Instagram back cleanly. The small delay lets this
+     * activity finish resuming first.
+     */
+    private void maybeHandleRestartRequest() {
+        try {
+            Intent intent = requireActivity().getIntent();
+            if (intent == null || !intent.hasExtra(CommonUtils.EXTRA_RESTART_IG)) return;
+            intent.removeExtra(CommonUtils.EXTRA_RESTART_IG);
+            mainHandler.postDelayed(this::restartInstagram, 500);
+        } catch (Throwable ignored) {
+        }
     }
 
     @Override
@@ -480,7 +499,12 @@ public class HomeFragment extends Fragment {
         } catch (Throwable ignored) { }
         moduleConfirmed = false;
         updateStatusPill();
-        ps.reso.instaeclipse.utils.toast.IeToast.makeText(requireContext(), getString(R.string.home_restart_done), Toast.LENGTH_SHORT).show();
+        // Show the "restarted" toast a second later so it lands as Instagram is coming back, not the
+        // moment it starts closing. Capture context/text now in case the fragment is gone by then.
+        final android.content.Context toastCtx = requireContext().getApplicationContext();
+        final String toastMsg = getString(R.string.home_restart_done);
+        mainHandler.postDelayed(
+                () -> ps.reso.instaeclipse.utils.toast.IeToast.makeText(toastCtx, toastMsg, Toast.LENGTH_SHORT).show(), 1000);
         // If Instagram was running it restarts itself above; this also brings it up if it was closed.
         mainHandler.postDelayed(() -> launchPackage(pkg), 1200);
     }

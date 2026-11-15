@@ -550,6 +550,7 @@
     <string name="ig_playback_speed_title">Playback speed</string>
     <string name="ig_background_play_title">Keep Playing in the Background</string>
     <string name="ig_video_pip_title">Reels Picture-in-Picture</string>
+    <string name="requires_android_15">Requires Android 15+</string>
     <string name="ig_playback_speed_next">Speed set — applies to the next video that starts</string>
     <string name="ig_dialog_distraction_hide_notes_tray">Hide Notes in Messages</string>
     <string name="ig_hide_dm_suggestions">Hide suggested accounts in Messages</string>

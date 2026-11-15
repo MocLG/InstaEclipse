@@ -313,6 +313,19 @@ public class DialogUtils {
         return flagSwitch(context, iconRes, accentHex, labelRes, flag, null);
     }
 
+    /**
+     * Like {@link #flagSwitch}, but greyed out and non-interactive (with a note) when the device is
+     * below {@code minSdk}. For features that depend on an OS capability Instagram only wires up on
+     * newer Android, e.g. reel picture-in-picture, which needs Android 15.
+     */
+    private static ToggleRow flagSwitchMinSdk(Context context, int iconRes, String accentHex, int labelRes, String flag, int minSdk) {
+        ToggleRow row = flagSwitch(context, iconRes, accentHex, labelRes, flag, null);
+        if (android.os.Build.VERSION.SDK_INT < minSdk) {
+            row.markUnavailable(I18n.t(context, R.string.requires_android_15));
+        }
+        return row;
+    }
+
     /** Switch for an Extras feature, with the label and icon from its ExtrasFeatures entry. */
     private static ToggleRow extraSwitch(Context context, String accentHex, String flag, Runnable after) {
         ExtrasFeatures.Entry e = ExtrasFeatures.entry(flag);
@@ -677,11 +690,10 @@ public class DialogUtils {
 
             if (launchIntent != null) {
                 clearAppCache(context);
-                // Delegate to the shared relaunch: it delays exit(0) on the main thread so the new
-                // task starts first. The old inline immediate exit killed the process before the
-                // relaunch could start, which left Instagram closed instead of restarted (the
-                // in-app dialog restart "not working" that the module UI restart didn't have).
-                ps.reso.instaeclipse.utils.core.CommonUtils.relaunchSelf(context);
+                // Route through the companion app so Instagram actually reopens. A dying process
+                // can't foreground itself on Android 12+, so relaunchSelf alone just lands on the
+                // launcher; the companion (a foreground app once launched) brings Instagram back.
+                ps.reso.instaeclipse.utils.core.CommonUtils.restartViaCompanion(context);
             } else {
                 ps.reso.instaeclipse.utils.toast.IeToast.makeText(context, I18n.t(context, R.string.ig_dialog_restart_not_found), Toast.LENGTH_SHORT).show();
             }
@@ -1747,7 +1759,7 @@ public class DialogUtils {
                 flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_dialog_reels_hold_left_slow, "holdLeftSlowMotion"),
                 flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_dialog_downloader_offer_speed, "offerPlaybackSpeed"),
                 flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_background_play_title, "keepVideoPlayingBackground"),
-                flagSwitch(context, R.drawable.ic_movie, "#FF375F", R.string.ig_video_pip_title, "videoPictureInPicture"),
+                flagSwitchMinSdk(context, R.drawable.ic_movie, "#FF375F", R.string.ig_video_pip_title, "videoPictureInPicture", 35),
                 extraSwitch(context, "#FF375F", "reelsBlurBars"),
                 extraSwitch(context, "#FF375F", "roundReelCorners")));
 
@@ -3693,6 +3705,19 @@ public class DialogUtils {
         void makeBold() {
             labelView.setTypeface(null, Typeface.BOLD);
             labelView.setTextSize(17);
+        }
+
+        /** Grey the row out (non-interactive) and add a dim second line saying why. */
+        void markUnavailable(String note) {
+            CharSequence base = labelView.getText();
+            if (note != null && !note.isEmpty()) {
+                android.text.SpannableString s = new android.text.SpannableString(base + "\n" + note);
+                int start = base.length() + 1;
+                s.setSpan(new android.text.style.RelativeSizeSpan(0.78f), start, s.length(), 0);
+                s.setSpan(new android.text.style.ForegroundColorSpan(C_TEXT2), start, s.length(), 0);
+                labelView.setText(s);
+            }
+            setEnabled(false);
         }
     }
 
