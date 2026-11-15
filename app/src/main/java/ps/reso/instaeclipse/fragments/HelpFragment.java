@@ -35,7 +35,7 @@ public class HelpFragment extends Fragment {
 
     private static final String VECTOR_URL = "https://github.com/JingMatrix/Vector/releases/latest";
     private static final String LSPATCH_URL = "https://github.com/JingMatrix/LSPatch/releases/latest";
-    private static final String LSPATCH_GUIDE_URL = "https://t.me/Eclipsemods_discussion";
+    private static final String LSPATCH_GUIDE_URL = "https://t.me/EclipseMods_Discussion";
 
     private static final int[] FAQ_STRINGS = {
             R.string.faq_1, R.string.faq_2, R.string.faq_3,

@@ -8,7 +8,8 @@
     <a href="https://github.com/ReSo7200/InstaEclipse/releases/latest"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/ReSo7200/InstaEclipse?style=for-the-badge&logo=github&color=1a1a2e&labelColor=0d0d0d"/></a>
     <a href="https://github.com/ReSo7200/InstaEclipse/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/ReSo7200/InstaEclipse?style=for-the-badge&logo=github&color=1a1a2e&labelColor=0d0d0d"/></a>
     <a href="https://github.com/ReSo7200/InstaEclipse/releases/latest"><img alt="Downloads" src="https://img.shields.io/github/downloads/ReSo7200/InstaEclipse/total?style=for-the-badge&logo=github&color=1a1a2e&labelColor=0d0d0d"/></a>
-    <a href="https://t.me/Eclipse_mods_a"><img alt="Telegram" src="https://img.shields.io/badge/Telegram-Channel-26A5E4?style=for-the-badge&logo=telegram&labelColor=0d0d0d"/></a>
+    <a href="https://t.me/Eclipse_mods_a"><img alt="Telegram Announcements" src="https://img.shields.io/badge/Telegram-Announcements-26A5E4?style=for-the-badge&logo=telegram&labelColor=0d0d0d"/></a>
+    <a href="https://t.me/EclipseMods_Discussion"><img alt="Telegram Chat" src="https://img.shields.io/badge/Telegram-Chat-26A5E4?style=for-the-badge&logo=telegram&labelColor=0d0d0d"/></a>
     <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/ReSo7200/InstaEclipse?style=for-the-badge&color=1a1a2e&labelColor=0d0d0d"/></a>
   </p>
 
@@ -386,7 +387,7 @@ Download the latest InstaEclipse APK from [**Releases**](https://github.com/ReSo
 5. **Enable the module.** In LSPatch, open Manage, pick Instagram, open Modules and enable InstaEclipse.
 6. **Open the menu.** Long press the Explore (search) tab.
 
-There is also a [step by step guide](https://t.me/Eclipsemods_discussion) in the community.
+There is also a [step by step guide](https://t.me/EclipseMods_Discussion) in the community.
 
 ---
 
@@ -401,7 +402,7 @@ There is also a [step by step guide](https://t.me/Eclipsemods_discussion) in the
 Updates and tips:
 
 - 📢 Announcements: [Telegram channel](https://t.me/Eclipse_mods_a)
-- 💬 Questions and help: [Telegram group](https://t.me/Eclipsemods_discussion)
+- 💬 Questions and help: [Telegram group](https://t.me/EclipseMods_Discussion)
 
 ---
 
@@ -426,7 +427,7 @@ Force stop Instagram and clear its cache, then open it again.
 Install [Instagram 455.0.0.8.72 from APKMirror](https://www.apkmirror.com/apk/instagram/instagram-instagram/instagram-455-0-0-8-72-release/) instead.
 
 **Still stuck?**
-Ask in the [Telegram group](https://t.me/Eclipsemods_discussion). Someone will help.
+Ask in the [Telegram group](https://t.me/EclipseMods_Discussion). Someone will help.
 
 ---
 
