@@ -29,7 +29,7 @@ public final class ExportBrand {
     }
 
     public static final String GITHUB   = "https://github.com/ReSo7200/InstaEclipse";
-    public static final String TELEGRAM = "https://t.me/InstaEclipse";
+    public static final String TELEGRAM = "https://t.me/Eclipse_mods_a";
 
     /** The Instagram build this release is tested on; "Get APK" opens its APKMirror page. */
     public static final String TESTED_INSTAGRAM = "451.0.0.20.80";
