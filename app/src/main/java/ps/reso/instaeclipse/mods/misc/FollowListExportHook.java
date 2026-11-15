@@ -49,8 +49,10 @@ import ps.reso.instaeclipse.utils.core.DexKitQueryCache;
 /**
  * Export a followers / following list to CSV (#224).
  *
- * FollowListFragment = class whose method uses "Invalid entry type for FollowListFragment"
- * (X.0D9r on 452, X.0D96 on 451). After its onViewCreated a small "Export CSV" pill is added;
+ * FollowListFragment = class whose method uses one of the anchor strings below:
+ * "User Exited Follow List Fragment" (onDestroy; X.0CSK on 455, X.0H5s on 452) is the primary
+ * anchor, with the older "Invalid entry type for FollowListFragment" (X.0D9r on 452, X.0D96 on
+ * 451 — dropped on 455) kept as a fallback. After its onViewCreated a small "Export CSV" pill is added;
  * on tap, every com.instagram.user.model.User held by the list's adapter (the ListView inside
  * the fragment) is written as username,full_name,id. No scrolling: on tap, IG's own list pager
  * (X.0DRF on 452: fragment field with isLoading(), next max_id in its String field) is asked for the
@@ -76,10 +78,18 @@ public class FollowListExportHook {
     public void install(DexKitBridge bridge, ClassLoader cl) {
         try {
             Class<?> frag = null;
-            for (MethodData md : DexKitQueryCache.findMethod(bridge, FindMethod.create().matcher(MethodMatcher.create()
-                    .usingStrings("Invalid entry type for FollowListFragment")))) {
-                frag = cl.loadClass(md.getClassName());
-                break;
+            // Try the 455 anchor first, then fall back to the old (pre-455) one; only after BOTH
+            // fail is "FollowListFragment not found" logged. Never hardcode the obfuscated class name.
+            for (String anchor : new String[]{
+                    "User Exited Follow List Fragment",          // IG 455 (X.0CSK.onDestroy)
+                    "Invalid entry type for FollowListFragment"  // fallback: 452/451 and earlier
+            }) {
+                for (MethodData md : DexKitQueryCache.findMethod(bridge, FindMethod.create().matcher(MethodMatcher.create()
+                        .usingStrings(anchor)))) {
+                    frag = cl.loadClass(md.getClassName());
+                    break;
+                }
+                if (frag != null) break;
             }
             if (frag == null) { ModuleLog.line(TAG + "❌ FollowListFragment not found"); return; }
             for (MethodData md : DexKitQueryCache.findMethod(bridge, FindMethod.create().matcher(MethodMatcher.create()
