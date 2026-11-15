@@ -297,20 +297,29 @@ public final class ApkPatcher {
     }
 
     private static String buildConfig(String originalSignature, String appComponentFactory) throws Exception {
+        // These identify the embedded loader and MUST match the bundled LSPatch build
+        // (v1.2, build 487 / core canary-3106). They are read straight from that release's
+        // LSPConfig. Refresh them whenever loader.dex/metaloader.dex/liblspatch.so are updated,
+        // or the loader can fall back to legacy behaviour.
         JSONObject lsp = new JSONObject();
-        lsp.put("API_CODE", 93);
-        lsp.put("VERSION_CODE", 430);
-        lsp.put("VERSION_NAME", "0.7");
-        lsp.put("CORE_VERSION_CODE", 7137);
-        lsp.put("CORE_VERSION_NAME", "1.10.1");
+        lsp.put("API_CODE", 102);
+        lsp.put("VERSION_CODE", 487);
+        lsp.put("VERSION_NAME", "1.2");
+        lsp.put("CORE_VERSION_CODE", 7306);
+        lsp.put("CORE_VERSION_NAME", "canary-3106");
+        lsp.put("CORE_VERSION_HASH", "e00c5c5038bbcc14e0b382ab893301d6993e6989");
 
+        // Field set matches LSPatch v1.2 PatchConfig. Omitting versionCode/managerPackageName
+        // leaves them null (no version override, built-in manager), as the official CLI does.
         JSONObject config = new JSONObject();
         config.put("useManager", false);
         config.put("debuggable", false);
-        config.put("overrideVersionCode", false);
         config.put("sigBypassLevel", 2);
         config.put("originalSignature", originalSignature);
         config.put("appComponentFactory", appComponentFactory);
+        config.put("injectDex", false);
+        config.put("addedPermissions", new org.json.JSONArray());
+        config.put("injectDocumentsProvider", false);
         config.put("lspConfig", lsp);
         return config.toString();
     }
