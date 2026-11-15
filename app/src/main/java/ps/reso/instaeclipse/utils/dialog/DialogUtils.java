@@ -1270,6 +1270,7 @@ public class DialogUtils {
     /** Incoming-call blocker: pick one of the 4 modes and edit the account list. */
     public static void showCallBlockerOptions(Context context) {
         try {
+            SettingsManager.init(context); // ensure prefs is ready before Save (see saveAllFlags)
             IeDialog dlg = new IeDialog(context)
                     .title(I18n.t(context, R.string.ig_call_block_title))
                     .message(I18n.t(context, R.string.ig_call_block_note));

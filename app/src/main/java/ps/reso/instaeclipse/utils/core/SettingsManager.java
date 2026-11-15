@@ -26,6 +26,15 @@ public class SettingsManager {
     }
 
     public static void saveAllFlags() {
+        // Guard against a save before init() ran in this process: recover prefs from the app
+        // context when we have one, otherwise skip rather than crash on prefs.getAll() (NPE).
+        if (prefs == null) {
+            if (appContext != null) prefs = appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+            if (prefs == null) {
+                ps.reso.instaeclipse.utils.log.ModuleLog.line("(InstaEclipse) saveAllFlags skipped: prefs not initialized");
+                return;
+            }
+        }
         // Snapshot to stamp the keys this save changes (see CompanionSync).
         java.util.Map<String, ?> before = new java.util.HashMap<>(prefs.getAll());
         SharedPreferences.Editor editor = prefs.edit();
